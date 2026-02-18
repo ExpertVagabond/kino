@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSM Player - Embed Code Generator</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --primary: #9b30ff;
+            --primary-dark: #7a1fe8;
+            --surface: #1a1625;
+            --background: #0c0a12;
+            --text: #f6f2ff;
+            --text-soft: #d4cde9;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        h1 { font-size: 1.5rem; }
+        h2 { font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-soft); }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            color: var(--text-soft);
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        input[type="text"],
+        input[type="url"],
+        input[type="number"] {
+            width: 100%;
+            background: var(--background);
+            border: 1px solid rgba(155, 48, 255, 0.3);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+        }
+
+        .checkbox-item label {
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .color-input {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .color-input input[type="color"] {
+            width: 44px;
+            height: 44px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: var(--background);
+        }
+
+        .color-input input[type="text"] {
+            width: 120px;
+        }
+
+        .size-inputs {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .size-inputs .form-group {
+            flex: 1;
+        }
+
+        .preview-container {
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 16 / 9;
+            margin-bottom: 1rem;
+        }
+
+        .preview-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .code-container {
+            position: relative;
+        }
+
+        .code-output {
+            background: var(--background);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.8rem;
+            color: var(--text-soft);
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 200px;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .copy-btn.copied {
+            background: #22c55e;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tab {
+            background: var(--background);
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            color: var(--text-soft);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: var(--text);
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .api-docs {
+            margin-top: 2rem;
+        }
+
+        .api-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .api-table th,
+        .api-table td {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(155, 48, 255, 0.1);
+        }
+
+        .api-table th {
+            color: var(--text-soft);
+            font-weight: 500;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .api-table code {
+            background: var(--background);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">PS</div>
+            <h1>PSM Player Embed Code Generator</h1>
+        </div>
+
+        <div class="grid">
+            <div>
+                <div class="panel">
+                    <h2>Configuration</h2>
+
+                    <div class="form-group">
+                        <label for="videoUrl">Video URL (HLS or MP4)</label>
+                        <input type="url" id="videoUrl" placeholder="https://example.com/video.m3u8" value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="posterUrl">Poster Image URL (optional)</label>
+                        <input type="url" id="posterUrl" placeholder="https://example.com/poster.jpg">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="startTime">Start Time (seconds)</label>
+                        <input type="number" id="startTime" min="0" value="0">
+                    </div>
+
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="autoplay">
+                            <label for="autoplay">Autoplay</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="loop">
+                            <label for="loop">Loop</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="muted">
+                            <label for="muted">Muted</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="controls" checked>
+                            <label for="controls">Show Controls</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Player Color</label>
+                        <div class="color-input">
+                            <input type="color" id="colorPicker" value="#9b30ff">
+                            <input type="text" id="colorText" value="#9b30ff">
+                        </div>
+                    </div>
+
+                    <div class="size-inputs">
+                        <div class="form-group">
+                            <label for="width">Width</label>
+                            <input type="text" id="width" value="640">
+                        </div>
+                        <div class="form-group">
+                            <label for="height">Height</label>
+                            <input type="text" id="height" value="360">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="panel">
+                    <h2>Preview</h2>
+                    <div class="preview-container">
+                        <iframe id="preview" src="about:blank" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+                    </div>
+
+                    <div class="tabs">
+                        <button class="tab active" data-tab="iframe">iframe</button>
+                        <button class="tab" data-tab="javascript">JavaScript</button>
+                    </div>
+
+                    <div class="code-container">
+                        <pre class="code-output" id="codeOutput"></pre>
+                        <button class="copy-btn" id="copyBtn">Copy</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel api-docs">
+            <h2>PostMessage API</h2>
+            <p style="color: var(--text-soft); margin-bottom: 1rem; font-size: 0.9rem;">
+                Control the embedded player from your parent page using the postMessage API.
+            </p>
+
+            <table class="api-table">
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>Parameters</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>play</code></td>
+                        <td>-</td>
+                        <td>Start playback</td>
+                    </tr>
+                    <tr>
+                        <td><code>pause</code></td>
+                        <td>-</td>
+                        <td>Pause playback</td>
+                    </tr>
+                    <tr>
+                        <td><code>seek</code></td>
+                        <td><code>time: number</code></td>
+                        <td>Seek to time in seconds</td>
+                    </tr>
+                    <tr>
+                        <td><code>setVolume</code></td>
+                        <td><code>volume: number</code></td>
+                        <td>Set volume (0-1)</td>
+                    </tr>
+                    <tr>
+                        <td><code>mute</code></td>
+                        <td>-</td>
+                        <td>Mute audio</td>
+                    </tr>
+                    <tr>
+                        <td><code>unmute</code></td>
+                        <td>-</td>
+                        <td>Unmute audio</td>
+                    </tr>
+                    <tr>
+                        <td><code>load</code></td>
+                        <td><code>src: string</code></td>
+                        <td>Load a new video</td>
+                    </tr>
+                    <tr>
+                        <td><code>getState</code></td>
+                        <td>-</td>
+                        <td>Request current state</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2 style="margin-top: 1.5rem;">Events from Player</h2>
+            <table class="api-table">
+                <thead>
+                    <tr>
+                        <th>Event</th>
+                        <th>Data</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>ready</code></td>
+                        <td>-</td>
+                        <td>Player is ready</td>
+                    </tr>
+                    <tr>
+                        <td><code>play</code></td>
+                        <td>-</td>
+                        <td>Playback started</td>
+                    </tr>
+                    <tr>
+                        <td><code>pause</code></td>
+                        <td>-</td>
+                        <td>Playback paused</td>
+                    </tr>
+                    <tr>
+                        <td><code>timeupdate</code></td>
+                        <td><code>currentTime, duration</code></td>
+                        <td>Playback position changed</td>
+                    </tr>
+                    <tr>
+                        <td><code>ended</code></td>
+                        <td>-</td>
+                        <td>Video ended</td>
+                    </tr>
+                    <tr>
+                        <td><code>error</code></td>
+                        <td><code>message</code></td>
+                        <td>Error occurred</td>
+                    </tr>
+                    <tr>
+                        <td><code>state</code></td>
+                        <td><code>currentTime, duration, paused, muted, volume</code></td>
+                        <td>Response to getState</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2 style="margin-top: 1.5rem;">Example: Control from Parent</h2>
+            <pre class="code-output" style="max-height: none;">// Get reference to iframe
+const iframe = document.getElementById('psm-player');
+
+// Send command to player
+iframe.contentWindow.postMessage({
+    target: 'psm-player',
+    action: 'play'
+}, '*');
+
+// Seek to 30 seconds
+iframe.contentWindow.postMessage({
+    target: 'psm-player',
+    action: 'seek',
+    time: 30
+}, '*');
+
+// Listen for events from player
+window.addEventListener('message', (e) => {
+    if (e.data.source === 'psm-player') {
+        console.log('Event:', e.data.type, e.data);
+    }
+});</pre>
+        </div>
+    </div>
+
+    <script>
+        const inputs = {
+            videoUrl: document.getElementById('videoUrl'),
+            posterUrl: document.getElementById('posterUrl'),
+            startTime: document.getElementById('startTime'),
+            autoplay: document.getElementById('autoplay'),
+            loop: document.getElementById('loop'),
+            muted: document.getElementById('muted'),
+            controls: document.getElementById('controls'),
+            colorPicker: document.getElementById('colorPicker'),
+            colorText: document.getElementById('colorText'),
+            width: document.getElementById('width'),
+            height: document.getElementById('height')
+        };
+
+        const preview = document.getElementById('preview');
+        const codeOutput = document.getElementById('codeOutput');
+        const copyBtn = document.getElementById('copyBtn');
+        const tabs = document.querySelectorAll('.tab');
+
+        let currentTab = 'iframe';
+        let widgetBaseUrl = window.location.href.replace('generator.html', 'widget.html');
+
+        function buildUrl() {
+            const params = new URLSearchParams();
+
+            if (inputs.videoUrl.value) params.set('src', inputs.videoUrl.value);
+            if (inputs.posterUrl.value) params.set('poster', inputs.posterUrl.value);
+            if (inputs.startTime.value && parseInt(inputs.startTime.value) > 0) {
+                params.set('start', inputs.startTime.value);
+            }
+            if (inputs.autoplay.checked) params.set('autoplay', 'true');
+            if (inputs.loop.checked) params.set('loop', 'true');
+            if (inputs.muted.checked) params.set('muted', 'true');
+            if (!inputs.controls.checked) params.set('controls', 'false');
+            if (inputs.colorText.value !== '#9b30ff') {
+                params.set('color', inputs.colorText.value);
+            }
+
+            return `${widgetBaseUrl}?${params.toString()}`;
+        }
+
+        function generateCode() {
+            const url = buildUrl();
+            const width = inputs.width.value || '640';
+            const height = inputs.height.value || '360';
+
+            if (currentTab === 'iframe') {
+                return `<iframe
+  id="psm-player"
+  src="${url}"
+  width="${width}"
+  height="${height}"
+  frameborder="0"
+  allow="autoplay; fullscreen; picture-in-picture"
+  allowfullscreen
+></iframe>`;
+            } else {
+                return `<!-- PSM Player Embed -->
+<div id="psm-player-container"></div>
+<script>
+(function() {
+    var iframe = document.createElement('iframe');
+    iframe.id = 'psm-player';
+    iframe.src = '${url}';
+    iframe.width = '${width}';
+    iframe.height = '${height}';
+    iframe.frameBorder = '0';
+    iframe.allow = 'autoplay; fullscreen; picture-in-picture';
+    iframe.allowFullscreen = true;
+    document.getElementById('psm-player-container').appendChild(iframe);
+
+    // Optional: Listen for player events
+    window.addEventListener('message', function(e) {
+        if (e.data.source === 'psm-player') {
+            console.log('PSM Player:', e.data.type, e.data);
+        }
+    });
+})();
+<\/script>`;
+            }
+        }
+
+        function updatePreview() {
+            preview.src = buildUrl();
+        }
+
+        function updateCode() {
+            codeOutput.textContent = generateCode();
+        }
+
+        function update() {
+            updatePreview();
+            updateCode();
+        }
+
+        // Sync color inputs
+        inputs.colorPicker.addEventListener('input', () => {
+            inputs.colorText.value = inputs.colorPicker.value;
+            update();
+        });
+
+        inputs.colorText.addEventListener('input', () => {
+            if (/^#[0-9A-Fa-f]{6}$/.test(inputs.colorText.value)) {
+                inputs.colorPicker.value = inputs.colorText.value;
+            }
+            update();
+        });
+
+        // Add listeners to all inputs
+        Object.values(inputs).forEach(input => {
+            input.addEventListener('input', update);
+            input.addEventListener('change', update);
+        });
+
+        // Tab switching
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentTab = tab.dataset.tab;
+                updateCode();
+            });
+        });
+
+        // Copy button
+        copyBtn.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(codeOutput.textContent);
+                copyBtn.textContent = 'Copied!';
+                copyBtn.classList.add('copied');
+                setTimeout(() => {
+                    copyBtn.textContent = 'Copy';
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+            } catch (e) {
+                console.error('Copy failed:', e);
+            }
+        });
+
+        // Initial update
+        update();
+    </script>
+</body>
+</html>

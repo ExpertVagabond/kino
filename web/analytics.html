@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSM Player - Analytics Dashboard</title>
+    <style id="psm-theme"></style>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--psm-background, #0c0a12);
+            color: var(--psm-text, #f6f2ff);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(155, 48, 255, 0.2);
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--psm-primary, #9b30ff), #7a1fe8);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        h1 {
+            flex: 1;
+            font-size: 1.75rem;
+        }
+
+        .nav-link {
+            color: var(--psm-text-soft, #d4cde9);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            background: rgba(155, 48, 255, 0.1);
+            color: var(--psm-text, #f6f2ff);
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--psm-surface, #1a1625);
+            border-radius: 8px;
+            font-size: 0.875rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .metric-card {
+            background: var(--psm-surface, #1a1625);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(155, 48, 255, 0.1);
+        }
+
+        .metric-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .metric-title {
+            color: var(--psm-text-soft, #d4cde9);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .metric-title svg {
+            width: 18px;
+            height: 18px;
+            opacity: 0.7;
+        }
+
+        .metric-trend {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .metric-trend.up {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .metric-trend.down {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value.good { color: #22c55e; }
+        .metric-value.warning { color: #f59e0b; }
+        .metric-value.bad { color: #ef4444; }
+
+        .metric-subtitle {
+            color: var(--psm-text-soft, #d4cde9);
+            font-size: 0.8rem;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background: var(--psm-surface, #1a1625);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-title {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .chart-tabs {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chart-tab {
+            background: none;
+            border: none;
+            color: var(--psm-text-soft, #d4cde9);
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chart-tab:hover {
+            background: rgba(155, 48, 255, 0.1);
+        }
+
+        .chart-tab.active {
+            background: var(--psm-primary, #9b30ff);
+            color: white;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 250px;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .quality-distribution {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .quality-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .quality-label {
+            width: 60px;
+            font-size: 0.875rem;
+            color: var(--psm-text-soft, #d4cde9);
+        }
+
+        .quality-track {
+            flex: 1;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .quality-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease-out;
+        }
+
+        .quality-percent {
+            width: 50px;
+            text-align: right;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .events-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .events-table th {
+            text-align: left;
+            padding: 0.75rem;
+            color: var(--psm-text-soft, #d4cde9);
+            font-weight: 500;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .events-table td {
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .event-type {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .event-type.play {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .event-type.pause {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+
+        .event-type.seek {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
+        .event-type.buffer {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .event-type.quality {
+            background: rgba(155, 48, 255, 0.2);
+            color: var(--psm-primary, #9b30ff);
+        }
+
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .bottom-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .session-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .session-item {
+            background: var(--psm-background, #0c0a12);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .session-label {
+            color: var(--psm-text-soft, #d4cde9);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+        }
+
+        .session-value {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .realtime-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--psm-text-soft, #d4cde9);
+        }
+
+        .realtime-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--psm-primary, #9b30ff);
+            animation: pulse 1s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">PS</div>
+            <h1>Analytics Dashboard</h1>
+            <a href="index.html" class="nav-link">Back to Player</a>
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                <span>Live</span>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-title">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                        Watch Time
+                    </span>
+                    <span class="metric-trend up">+12%</span>
+                </div>
+                <div class="metric-value" id="watchTime">0:00</div>
+                <div class="metric-subtitle">Total playback duration</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-title">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                        QoE Score
+                    </span>
+                </div>
+                <div class="metric-value good" id="qoeScore">--</div>
+                <div class="metric-subtitle">Quality of Experience</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-title">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 18h16c1.1 0 2-.8 2-1.78V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10.22C2 17.2 2.9 18 4 18zm-1-12c0-.55.45-1 1-1h16c.55 0 1 .45 1 1v10c0 .55-.45 1-1 1H4c-.55 0-1-.45-1-1V6z"/></svg>
+                        Bandwidth
+                    </span>
+                </div>
+                <div class="metric-value" id="avgBandwidth">--</div>
+                <div class="metric-subtitle">Current estimated</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-title">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5.04-6.71l-2.75 3.54-1.96-2.36L6.5 17h11l-3.54-4.71z"/></svg>
+                        Current Quality
+                    </span>
+                </div>
+                <div class="metric-value" id="currentQuality">--</div>
+                <div class="metric-subtitle" id="qualityBitrate">--</div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-title">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+                        Buffer Level
+                    </span>
+                </div>
+                <div class="metric-value" id="bufferLevel">--</div>
+                <div class="metric-subtitle">Seconds ahead</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-title">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM8 17.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5zM9.5 8c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5S9.5 9.38 9.5 8zm6.5 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                        Rebuffer Events
+                    </span>
+                </div>
+                <div class="metric-value" id="rebufferCount">0</div>
+                <div class="metric-subtitle" id="rebufferTime">Total: 0.0s</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-title">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+                        Quality Switches
+                    </span>
+                </div>
+                <div class="metric-value" id="qualitySwitches">0</div>
+                <div class="metric-subtitle">Adaptive changes</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-title">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+                        Startup Time
+                    </span>
+                </div>
+                <div class="metric-value" id="startupTime">--</div>
+                <div class="metric-subtitle">Time to first frame</div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <span class="chart-title">Bandwidth Over Time</span>
+                    <div class="chart-tabs">
+                        <button class="chart-tab active" data-range="1m">1m</button>
+                        <button class="chart-tab" data-range="5m">5m</button>
+                        <button class="chart-tab" data-range="all">All</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="bandwidthChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <span class="chart-title">Quality Distribution</span>
+                </div>
+                <div class="quality-distribution" id="qualityDistribution">
+                    <div class="quality-bar">
+                        <span class="quality-label">Auto</span>
+                        <div class="quality-track">
+                            <div class="quality-fill" style="width: 100%; background: var(--psm-primary, #9b30ff);"></div>
+                        </div>
+                        <span class="quality-percent">100%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <span class="chart-title">Buffer Level History</span>
+                    <div class="realtime-indicator">
+                        <div class="realtime-dot"></div>
+                        Real-time
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="bufferChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <span class="chart-title">QoE Score History</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="qoeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <span class="chart-title">Playback Events</span>
+                </div>
+                <table class="events-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Event</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="eventsBody">
+                        <tr>
+                            <td colspan="3" style="text-align: center; color: var(--psm-text-soft);">No events yet</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <span class="chart-title">Session Information</span>
+                </div>
+                <div class="session-info">
+                    <div class="session-item">
+                        <div class="session-label">Session ID</div>
+                        <div class="session-value" id="sessionId">--</div>
+                    </div>
+                    <div class="session-item">
+                        <div class="session-label">Start Time</div>
+                        <div class="session-value" id="sessionStart">--</div>
+                    </div>
+                    <div class="session-item">
+                        <div class="session-label">Video URL</div>
+                        <div class="session-value" id="videoUrl" style="word-break: break-all; font-size: 0.8rem;">--</div>
+                    </div>
+                    <div class="session-item">
+                        <div class="session-label">Player Version</div>
+                        <div class="session-value" id="playerVersion">--</div>
+                    </div>
+                    <div class="session-item">
+                        <div class="session-label">Browser</div>
+                        <div class="session-value" id="browserInfo">--</div>
+                    </div>
+                    <div class="session-item">
+                        <div class="session-label">Connection Type</div>
+                        <div class="session-value" id="connectionType">--</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import init, {
+            PsmBranding,
+            version
+        } from '../crates/psm-player-wasm/pkg/psm_player_wasm.js';
+
+        // Initialize WASM and branding
+        await init();
+        document.getElementById('psm-theme').textContent = PsmBranding.get_css_variables();
+        document.getElementById('playerVersion').textContent = `v${version()}`;
+
+        // Session data
+        const sessionId = 'psm-' + Math.random().toString(36).substr(2, 9);
+        const sessionStart = new Date();
+        document.getElementById('sessionId').textContent = sessionId;
+        document.getElementById('sessionStart').textContent = sessionStart.toLocaleTimeString();
+
+        // Detect browser
+        const ua = navigator.userAgent;
+        let browser = 'Unknown';
+        if (ua.includes('Firefox')) browser = 'Firefox';
+        else if (ua.includes('Chrome')) browser = 'Chrome';
+        else if (ua.includes('Safari')) browser = 'Safari';
+        else if (ua.includes('Edge')) browser = 'Edge';
+        document.getElementById('browserInfo').textContent = browser;
+
+        // Connection type
+        if (navigator.connection) {
+            document.getElementById('connectionType').textContent = navigator.connection.effectiveType || 'Unknown';
+        }
+
+        // Chart data
+        const maxDataPoints = 120;
+        const bandwidthData = [];
+        const bufferData = [];
+        const qoeData = [];
+        const events = [];
+        let qualityTimes = {};
+        let startTime = null;
+
+        // Chart canvases
+        const bandwidthCanvas = document.getElementById('bandwidthChart');
+        const bufferCanvas = document.getElementById('bufferChart');
+        const qoeCanvas = document.getElementById('qoeChart');
+        const bandwidthCtx = bandwidthCanvas.getContext('2d');
+        const bufferCtx = bufferCanvas.getContext('2d');
+        const qoeCtx = qoeCanvas.getContext('2d');
+
+        // Listen for analytics messages from the player
+        window.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'psm-analytics') {
+                handleAnalyticsData(event.data.data);
+            }
+        });
+
+        // Also poll localStorage for analytics data (cross-tab communication)
+        function pollAnalytics() {
+            try {
+                const data = JSON.parse(localStorage.getItem('psm-analytics-data') || '{}');
+                if (data.timestamp && Date.now() - data.timestamp < 2000) {
+                    handleAnalyticsData(data);
+                }
+            } catch (e) {}
+        }
+
+        function handleAnalyticsData(data) {
+            const now = Date.now();
+            if (!startTime) startTime = now;
+
+            // Update metrics
+            if (data.watchTime !== undefined) {
+                document.getElementById('watchTime').textContent = formatTime(data.watchTime);
+            }
+
+            if (data.qoe !== undefined) {
+                const qoeEl = document.getElementById('qoeScore');
+                qoeEl.textContent = data.qoe.score.toFixed(0);
+                qoeEl.className = 'metric-value ' + (data.qoe.score >= 80 ? 'good' : data.qoe.score >= 50 ? 'warning' : 'bad');
+
+                document.getElementById('rebufferCount').textContent = data.qoe.rebuffer_count || 0;
+                document.getElementById('qualitySwitches').textContent = data.qoe.quality_switches || 0;
+
+                qoeData.push({ time: now, value: data.qoe.score });
+                if (qoeData.length > maxDataPoints) qoeData.shift();
+            }
+
+            if (data.bandwidth !== undefined) {
+                document.getElementById('avgBandwidth').textContent = formatBandwidth(data.bandwidth);
+                bandwidthData.push({ time: now, value: data.bandwidth });
+                if (bandwidthData.length > maxDataPoints) bandwidthData.shift();
+            }
+
+            if (data.buffer !== undefined) {
+                const bufferEl = document.getElementById('bufferLevel');
+                bufferEl.textContent = data.buffer.toFixed(1) + 's';
+                bufferEl.className = 'metric-value ' + (data.buffer < 5 ? 'bad' : data.buffer < 15 ? 'warning' : 'good');
+
+                bufferData.push({ time: now, value: data.buffer });
+                if (bufferData.length > maxDataPoints) bufferData.shift();
+            }
+
+            if (data.quality !== undefined) {
+                document.getElementById('currentQuality').textContent = data.quality.height ? `${data.quality.height}p` : 'Auto';
+                document.getElementById('qualityBitrate').textContent = data.quality.bitrate ? `${Math.round(data.quality.bitrate / 1000)} kbps` : '--';
+
+                // Track quality time
+                const qualityKey = data.quality.height ? `${data.quality.height}p` : 'Auto';
+                qualityTimes[qualityKey] = (qualityTimes[qualityKey] || 0) + 0.5;
+                updateQualityDistribution();
+            }
+
+            if (data.startupTime !== undefined) {
+                document.getElementById('startupTime').textContent = data.startupTime.toFixed(0) + 'ms';
+            }
+
+            if (data.rebufferTime !== undefined) {
+                document.getElementById('rebufferTime').textContent = `Total: ${data.rebufferTime.toFixed(1)}s`;
+            }
+
+            if (data.videoUrl !== undefined) {
+                document.getElementById('videoUrl').textContent = data.videoUrl;
+            }
+
+            if (data.event) {
+                addEvent(data.event);
+            }
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function formatBandwidth(bps) {
+            if (bps >= 1000000) return (bps / 1000000).toFixed(1) + ' Mbps';
+            if (bps >= 1000) return (bps / 1000).toFixed(0) + ' kbps';
+            return bps + ' bps';
+        }
+
+        function addEvent(event) {
+            events.unshift(event);
+            if (events.length > 50) events.pop();
+            updateEventsTable();
+        }
+
+        function updateEventsTable() {
+            const tbody = document.getElementById('eventsBody');
+            if (events.length === 0) return;
+
+            tbody.innerHTML = events.slice(0, 10).map(event => `
+                <tr>
+                    <td>${new Date(event.timestamp).toLocaleTimeString()}</td>
+                    <td><span class="event-type ${event.type}">${event.type}</span></td>
+                    <td>${event.details || '--'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function updateQualityDistribution() {
+            const total = Object.values(qualityTimes).reduce((a, b) => a + b, 0);
+            if (total === 0) return;
+
+            const container = document.getElementById('qualityDistribution');
+            const sorted = Object.entries(qualityTimes).sort((a, b) => b[1] - a[1]);
+            const colors = ['#9b30ff', '#7a1fe8', '#3b82f6', '#22c55e', '#f59e0b'];
+
+            container.innerHTML = sorted.map(([quality, time], i) => {
+                const percent = ((time / total) * 100).toFixed(1);
+                return `
+                    <div class="quality-bar">
+                        <span class="quality-label">${quality}</span>
+                        <div class="quality-track">
+                            <div class="quality-fill" style="width: ${percent}%; background: ${colors[i % colors.length]};"></div>
+                        </div>
+                        <span class="quality-percent">${percent}%</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function drawChart(ctx, canvas, data, options = {}) {
+            const { color = '#9b30ff', maxValue = null, label = '', unit = '' } = options;
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            const width = rect.width;
+            const height = rect.height;
+            const padding = { top: 20, right: 10, bottom: 30, left: 50 };
+            const chartWidth = width - padding.left - padding.right;
+            const chartHeight = height - padding.top - padding.bottom;
+
+            ctx.clearRect(0, 0, width, height);
+
+            if (data.length < 2) {
+                ctx.fillStyle = '#666';
+                ctx.font = '14px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('Collecting data...', width / 2, height / 2);
+                return;
+            }
+
+            // Calculate min/max
+            const values = data.map(d => d.value);
+            const max = maxValue || Math.max(...values) * 1.1;
+            const min = 0;
+
+            // Draw grid
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const y = padding.top + (chartHeight / 4) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(width - padding.right, y);
+                ctx.stroke();
+
+                // Y-axis labels
+                ctx.fillStyle = '#888';
+                ctx.font = '11px sans-serif';
+                ctx.textAlign = 'right';
+                const value = max - (max / 4) * i;
+                let labelText = value.toFixed(unit === 's' ? 1 : 0) + unit;
+                if (unit === 'Mbps' && value >= 1000000) {
+                    labelText = (value / 1000000).toFixed(1) + ' Mbps';
+                } else if (unit === 'Mbps' && value >= 1000) {
+                    labelText = (value / 1000).toFixed(0) + ' kbps';
+                }
+                ctx.fillText(labelText, padding.left - 8, y + 4);
+            }
+
+            // Draw line
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.lineJoin = 'round';
+
+            data.forEach((point, i) => {
+                const x = padding.left + (i / (data.length - 1)) * chartWidth;
+                const y = padding.top + chartHeight - ((point.value - min) / (max - min)) * chartHeight;
+
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            // Fill gradient
+            ctx.lineTo(padding.left + chartWidth, padding.top + chartHeight);
+            ctx.lineTo(padding.left, padding.top + chartHeight);
+            ctx.closePath();
+
+            const gradient = ctx.createLinearGradient(0, padding.top, 0, padding.top + chartHeight);
+            gradient.addColorStop(0, color + '40');
+            gradient.addColorStop(1, color + '00');
+            ctx.fillStyle = gradient;
+            ctx.fill();
+        }
+
+        function updateCharts() {
+            drawChart(bandwidthCtx, bandwidthCanvas, bandwidthData, {
+                color: '#9b30ff',
+                unit: 'Mbps',
+                label: 'Bandwidth'
+            });
+            drawChart(bufferCtx, bufferCanvas, bufferData, {
+                color: '#22c55e',
+                maxValue: 30,
+                unit: 's',
+                label: 'Buffer'
+            });
+            drawChart(qoeCtx, qoeCanvas, qoeData, {
+                color: '#f59e0b',
+                maxValue: 100,
+                unit: '',
+                label: 'QoE'
+            });
+        }
+
+        // Demo data generation for testing
+        function generateDemoData() {
+            const now = Date.now();
+
+            // Simulate bandwidth variation
+            const baseBandwidth = 5000000 + Math.random() * 3000000;
+            const bandwidth = baseBandwidth + Math.sin(now / 5000) * 1000000 + (Math.random() - 0.5) * 500000;
+
+            // Simulate buffer level
+            const buffer = 15 + Math.sin(now / 3000) * 5 + (Math.random() - 0.5) * 3;
+
+            // Simulate QoE score
+            const qoe = {
+                score: 75 + Math.sin(now / 4000) * 15 + (Math.random() - 0.5) * 10,
+                rebuffer_count: Math.floor(Math.random() * 3),
+                quality_switches: Math.floor(Math.random() * 5)
+            };
+
+            // Simulate quality
+            const qualities = [
+                { height: 1080, bitrate: 5000000 },
+                { height: 720, bitrate: 3000000 },
+                { height: 480, bitrate: 1500000 },
+                { height: 360, bitrate: 800000 }
+            ];
+            const quality = qualities[Math.floor(Math.random() * qualities.length)];
+
+            handleAnalyticsData({
+                watchTime: (now - (startTime || now)) / 1000,
+                bandwidth,
+                buffer: Math.max(0, buffer),
+                qoe,
+                quality,
+                startupTime: 250 + Math.random() * 150,
+                rebufferTime: Math.random() * 2,
+                videoUrl: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'
+            });
+        }
+
+        // Run demo data generation
+        setInterval(generateDemoData, 500);
+        setInterval(updateCharts, 500);
+        setInterval(pollAnalytics, 500);
+
+        // Tab switching
+        document.querySelectorAll('.chart-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            });
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', updateCharts);
+    </script>
+</body>
+</html>

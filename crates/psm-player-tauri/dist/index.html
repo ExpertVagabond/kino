@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSM Player</title>
+    <style>
+        :root {
+            --psm-primary: #9b30ff;
+            --psm-primary-dark: #7a1fe8;
+            --psm-background: #0c0a12;
+            --psm-background-light: #0f0b18;
+            --psm-surface: #1a1625;
+            --psm-text: #f6f2ff;
+            --psm-text-soft: #d4cde9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--psm-background);
+            color: var(--psm-text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            background: var(--psm-surface);
+            border-bottom: 1px solid rgba(155, 48, 255, 0.2);
+        }
+
+        .logo {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(145deg, var(--psm-primary), var(--psm-primary-dark));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            gap: 1.5rem;
+        }
+
+        .url-bar {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            background: var(--psm-background-light);
+            border: 1px solid rgba(155, 48, 255, 0.3);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: var(--psm-text);
+            font-size: 0.9rem;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--psm-primary);
+            box-shadow: 0 0 0 2px rgba(155, 48, 255, 0.2);
+        }
+
+        button {
+            background: var(--psm-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: var(--psm-primary-dark);
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .player-container {
+            flex: 1;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            min-height: 400px;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .controls-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem;
+            background: linear-gradient(transparent, rgba(12, 10, 18, 0.95));
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--psm-primary);
+            width: 0%;
+            transition: width 0.1s;
+        }
+
+        .control-buttons {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .play-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .time {
+            color: var(--psm-text-soft);
+            font-size: 0.875rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: var(--psm-surface);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .stat-label {
+            color: var(--psm-text-soft);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .quality-select {
+            background: var(--psm-background-light);
+            border: 1px solid rgba(155, 48, 255, 0.3);
+            border-radius: 6px;
+            padding: 0.5rem;
+            color: var(--psm-text);
+            font-size: 0.875rem;
+            margin-left: auto;
+        }
+
+        .status {
+            padding: 0.5rem 1rem;
+            background: var(--psm-background-light);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            color: var(--psm-text-soft);
+        }
+
+        .status.connected {
+            color: #22c55e;
+        }
+
+        .status.error {
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">PS</div>
+        <h1>PSM Player</h1>
+        <div class="status" id="status">Ready</div>
+    </div>
+
+    <div class="main">
+        <div class="url-bar">
+            <input type="text" id="url" placeholder="Enter HLS/DASH stream URL..."
+                   value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8">
+            <button id="loadBtn">Load Stream</button>
+        </div>
+
+        <div class="player-container">
+            <video id="video"></video>
+            <div class="controls-overlay">
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="control-buttons">
+                    <button class="play-btn" id="playBtn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                    <span class="time" id="time">0:00 / 0:00</span>
+                    <select class="quality-select" id="qualitySelect">
+                        <option value="-1">Auto</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-label">Quality</div>
+                <div class="stat-value" id="statQuality">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Buffer</div>
+                <div class="stat-value" id="statBuffer">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Bitrate</div>
+                <div class="stat-value" id="statBitrate">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">State</div>
+                <div class="stat-value" id="statState">Idle</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script>
+        const { invoke } = window.__TAURI__.core;
+
+        const video = document.getElementById('video');
+        const urlInput = document.getElementById('url');
+        const loadBtn = document.getElementById('loadBtn');
+        const playBtn = document.getElementById('playBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const timeDisplay = document.getElementById('time');
+        const qualitySelect = document.getElementById('qualitySelect');
+        const status = document.getElementById('status');
+
+        let hls = null;
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateStats() {
+            // Quality
+            if (hls && hls.currentLevel >= 0 && hls.levels[hls.currentLevel]) {
+                const level = hls.levels[hls.currentLevel];
+                document.getElementById('statQuality').textContent = `${level.height}p`;
+                document.getElementById('statBitrate').textContent = `${Math.round(level.bitrate / 1000)} kbps`;
+            }
+
+            // Buffer
+            if (video.buffered.length > 0) {
+                const buffered = video.buffered.end(video.buffered.length - 1) - video.currentTime;
+                document.getElementById('statBuffer').textContent = `${buffered.toFixed(1)}s`;
+            }
+
+            // State
+            let state = 'Idle';
+            if (video.paused) state = 'Paused';
+            else if (video.seeking) state = 'Seeking';
+            else if (video.readyState < 3) state = 'Buffering';
+            else state = 'Playing';
+            document.getElementById('statState').textContent = state;
+        }
+
+        async function loadStream() {
+            const url = urlInput.value;
+            if (!url) return;
+
+            status.textContent = 'Loading...';
+            status.className = 'status';
+
+            // Notify Tauri backend
+            try {
+                await invoke('load_video', { url });
+            } catch (e) {
+                console.log('Backend notification:', e);
+            }
+
+            if (hls) {
+                hls.destroy();
+            }
+
+            if (Hls.isSupported()) {
+                hls = new Hls({
+                    startLevel: -1,
+                });
+
+                hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+                    status.textContent = 'Connected';
+                    status.className = 'status connected';
+
+                    // Populate quality selector
+                    qualitySelect.innerHTML = '<option value="-1">Auto</option>';
+                    data.levels.forEach((level, i) => {
+                        const option = document.createElement('option');
+                        option.value = i;
+                        option.textContent = `${level.height}p (${Math.round(level.bitrate / 1000)} kbps)`;
+                        qualitySelect.appendChild(option);
+                    });
+
+                    video.play().catch(() => {});
+                });
+
+                hls.on(Hls.Events.ERROR, (event, data) => {
+                    if (data.fatal) {
+                        status.textContent = 'Error: ' + data.details;
+                        status.className = 'status error';
+                    }
+                });
+
+                hls.loadSource(url);
+                hls.attachMedia(video);
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = url;
+                status.textContent = 'Connected (native)';
+                status.className = 'status connected';
+            }
+        }
+
+        loadBtn.addEventListener('click', loadStream);
+
+        playBtn.addEventListener('click', async () => {
+            if (video.paused) {
+                video.play();
+                try { await invoke('play'); } catch (e) {}
+            } else {
+                video.pause();
+                try { await invoke('pause'); } catch (e) {}
+            }
+        });
+
+        video.addEventListener('play', () => {
+            playBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+        });
+
+        video.addEventListener('pause', () => {
+            playBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+        });
+
+        video.addEventListener('timeupdate', () => {
+            const current = formatTime(video.currentTime);
+            const duration = formatTime(video.duration || 0);
+            timeDisplay.textContent = `${current} / ${duration}`;
+
+            if (video.duration) {
+                progressFill.style.width = `${(video.currentTime / video.duration) * 100}%`;
+            }
+        });
+
+        progressBar.addEventListener('click', async (e) => {
+            const rect = progressBar.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            const time = percent * video.duration;
+            video.currentTime = time;
+            try { await invoke('seek', { position: time }); } catch (e) {}
+        });
+
+        qualitySelect.addEventListener('change', () => {
+            if (hls) {
+                hls.currentLevel = parseInt(qualitySelect.value);
+            }
+        });
+
+        setInterval(updateStats, 500);
+
+        // Handle keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                playBtn.click();
+            } else if (e.code === 'ArrowLeft') {
+                video.currentTime = Math.max(0, video.currentTime - 10);
+            } else if (e.code === 'ArrowRight') {
+                video.currentTime = Math.min(video.duration, video.currentTime + 10);
+            } else if (e.code === 'KeyF') {
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else {
+                    document.querySelector('.player-container').requestFullscreen();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

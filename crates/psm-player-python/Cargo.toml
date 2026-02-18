@@ -1,0 +1,16 @@
+[package]
+name = "psm-player-python"
+description = "Python bindings for PSM Player frequency analysis"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[lib]
+name = "psm_frequency"
+crate-type = ["cdylib"]
+
+[dependencies]
+psm-player-frequency = { path = "../psm-player-frequency" }
+pyo3 = { version = "0.22", features = ["extension-module"] }
+numpy = "0.22"

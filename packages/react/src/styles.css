@@ -1,0 +1,98 @@
+/* PSM Player - React Component Styles */
+
+:root {
+  --psm-primary: #9b30ff;
+  --psm-primary-dark: #7a1fe8;
+  --psm-primary-deep: #5a10b8;
+  --psm-background: #0c0a12;
+  --psm-background-light: #120f1a;
+  --psm-surface: #1a1625;
+  --psm-text: #f6f2ff;
+  --psm-text-soft: #d4cde9;
+}
+
+.psm-player {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--psm-background);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.psm-player video {
+  display: block;
+  background: #000;
+}
+
+/* Custom controls styling when native controls are hidden */
+.psm-player video::-webkit-media-controls {
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+}
+
+.psm-player video::-webkit-media-controls-panel {
+  background: linear-gradient(transparent, rgba(12, 10, 18, 0.95));
+}
+
+.psm-player video::-webkit-media-controls-play-button {
+  background-color: var(--psm-primary);
+  border-radius: 50%;
+}
+
+.psm-player video::-webkit-media-controls-current-time-display,
+.psm-player video::-webkit-media-controls-time-remaining-display {
+  color: var(--psm-text);
+}
+
+.psm-player video::-webkit-media-controls-timeline {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.psm-player video::-webkit-media-controls-volume-slider {
+  background: var(--psm-primary);
+}
+
+/* Fullscreen styles */
+.psm-player:fullscreen {
+  border-radius: 0;
+}
+
+.psm-player:fullscreen video {
+  width: 100vw;
+  height: 100vh;
+  object-fit: contain;
+}
+
+/* Loading state */
+.psm-player.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(155, 48, 255, 0.3);
+  border-top-color: var(--psm-primary);
+  border-radius: 50%;
+  animation: psm-spin 1s linear infinite;
+}
+
+@keyframes psm-spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* Error state */
+.psm-player.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.psm-player.error::before {
+  content: 'Unable to play video';
+  color: var(--psm-text-soft);
+  font-size: 14px;
+}

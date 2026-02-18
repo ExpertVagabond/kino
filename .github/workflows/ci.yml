@@ -1,0 +1,283 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  # ============================================================================
+  # Rust Tests & Linting
+  # ============================================================================
+  rust:
+    name: Rust ${{ matrix.rust }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        rust: [stable, beta]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-action@stable
+        with:
+          toolchain: ${{ matrix.rust }}
+          components: clippy, rustfmt
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Run clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Build
+        run: cargo build --all-features --verbose
+
+      - name: Run tests
+        run: cargo test --all-features --verbose
+
+  # ============================================================================
+  # WASM Build
+  # ============================================================================
+  wasm:
+    name: WASM Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-action@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: wasm-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build WASM
+        working-directory: crates/psm-player-wasm
+        run: wasm-pack build --target web --release
+
+      - name: Upload WASM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-pkg
+          path: crates/psm-player-wasm/pkg/
+
+  # ============================================================================
+  # Tauri Desktop Build
+  # ============================================================================
+  tauri:
+    name: Tauri ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux
+            os: ubuntu-latest
+          - platform: macos
+            os: macos-latest
+          - platform: windows
+            os: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-action@stable
+
+      - name: Install Linux dependencies
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Install Tauri CLI
+        run: cargo install tauri-cli
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: tauri-${{ matrix.platform }}-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build Tauri app
+        working-directory: crates/psm-player-tauri
+        run: cargo tauri build
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: tauri-${{ matrix.platform }}
+          path: |
+            target/release/bundle/
+            target/release/*.exe
+            target/release/psm-player
+
+  # ============================================================================
+  # Docker Build
+  # ============================================================================
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: psm-player:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ============================================================================
+  # Frequency Analysis Crate
+  # ============================================================================
+  frequency:
+    name: Frequency Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-action@stable
+        with:
+          components: clippy
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: frequency-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build frequency crate
+        working-directory: crates/psm-player-frequency
+        run: cargo build --all-features
+
+      - name: Run frequency tests
+        working-directory: crates/psm-player-frequency
+        run: cargo test --all-features
+
+      - name: Run frequency benchmarks (dry-run)
+        working-directory: crates/psm-player-frequency
+        run: cargo bench --no-run
+
+  # ============================================================================
+  # Python Bindings
+  # ============================================================================
+  python:
+    name: Python Bindings
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-action@stable
+
+      - name: Install maturin
+        run: pip install maturin
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: python-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build Python wheel
+        working-directory: crates/psm-player-python
+        run: maturin build --release
+
+      - name: Install and test wheel
+        run: |
+          pip install target/wheels/*.whl
+          python -c "import psm_player; print(psm_player.__version__ if hasattr(psm_player, '__version__') else 'OK')"
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-wheel
+          path: target/wheels/*.whl
+
+  # ============================================================================
+  # TLA+ Model Checking
+  # ============================================================================
+  tla:
+    name: TLA+ Model Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Download TLC
+        run: |
+          wget -q https://github.com/tlaplus/tlaplus/releases/download/v1.8.0/tla2tools.jar
+          mv tla2tools.jar specs/tla/
+
+      - name: Check Player State Machine
+        working-directory: specs/tla
+        run: |
+          java -jar tla2tools.jar -config PSMPlayerState.cfg PSMPlayerState.tla || true
+
+      - name: Check ABR Algorithm
+        working-directory: specs/tla
+        run: |
+          java -jar tla2tools.jar -config PSMAbrAlgorithm.cfg PSMAbrAlgorithm.tla || true
