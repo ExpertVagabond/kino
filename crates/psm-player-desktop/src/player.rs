@@ -190,8 +190,8 @@ impl DesktopPlayer {
 
         // Create player with video renderer
         let player = gst_player::Player::new(
-            gst_player::PlayerVideoRenderer::NONE,
-            gst_player::PlayerSignalDispatcher::NONE,
+            None::<gst_player::PlayerVideoRenderer>,
+            None::<gst_player::PlayerSignalDispatcher>,
         );
 
         let session = Arc::new(PlayerSession::new(config.core.clone()));
