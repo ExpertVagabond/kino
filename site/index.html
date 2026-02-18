@@ -20,10 +20,10 @@
   --text: #FAFAF9;
   --text-secondary: #A8A8B3;
   --text-dim: #63636E;
-  --accent: #F59E0B;
-  --accent-light: #FBBF24;
-  --accent-dim: rgba(245, 158, 11, 0.15);
-  --accent-glow: rgba(245, 158, 11, 0.08);
+  --accent: #8B5CF6;
+  --accent-light: #A78BFA;
+  --accent-dim: rgba(139, 92, 246, 0.15);
+  --accent-glow: rgba(139, 92, 246, 0.08);
   --font-display: 'Syne', sans-serif;
   --font-body: 'Outfit', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
@@ -132,14 +132,14 @@ nav .container {
   font-size: 13px !important;
   padding: 8px 16px;
   background: var(--accent-dim);
-  border: 1px solid rgba(245, 158, 11, 0.25);
+  border: 1px solid rgba(139, 92, 246, 0.25);
   border-radius: 6px;
   color: var(--accent-light) !important;
   transition: all 0.2s !important;
 }
 
 .nav-cta:hover {
-  background: rgba(245, 158, 11, 0.2) !important;
+  background: rgba(139, 92, 246, 0.2) !important;
   border-color: var(--accent) !important;
 }
 
@@ -161,7 +161,7 @@ nav .container {
   right: 10%;
   width: 500px;
   height: 800px;
-  background: conic-gradient(from 180deg at 50% 0%, transparent 40%, rgba(245, 158, 11, 0.04) 48%, rgba(245, 158, 11, 0.06) 50%, rgba(245, 158, 11, 0.04) 52%, transparent 60%);
+  background: conic-gradient(from 180deg at 50% 0%, transparent 40%, rgba(139, 92, 246, 0.04) 48%, rgba(139, 92, 246, 0.06) 50%, rgba(139, 92, 246, 0.04) 52%, transparent 60%);
   pointer-events: none;
   animation: beam-sway 12s ease-in-out infinite;
 }
@@ -202,7 +202,7 @@ nav .container {
   gap: 8px;
   padding: 6px 14px;
   background: var(--accent-dim);
-  border: 1px solid rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.2);
   border-radius: 100px;
   font-family: var(--font-mono);
   font-size: 12px;
@@ -270,12 +270,12 @@ h1 .accent { color: var(--accent); }
 .btn-primary {
   background: var(--accent);
   color: var(--bg);
-  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.3), 0 4px 24px rgba(245, 158, 11, 0.2);
+  box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.3), 0 4px 24px rgba(139, 92, 246, 0.2);
 }
 
 .btn-primary:hover {
   background: var(--accent-light);
-  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.5), 0 8px 32px rgba(245, 158, 11, 0.3);
+  box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.5), 0 8px 32px rgba(139, 92, 246, 0.3);
   transform: translateY(-1px);
 }
 
@@ -320,7 +320,7 @@ h1 .accent { color: var(--accent); }
 }
 
 .terminal-dot:nth-child(1) { background: #EF4444; }
-.terminal-dot:nth-child(2) { background: #F59E0B; }
+.terminal-dot:nth-child(2) { background: #8B5CF6; }
 .terminal-dot:nth-child(3) { background: #22C55E; }
 
 .terminal-title {
@@ -557,7 +557,7 @@ h1 .accent { color: var(--accent); }
   align-items: center;
   justify-content: center;
   background: var(--accent-dim);
-  border: 1px solid rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.15);
   border-radius: 10px;
   margin-bottom: 20px;
   font-size: 18px;
@@ -974,7 +974,7 @@ footer .container {
       <!-- Core layer -->
       <div class="arch-label">Core</div>
       <div class="arch-row">
-        <div class="arch-crate" style="border-color: var(--accent); background: rgba(245, 158, 11, 0.03);">
+        <div class="arch-crate" style="border-color: var(--accent); background: rgba(139, 92, 246, 0.03);">
           <span class="crate-name">kino-core</span>
           <span class="crate-desc">HLS/DASH, ABR, buffers, DRM</span>
         </div>
