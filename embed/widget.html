@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSM Player Widget</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --psm-primary: #9b30ff;
+            --psm-primary-dark: #7a1fe8;
+            --psm-surface: #1a1625;
+            --psm-background: #0c0a12;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            background: #000;
+            overflow: hidden;
+        }
+
+        .psm-widget {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .psm-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .psm-widget:hover .psm-overlay,
+        .psm-widget.paused .psm-overlay,
+        .psm-widget.loading .psm-overlay {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .psm-gradient {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 120px;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+            pointer-events: none;
+        }
+
+        .psm-controls {
+            position: relative;
+            padding: 12px 16px;
+            z-index: 10;
+        }
+
+        .psm-progress {
+            position: relative;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
+
+        .psm-progress-bar {
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            transition: height 0.1s;
+        }
+
+        .psm-progress:hover .psm-progress-bar {
+            height: 5px;
+        }
+
+        .psm-progress-buffer {
+            position: absolute;
+            left: 0;
+            height: 3px;
+            background: rgba(155, 48, 255, 0.3);
+            border-radius: 2px;
+            pointer-events: none;
+        }
+
+        .psm-progress:hover .psm-progress-buffer {
+            height: 5px;
+        }
+
+        .psm-progress-fill {
+            position: absolute;
+            left: 0;
+            height: 3px;
+            background: var(--psm-primary);
+            border-radius: 2px;
+            pointer-events: none;
+        }
+
+        .psm-progress:hover .psm-progress-fill {
+            height: 5px;
+        }
+
+        .psm-progress-handle {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.1s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+        }
+
+        .psm-progress:hover .psm-progress-handle {
+            opacity: 1;
+        }
+
+        .psm-buttons {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .psm-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.9;
+            transition: opacity 0.15s, transform 0.15s;
+        }
+
+        .psm-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .psm-btn svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .psm-play-btn {
+            width: 36px;
+            height: 36px;
+            background: var(--psm-primary);
+            border-radius: 50%;
+        }
+
+        .psm-play-btn:hover {
+            background: var(--psm-primary-dark);
+        }
+
+        .psm-time {
+            color: rgba(255, 255, 255, 0.8);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 12px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .psm-spacer { flex: 1; }
+
+        .psm-volume {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .psm-volume-slider {
+            width: 60px;
+            height: 3px;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            cursor: pointer;
+        }
+
+        .psm-volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .psm-big-play {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 64px;
+            height: 64px;
+            background: var(--psm-primary);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.2s;
+            box-shadow: 0 4px 20px rgba(155, 48, 255, 0.5);
+            z-index: 20;
+        }
+
+        .psm-widget.paused .psm-big-play {
+            opacity: 1;
+        }
+
+        .psm-big-play:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .psm-big-play svg {
+            width: 28px;
+            height: 28px;
+            fill: white;
+            margin-left: 3px;
+        }
+
+        .psm-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-top-color: var(--psm-primary);
+            border-radius: 50%;
+            opacity: 0;
+            z-index: 15;
+        }
+
+        .psm-widget.loading .psm-loading {
+            opacity: 1;
+            animation: psm-spin 1s linear infinite;
+        }
+
+        .psm-widget.loading .psm-big-play {
+            opacity: 0;
+        }
+
+        @keyframes psm-spin {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .psm-logo {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 10;
+        }
+
+        .psm-widget:hover .psm-logo {
+            opacity: 1;
+        }
+
+        .psm-logo-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--psm-primary), var(--psm-primary-dark));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .psm-error {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 14px;
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+
+        .psm-widget.error .psm-error {
+            display: block;
+        }
+
+        .psm-widget.error .psm-big-play,
+        .psm-widget.error .psm-loading {
+            display: none;
+        }
+
+        .psm-error-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 12px;
+            fill: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="psm-widget paused" id="widget">
+        <video id="video" playsinline></video>
+
+        <div class="psm-loading"></div>
+
+        <button class="psm-big-play" id="bigPlay">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+
+        <div class="psm-error">
+            <svg class="psm-error-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            <div id="errorMessage">Unable to load video</div>
+        </div>
+
+        <div class="psm-overlay">
+            <div class="psm-gradient"></div>
+            <div class="psm-logo">
+                <div class="psm-logo-icon">PS</div>
+            </div>
+            <div class="psm-controls">
+                <div class="psm-progress" id="progress">
+                    <div class="psm-progress-bar"></div>
+                    <div class="psm-progress-buffer" id="buffer"></div>
+                    <div class="psm-progress-fill" id="fill"></div>
+                    <div class="psm-progress-handle" id="handle"></div>
+                </div>
+                <div class="psm-buttons">
+                    <button class="psm-btn psm-play-btn" id="playBtn">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                    <span class="psm-time" id="time">0:00 / 0:00</span>
+                    <div class="psm-spacer"></div>
+                    <div class="psm-volume">
+                        <button class="psm-btn" id="muteBtn">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                        </button>
+                        <input type="range" class="psm-volume-slider" id="volume" min="0" max="1" step="0.05" value="1">
+                    </div>
+                    <button class="psm-btn" id="fullscreenBtn" title="Fullscreen">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script>
+    (function() {
+        'use strict';
+
+        // Parse configuration from URL or parent
+        const params = new URLSearchParams(window.location.search);
+        const config = {
+            src: params.get('src') || '',
+            autoplay: params.get('autoplay') === 'true',
+            loop: params.get('loop') === 'true',
+            muted: params.get('muted') === 'true',
+            controls: params.get('controls') !== 'false',
+            poster: params.get('poster') || '',
+            startTime: parseFloat(params.get('start')) || 0,
+            color: params.get('color') || '#9b30ff'
+        };
+
+        // Apply custom color
+        if (config.color !== '#9b30ff') {
+            document.documentElement.style.setProperty('--psm-primary', config.color);
+            // Darken for hover state
+            const darken = (hex, percent) => {
+                const num = parseInt(hex.replace('#', ''), 16);
+                const amt = Math.round(2.55 * percent);
+                const R = Math.max(0, (num >> 16) - amt);
+                const G = Math.max(0, ((num >> 8) & 0x00FF) - amt);
+                const B = Math.max(0, (num & 0x0000FF) - amt);
+                return '#' + (1 << 24 | R << 16 | G << 8 | B).toString(16).slice(1);
+            };
+            document.documentElement.style.setProperty('--psm-primary-dark', darken(config.color, 15));
+        }
+
+        const widget = document.getElementById('widget');
+        const video = document.getElementById('video');
+        const playBtn = document.getElementById('playBtn');
+        const bigPlay = document.getElementById('bigPlay');
+        const timeDisplay = document.getElementById('time');
+        const progress = document.getElementById('progress');
+        const fill = document.getElementById('fill');
+        const buffer = document.getElementById('buffer');
+        const handle = document.getElementById('handle');
+        const muteBtn = document.getElementById('muteBtn');
+        const volumeSlider = document.getElementById('volume');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const errorMessage = document.getElementById('errorMessage');
+
+        let hls = null;
+
+        // Format time
+        function formatTime(s) {
+            if (!s || isNaN(s)) return '0:00';
+            const m = Math.floor(s / 60);
+            const sec = Math.floor(s % 60);
+            return `${m}:${sec.toString().padStart(2, '0')}`;
+        }
+
+        // Load video
+        function loadVideo(src) {
+            if (!src) return;
+
+            widget.classList.add('loading');
+            widget.classList.remove('error');
+
+            if (hls) {
+                hls.destroy();
+                hls = null;
+            }
+
+            if (src.includes('.m3u8') && Hls.isSupported()) {
+                hls = new Hls({
+                    startLevel: -1,
+                    capLevelToPlayerSize: true
+                });
+
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    widget.classList.remove('loading');
+                    if (config.startTime > 0) {
+                        video.currentTime = config.startTime;
+                    }
+                    if (config.autoplay) {
+                        video.play().catch(() => {});
+                    }
+                });
+
+                hls.on(Hls.Events.ERROR, (event, data) => {
+                    if (data.fatal) {
+                        widget.classList.remove('loading');
+                        widget.classList.add('error');
+                        errorMessage.textContent = 'Failed to load video stream';
+                        postMessage('error', { message: data.reason });
+                    }
+                });
+
+                hls.loadSource(src);
+                hls.attachMedia(video);
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = src;
+                video.addEventListener('loadedmetadata', () => {
+                    widget.classList.remove('loading');
+                    if (config.startTime > 0) {
+                        video.currentTime = config.startTime;
+                    }
+                    if (config.autoplay) {
+                        video.play().catch(() => {});
+                    }
+                }, { once: true });
+            } else {
+                video.src = src;
+                video.addEventListener('loadeddata', () => {
+                    widget.classList.remove('loading');
+                    if (config.autoplay) {
+                        video.play().catch(() => {});
+                    }
+                }, { once: true });
+            }
+        }
+
+        // Play/pause
+        function togglePlay() {
+            if (video.paused) {
+                video.play().catch(() => {});
+            } else {
+                video.pause();
+            }
+        }
+
+        function updatePlayButton(playing) {
+            playBtn.innerHTML = playing
+                ? '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'
+                : '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+        }
+
+        // Progress
+        function updateProgress() {
+            if (!video.duration) return;
+
+            const percent = (video.currentTime / video.duration) * 100;
+            fill.style.width = `${percent}%`;
+            handle.style.left = `${percent}%`;
+
+            timeDisplay.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
+
+            if (video.buffered.length > 0) {
+                const buffered = video.buffered.end(video.buffered.length - 1);
+                buffer.style.width = `${(buffered / video.duration) * 100}%`;
+            }
+        }
+
+        function seek(e) {
+            const rect = progress.getBoundingClientRect();
+            const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+            video.currentTime = percent * video.duration;
+        }
+
+        // Volume
+        function updateVolumeIcon() {
+            const vol = video.muted ? 0 : video.volume;
+            let icon;
+            if (vol === 0) {
+                icon = '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>';
+            } else if (vol < 0.5) {
+                icon = '<path d="M18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM5 9v6h4l5 5V4L9 9H5z"/>';
+            } else {
+                icon = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
+            }
+            muteBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor">${icon}</svg>`;
+            volumeSlider.value = video.muted ? 0 : video.volume;
+        }
+
+        // Fullscreen
+        function toggleFullscreen() {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else {
+                widget.requestFullscreen().catch(() => {});
+            }
+        }
+
+        // PostMessage API for external control
+        function postMessage(type, data = {}) {
+            if (window.parent !== window) {
+                window.parent.postMessage({ source: 'psm-player', type, ...data }, '*');
+            }
+        }
+
+        // Listen for messages from parent
+        window.addEventListener('message', (e) => {
+            if (!e.data || e.data.target !== 'psm-player') return;
+
+            switch (e.data.action) {
+                case 'play':
+                    video.play().catch(() => {});
+                    break;
+                case 'pause':
+                    video.pause();
+                    break;
+                case 'seek':
+                    if (typeof e.data.time === 'number') {
+                        video.currentTime = e.data.time;
+                    }
+                    break;
+                case 'setVolume':
+                    if (typeof e.data.volume === 'number') {
+                        video.volume = Math.max(0, Math.min(1, e.data.volume));
+                        video.muted = false;
+                        updateVolumeIcon();
+                    }
+                    break;
+                case 'mute':
+                    video.muted = true;
+                    updateVolumeIcon();
+                    break;
+                case 'unmute':
+                    video.muted = false;
+                    updateVolumeIcon();
+                    break;
+                case 'load':
+                    if (e.data.src) {
+                        loadVideo(e.data.src);
+                    }
+                    break;
+                case 'getState':
+                    postMessage('state', {
+                        currentTime: video.currentTime,
+                        duration: video.duration || 0,
+                        paused: video.paused,
+                        muted: video.muted,
+                        volume: video.volume
+                    });
+                    break;
+            }
+        });
+
+        // Event listeners
+        playBtn.addEventListener('click', togglePlay);
+        bigPlay.addEventListener('click', togglePlay);
+
+        video.addEventListener('play', () => {
+            widget.classList.remove('paused');
+            updatePlayButton(true);
+            postMessage('play');
+        });
+
+        video.addEventListener('pause', () => {
+            widget.classList.add('paused');
+            updatePlayButton(false);
+            postMessage('pause');
+        });
+
+        video.addEventListener('waiting', () => {
+            widget.classList.add('loading');
+        });
+
+        video.addEventListener('playing', () => {
+            widget.classList.remove('loading');
+        });
+
+        video.addEventListener('timeupdate', () => {
+            updateProgress();
+            postMessage('timeupdate', { currentTime: video.currentTime, duration: video.duration });
+        });
+
+        video.addEventListener('ended', () => {
+            if (config.loop) {
+                video.currentTime = 0;
+                video.play().catch(() => {});
+            } else {
+                postMessage('ended');
+            }
+        });
+
+        video.addEventListener('error', () => {
+            widget.classList.remove('loading');
+            widget.classList.add('error');
+            errorMessage.textContent = 'Unable to load video';
+            postMessage('error', { message: 'Video load failed' });
+        });
+
+        progress.addEventListener('click', seek);
+
+        muteBtn.addEventListener('click', () => {
+            video.muted = !video.muted;
+            updateVolumeIcon();
+        });
+
+        volumeSlider.addEventListener('input', (e) => {
+            video.volume = e.target.value;
+            video.muted = false;
+            updateVolumeIcon();
+        });
+
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            switch (e.code) {
+                case 'Space':
+                case 'KeyK':
+                    e.preventDefault();
+                    togglePlay();
+                    break;
+                case 'ArrowLeft':
+                    video.currentTime = Math.max(0, video.currentTime - 5);
+                    break;
+                case 'ArrowRight':
+                    video.currentTime = Math.min(video.duration || 0, video.currentTime + 5);
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    video.volume = Math.min(1, video.volume + 0.1);
+                    updateVolumeIcon();
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    video.volume = Math.max(0, video.volume - 0.1);
+                    updateVolumeIcon();
+                    break;
+                case 'KeyM':
+                    video.muted = !video.muted;
+                    updateVolumeIcon();
+                    break;
+                case 'KeyF':
+                    toggleFullscreen();
+                    break;
+            }
+        });
+
+        // Initialize
+        video.loop = config.loop;
+        video.muted = config.muted;
+        if (config.poster) {
+            video.poster = config.poster;
+        }
+
+        if (!config.controls) {
+            document.querySelector('.psm-overlay').style.display = 'none';
+        }
+
+        if (config.src) {
+            loadVideo(config.src);
+        }
+
+        // Notify parent that widget is ready
+        postMessage('ready');
+    })();
+    </script>
+</body>
+</html>

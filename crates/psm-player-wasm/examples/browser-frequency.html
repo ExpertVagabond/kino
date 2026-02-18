@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSM Frequency - WASM Demo</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            margin: 0;
+            padding: 24px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 32px;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            margin-bottom: 32px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #fff;
+            background: #6366f1;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #4f46e5;
+        }
+
+        button:disabled {
+            background: #475569;
+            cursor: not-allowed;
+        }
+
+        button.stop {
+            background: #ef4444;
+        }
+
+        button.stop:hover {
+            background: #dc2626;
+        }
+
+        .canvas-container {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #1e293b;
+            padding: 16px;
+            border-radius: 8px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            font-family: monospace;
+        }
+
+        .frequencies {
+            background: #1e293b;
+            padding: 16px;
+            border-radius: 12px;
+        }
+
+        .freq-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid #334155;
+        }
+
+        .freq-item:last-child {
+            border-bottom: none;
+        }
+
+        .freq-rank {
+            width: 30px;
+            color: #94a3b8;
+        }
+
+        .freq-value {
+            width: 100px;
+            font-family: monospace;
+        }
+
+        .freq-bar {
+            flex: 1;
+            height: 20px;
+            background: #334155;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .freq-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1, #a855f7);
+            border-radius: 4px;
+            transition: width 0.1s;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 48px;
+            color: #94a3b8;
+        }
+
+        .error {
+            color: #ef4444;
+            padding: 16px;
+            background: #7f1d1d20;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PSM Frequency Analysis</h1>
+        <p class="subtitle">Real-time audio frequency analysis using WebAssembly</p>
+
+        <div id="loading" class="loading">
+            Loading WASM module...
+        </div>
+
+        <div id="app" style="display: none;">
+            <div class="controls">
+                <button id="startBtn">🎤 Start Microphone</button>
+                <button id="stopBtn" class="stop" disabled>⏹ Stop</button>
+                <button id="fileBtn">📁 Analyze File</button>
+                <input type="file" id="fileInput" accept="audio/*" style="display: none;">
+            </div>
+
+            <div id="error" class="error" style="display: none;"></div>
+
+            <div class="canvas-container">
+                <canvas id="spectrum" width="868" height="200"></canvas>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-label">Dominant Frequency</div>
+                    <div class="stat-value" id="dominantFreq">-- Hz</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Spectral Centroid</div>
+                    <div class="stat-value" id="centroid">-- Hz</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Energy</div>
+                    <div class="stat-value" id="energy">--.--</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Note</div>
+                    <div class="stat-value" id="note">--</div>
+                </div>
+            </div>
+
+            <div class="frequencies">
+                <h3 style="margin-top: 0;">Top Frequencies</h3>
+                <div id="freqList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import init, { PsmFrequencyAnalyzer, PsmStreamingAnalyzer } from '../pkg/psm_player_wasm.js';
+
+        let audioContext;
+        let mediaStreamSource;
+        let analyzerNode;
+        let wasmAnalyzer;
+        let animationId;
+        let isRunning = false;
+
+        // DOM elements
+        const loadingEl = document.getElementById('loading');
+        const appEl = document.getElementById('app');
+        const errorEl = document.getElementById('error');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const fileBtn = document.getElementById('fileBtn');
+        const fileInput = document.getElementById('fileInput');
+        const canvas = document.getElementById('spectrum');
+        const ctx = canvas.getContext('2d');
+
+        // Stats elements
+        const dominantFreqEl = document.getElementById('dominantFreq');
+        const centroidEl = document.getElementById('centroid');
+        const energyEl = document.getElementById('energy');
+        const noteEl = document.getElementById('note');
+        const freqListEl = document.getElementById('freqList');
+
+        // Initialize WASM
+        async function initialize() {
+            try {
+                await init();
+                wasmAnalyzer = new PsmFrequencyAnalyzer(44100, 4096);
+
+                loadingEl.style.display = 'none';
+                appEl.style.display = 'block';
+            } catch (err) {
+                loadingEl.textContent = 'Failed to load WASM module: ' + err.message;
+                console.error(err);
+            }
+        }
+
+        // Start microphone
+        async function startMicrophone() {
+            try {
+                hideError();
+
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                audioContext = new AudioContext({ sampleRate: 44100 });
+
+                mediaStreamSource = audioContext.createMediaStreamSource(stream);
+                analyzerNode = audioContext.createAnalyser();
+                analyzerNode.fftSize = 4096;
+                analyzerNode.smoothingTimeConstant = 0.8;
+
+                mediaStreamSource.connect(analyzerNode);
+
+                isRunning = true;
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+
+                analyze();
+            } catch (err) {
+                showError('Microphone access denied: ' + err.message);
+            }
+        }
+
+        // Stop microphone
+        function stopMicrophone() {
+            isRunning = false;
+
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+
+            if (mediaStreamSource) {
+                mediaStreamSource.disconnect();
+                mediaStreamSource.mediaStream.getTracks().forEach(t => t.stop());
+            }
+
+            if (audioContext) {
+                audioContext.close();
+            }
+
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+
+            // Clear canvas
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Analyze audio
+        function analyze() {
+            if (!isRunning) return;
+
+            const frequencyData = new Uint8Array(analyzerNode.frequencyBinCount);
+            const timeData = new Float32Array(analyzerNode.fftSize);
+
+            analyzerNode.getByteFrequencyData(frequencyData);
+            analyzerNode.getFloatTimeDomainData(timeData);
+
+            // Use WASM analyzer for detailed analysis
+            const result = wasmAnalyzer.analyze(timeData);
+
+            // Draw spectrum
+            drawSpectrum(frequencyData);
+
+            // Update stats
+            updateStats(result, frequencyData);
+
+            animationId = requestAnimationFrame(analyze);
+        }
+
+        // Draw frequency spectrum
+        function drawSpectrum(data) {
+            const width = canvas.width;
+            const height = canvas.height;
+            const barCount = 128;
+            const barWidth = width / barCount;
+
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(0, 0, width, height);
+
+            const gradient = ctx.createLinearGradient(0, height, 0, 0);
+            gradient.addColorStop(0, '#6366f1');
+            gradient.addColorStop(0.5, '#a855f7');
+            gradient.addColorStop(1, '#ec4899');
+
+            ctx.fillStyle = gradient;
+
+            for (let i = 0; i < barCount; i++) {
+                const dataIndex = Math.floor(i * data.length / barCount);
+                const value = data[dataIndex] / 255;
+                const barHeight = value * height;
+
+                ctx.fillRect(
+                    i * barWidth,
+                    height - barHeight,
+                    barWidth - 1,
+                    barHeight
+                );
+            }
+        }
+
+        // Update stats display
+        function updateStats(result, frequencyData) {
+            if (result.dominant_frequencies && result.dominant_frequencies.length > 0) {
+                const topFreq = result.dominant_frequencies[0];
+                dominantFreqEl.textContent = topFreq.frequency.toFixed(1) + ' Hz';
+                noteEl.textContent = frequencyToNote(topFreq.frequency);
+            }
+
+            centroidEl.textContent = result.spectral_centroid.toFixed(0) + ' Hz';
+
+            // Calculate energy from frequency data
+            const energy = Array.from(frequencyData).reduce((a, b) => a + b, 0) / frequencyData.length / 255;
+            energyEl.textContent = energy.toFixed(3);
+
+            // Update frequency list
+            if (result.dominant_frequencies) {
+                const freqHtml = result.dominant_frequencies.slice(0, 5).map((f, i) => `
+                    <div class="freq-item">
+                        <span class="freq-rank">#${i + 1}</span>
+                        <span class="freq-value">${f.frequency.toFixed(1)} Hz</span>
+                        <div class="freq-bar">
+                            <div class="freq-fill" style="width: ${f.magnitude * 100}%"></div>
+                        </div>
+                    </div>
+                `).join('');
+                freqListEl.innerHTML = freqHtml;
+            }
+        }
+
+        // Convert frequency to musical note
+        function frequencyToNote(freq) {
+            if (freq <= 0) return '--';
+
+            const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+            const a4 = 440;
+
+            const semitones = 12 * Math.log2(freq / a4);
+            const midi = Math.round(semitones + 69);
+
+            if (midi < 0 || midi > 127) return freq.toFixed(0) + 'Hz';
+
+            const noteIdx = midi % 12;
+            const octave = Math.floor(midi / 12) - 1;
+
+            return notes[noteIdx] + octave;
+        }
+
+        // Analyze file
+        async function analyzeFile(file) {
+            try {
+                hideError();
+
+                const arrayBuffer = await file.arrayBuffer();
+                const tempContext = new AudioContext({ sampleRate: 44100 });
+                const audioBuffer = await tempContext.decodeAudioData(arrayBuffer);
+
+                const samples = audioBuffer.getChannelData(0);
+                const result = wasmAnalyzer.analyze(samples);
+
+                // Display results
+                if (result.dominant_frequencies && result.dominant_frequencies.length > 0) {
+                    const topFreq = result.dominant_frequencies[0];
+                    dominantFreqEl.textContent = topFreq.frequency.toFixed(1) + ' Hz';
+                    noteEl.textContent = frequencyToNote(topFreq.frequency);
+                }
+
+                centroidEl.textContent = result.spectral_centroid.toFixed(0) + ' Hz';
+                energyEl.textContent = '--';
+
+                // Update frequency list
+                const freqHtml = result.dominant_frequencies.slice(0, 5).map((f, i) => `
+                    <div class="freq-item">
+                        <span class="freq-rank">#${i + 1}</span>
+                        <span class="freq-value">${f.frequency.toFixed(1)} Hz</span>
+                        <div class="freq-bar">
+                            <div class="freq-fill" style="width: ${f.magnitude * 100}%"></div>
+                        </div>
+                    </div>
+                `).join('');
+                freqListEl.innerHTML = freqHtml;
+
+                tempContext.close();
+
+                alert(`Analyzed: ${file.name}\nDominant frequency: ${result.dominant_frequencies[0].frequency.toFixed(1)} Hz`);
+            } catch (err) {
+                showError('Failed to analyze file: ' + err.message);
+            }
+        }
+
+        // Show error
+        function showError(message) {
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
+
+        // Hide error
+        function hideError() {
+            errorEl.style.display = 'none';
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', startMicrophone);
+        stopBtn.addEventListener('click', stopMicrophone);
+        fileBtn.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                analyzeFile(e.target.files[0]);
+            }
+        });
+
+        // Initialize
+        initialize();
+    </script>
+</body>
+</html>

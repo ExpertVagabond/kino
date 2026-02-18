@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSM Player Demo</title>
+    <style id="psm-theme"></style>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            background: var(--psm-primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        h1 {
+            color: var(--psm-text);
+            margin: 0;
+        }
+
+        .player-container {
+            background: var(--psm-surface);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        #video-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #000;
+        }
+
+        #video {
+            width: 100%;
+            height: 100%;
+        }
+
+        .controls {
+            padding: 1rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            color: var(--psm-text-soft);
+            font-size: 0.875rem;
+        }
+
+        input[type="text"], select {
+            background: var(--psm-background);
+            border: 1px solid rgba(155, 48, 255, 0.3);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            color: var(--psm-text);
+            font-size: 1rem;
+            min-width: 200px;
+        }
+
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: var(--psm-primary);
+        }
+
+        button {
+            background: var(--psm-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: var(--psm-primary-dark);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .stats {
+            background: var(--psm-surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .stats h2 {
+            color: var(--psm-text);
+            margin: 0 0 1rem 0;
+            font-size: 1.25rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: var(--psm-background);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .stat-label {
+            color: var(--psm-text-soft);
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-value {
+            color: var(--psm-text);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .stat-value.good {
+            color: #22c55e;
+        }
+
+        .stat-value.warning {
+            color: #f59e0b;
+        }
+
+        .stat-value.bad {
+            color: #ef4444;
+        }
+
+        .quality-levels {
+            margin-top: 1rem;
+        }
+
+        .quality-level {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .quality-level:hover {
+            background: rgba(155, 48, 255, 0.1);
+        }
+
+        .quality-level.active {
+            background: rgba(155, 48, 255, 0.2);
+        }
+
+        .quality-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--psm-primary);
+        }
+
+        .captions-display {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 1.25rem;
+            text-align: center;
+            max-width: 80%;
+            display: none;
+        }
+
+        .captions-display.visible {
+            display: block;
+        }
+
+        .chapters {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--psm-background);
+            overflow-x: auto;
+        }
+
+        .chapter {
+            flex-shrink: 0;
+            background: var(--psm-surface);
+            border-radius: 4px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: var(--psm-text-soft);
+            transition: all 0.2s;
+        }
+
+        .chapter:hover {
+            background: rgba(155, 48, 255, 0.2);
+        }
+
+        .chapter.active {
+            background: var(--psm-primary);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">PS</div>
+            <h1>PSM Player Demo</h1>
+        </div>
+
+        <div class="player-container">
+            <div id="video-container">
+                <video id="video" controls></video>
+                <div id="captions" class="captions-display"></div>
+            </div>
+            <div id="chapters" class="chapters"></div>
+            <div class="controls">
+                <div class="control-group">
+                    <label for="url">HLS Stream URL</label>
+                    <input type="text" id="url" placeholder="https://example.com/stream.m3u8"
+                           value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8">
+                </div>
+                <div class="control-group">
+                    <label for="abr">ABR Algorithm</label>
+                    <select id="abr">
+                        <option value="bola" selected>BOLA (Buffer-based)</option>
+                        <option value="throughput">Throughput</option>
+                        <option value="hybrid">Hybrid</option>
+                    </select>
+                </div>
+                <div class="control-group" style="justify-content: flex-end;">
+                    <button id="load">Load Stream</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <h2>Playback Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Current Quality</div>
+                    <div class="stat-value" id="stat-quality">--</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Bandwidth</div>
+                    <div class="stat-value" id="stat-bandwidth">--</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Buffer Level</div>
+                    <div class="stat-value" id="stat-buffer">--</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">QoE Score</div>
+                    <div class="stat-value" id="stat-qoe">--</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Rebuffers</div>
+                    <div class="stat-value" id="stat-rebuffers">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Quality Switches</div>
+                    <div class="stat-value" id="stat-switches">0</div>
+                </div>
+            </div>
+            <div class="quality-levels" id="quality-levels"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script type="module" src="player.js"></script>
+</body>
+</html>
