@@ -3430,6 +3430,7 @@ dependencies = [
  "base64 0.22.1",
  "bytes",
  "chrono",
+ "criterion",
  "m3u8-rs",
  "nom 8.0.0",
  "reqwest",

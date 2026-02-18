@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kino — Investor Deck</title>
+<meta name="description" content="Kino: High-Performance Rust Media Engine. Investor pitch deck by Purple Squirrel Media.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #08080A;
+  --bg-elevated: #111114;
+  --bg-card: #18181C;
+  --border: #27272B;
+  --border-subtle: #1C1C20;
+  --text: #EDEDEF;
+  --text-secondary: #9494A0;
+  --text-dim: #55555F;
+  --accent: #8B5CF6;
+  --accent-light: #A78BFA;
+  --accent-dim: rgba(139, 92, 246, 0.12);
+  --accent-glow: rgba(139, 92, 246, 0.06);
+  --green: #34D399;
+  --red: #F87171;
+  --yellow: #FBBF24;
+  --font-display: 'Bricolage Grotesque', serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+html {
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  line-height: 1.6;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Grain overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.02;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") repeat;
+}
+
+/* ── Slide container ── */
+.deck {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 80px;
+  opacity: 0;
+  transform: translateX(60px);
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.slide.active {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+  z-index: 2;
+}
+
+.slide.prev {
+  opacity: 0;
+  transform: translateX(-60px);
+  z-index: 1;
+}
+
+/* ── Typography ── */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.slide-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.slide-title {
+  font-size: clamp(32px, 5vw, 56px);
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.slide-subtitle {
+  font-size: clamp(16px, 2vw, 22px);
+  color: var(--text-secondary);
+  font-weight: 300;
+  max-width: 680px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.accent { color: var(--accent-light); }
+.green { color: var(--green); }
+.mono { font-family: var(--font-mono); }
+
+/* ── Slide counter ── */
+.slide-counter {
+  position: fixed;
+  bottom: 28px;
+  right: 36px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-dim);
+  z-index: 100;
+  letter-spacing: 1px;
+  user-select: none;
+}
+
+/* ── Progress bar ── */
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  z-index: 100;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Nav hint ── */
+.nav-hint {
+  position: fixed;
+  bottom: 28px;
+  left: 36px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  z-index: 100;
+  opacity: 0.6;
+  user-select: none;
+}
+
+/* ── Slide 1: Title ── */
+.title-hero {
+  font-family: var(--font-display);
+  font-size: clamp(72px, 12vw, 140px);
+  font-weight: 800;
+  letter-spacing: -2px;
+  background: linear-gradient(135deg, var(--text) 0%, var(--accent-light) 50%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 16px;
+}
+
+.title-tagline {
+  font-family: var(--font-body);
+  font-size: clamp(18px, 2.5vw, 28px);
+  font-weight: 300;
+  color: var(--text-secondary);
+  margin-bottom: 48px;
+  letter-spacing: 0.5px;
+}
+
+.title-org {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-dim);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+/* ── Slide 2: Problem ── */
+.stat-big {
+  font-family: var(--font-display);
+  font-size: clamp(64px, 10vw, 120px);
+  font-weight: 800;
+  color: var(--red);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 18px;
+  color: var(--text-secondary);
+  margin-bottom: 40px;
+}
+
+.problem-list {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.problem-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px 28px;
+  max-width: 220px;
+  text-align: center;
+}
+
+.problem-item .icon {
+  font-size: 28px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.problem-item h4 {
+  font-size: 15px;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+.problem-item p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* ── Slide 3: Solution ── */
+.solution-grid {
+  display: flex;
+  gap: 32px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.solution-pill {
+  background: var(--accent-dim);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 100px;
+  padding: 14px 28px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--accent-light);
+  letter-spacing: 0.5px;
+}
+
+/* ── Slide 4: Market Grid ── */
+.market-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 860px;
+  width: 100%;
+  margin-top: 32px;
+}
+
+.market-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px 24px;
+  text-align: left;
+  transition: border-color 0.3s;
+}
+
+.market-card:hover {
+  border-color: var(--accent);
+}
+
+.market-card .card-icon {
+  font-size: 28px;
+  margin-bottom: 14px;
+  display: block;
+}
+
+.market-card h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.market-card p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* ── Slide 5: Architecture ── */
+.arch-diagram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+  width: 100%;
+  max-width: 780px;
+}
+
+.arch-layer {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.arch-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 24px;
+  text-align: center;
+  min-width: 140px;
+  transition: border-color 0.3s, background 0.3s;
+}
+
+.arch-box:hover {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.arch-box.core {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  padding: 24px 40px;
+}
+
+.arch-box h4 {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent-light);
+  margin-bottom: 4px;
+}
+
+.arch-box p {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.arch-connector {
+  width: 2px;
+  height: 20px;
+  background: var(--border);
+  position: relative;
+}
+
+.arch-connector::before,
+.arch-connector::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.arch-connector::before { top: -3px; }
+.arch-connector::after { bottom: -3px; }
+
+.arch-note {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 16px;
+  letter-spacing: 0.5px;
+}
+
+/* ── Slide 6: Competitive Matrix ── */
+.matrix-table {
+  width: 100%;
+  max-width: 860px;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 24px;
+  font-size: 14px;
+}
+
+.matrix-table th,
+.matrix-table td {
+  padding: 14px 18px;
+  text-align: center;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.matrix-table th {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding-bottom: 18px;
+}
+
+.matrix-table th.kino-col {
+  color: var(--accent-light);
+}
+
+.matrix-table td:first-child {
+  text-align: left;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.matrix-table tr:last-child td {
+  border-bottom: none;
+}
+
+.check { color: var(--green); font-weight: 600; }
+.cross { color: var(--red); opacity: 0.7; }
+.partial { color: var(--yellow); }
+
+/* ── Slide 7: Business Model ── */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 860px;
+  width: 100%;
+  margin-top: 28px;
+}
+
+.pricing-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 32px 28px;
+  text-align: center;
+  position: relative;
+  transition: border-color 0.3s, transform 0.3s;
+}
+
+.pricing-card:hover {
+  transform: translateY(-4px);
+}
+
+.pricing-card.featured {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, rgba(139, 92, 246, 0.08) 0%, var(--bg-card) 100%);
+}
+
+.pricing-card .tier-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+.pricing-card.featured .tier-label {
+  color: var(--accent-light);
+}
+
+.pricing-card .price {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.pricing-card .price-note {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.pricing-card ul {
+  list-style: none;
+  text-align: left;
+}
+
+.pricing-card li {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 6px 0;
+  border-top: 1px solid var(--border-subtle);
+  line-height: 1.4;
+}
+
+.pricing-card li::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+.extras {
+  margin-top: 24px;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.extras span {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 100px;
+  padding: 8px 18px;
+}
+
+/* ── Slide 8: Roadmap ── */
+.roadmap {
+  display: flex;
+  gap: 24px;
+  max-width: 900px;
+  width: 100%;
+  margin-top: 28px;
+}
+
+.roadmap-phase {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px 24px;
+  position: relative;
+}
+
+.roadmap-phase::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 14px 14px 0 0;
+  background: var(--accent);
+  opacity: 0.5;
+}
+
+.roadmap-phase:first-child::before { opacity: 1; }
+
+.phase-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent-light);
+  margin-bottom: 8px;
+}
+
+.roadmap-phase h4 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.roadmap-phase ul {
+  list-style: none;
+}
+
+.roadmap-phase li {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 5px 0;
+  line-height: 1.4;
+}
+
+.roadmap-phase li::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+.arr-badge {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--green);
+  font-weight: 600;
+  margin-top: 16px;
+  display: block;
+}
+
+/* ── Slide 9: Traction ── */
+.traction-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  max-width: 760px;
+  width: 100%;
+  margin-top: 28px;
+}
+
+.traction-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.traction-card .traction-value {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--accent-light);
+  margin-bottom: 6px;
+}
+
+.traction-card .traction-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.3;
+}
+
+/* ── Slide 10: Contact ── */
+.contact-links {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 32px;
+  align-items: center;
+}
+
+.contact-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.3s;
+  padding: 10px 24px;
+  border-radius: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  min-width: 380px;
+  justify-content: center;
+}
+
+.contact-link:hover {
+  color: var(--accent-light);
+  border-color: var(--accent);
+}
+
+.contact-link .link-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  width: 60px;
+  text-align: right;
+}
+
+/* ── Print styles ── */
+@media print {
+  body { overflow: visible; }
+  .slide {
+    position: relative;
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: auto !important;
+    page-break-after: always;
+    page-break-inside: avoid;
+    height: 100vh;
+    width: 100vw;
+  }
+  .slide.prev { opacity: 1 !important; transform: none !important; }
+  .slide-counter, .progress-bar, .nav-hint { display: none !important; }
+  body::after { display: none; }
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .slide { padding: 40px 24px; }
+  .market-grid, .pricing-grid, .traction-grid { grid-template-columns: 1fr 1fr; }
+  .roadmap { flex-direction: column; }
+  .problem-list { flex-direction: column; align-items: center; }
+  .contact-link { min-width: auto; width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .market-grid, .pricing-grid, .traction-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+<div class="slide-counter" id="counter"></div>
+<div class="nav-hint" id="navHint"></div>
+
+<div class="deck" id="deck">
+
+  <!-- ═══ Slide 1: Title ═══ -->
+  <div class="slide active" data-slide="1">
+    <div class="title-hero">Kino</div>
+    <div class="title-tagline">High-Performance Rust Media Engine</div>
+    <div class="title-org">Purple Squirrel Media</div>
+  </div>
+
+  <!-- ═══ Slide 2: The Problem ═══ -->
+  <div class="slide" data-slide="2">
+    <div class="slide-label">The Problem</div>
+    <div class="slide-title">C++ Technical Debt</div>
+    <div class="stat-big">70%</div>
+    <div class="stat-label">of security vulnerabilities in media software come from memory issues</div>
+    <div class="problem-list">
+      <div class="problem-item">
+        <span class="icon">&#x1f4a5;</span>
+        <h4>Crashes</h4>
+        <p>Buffer overflows and use-after-free bugs plague legacy players</p>
+      </div>
+      <div class="problem-item">
+        <span class="icon">&#x1f4a7;</span>
+        <h4>Memory Leaks</h4>
+        <p>Manual memory management leads to resource exhaustion</p>
+      </div>
+      <div class="problem-item">
+        <span class="icon">&#x1f6a8;</span>
+        <h4>Audit Failures</h4>
+        <p>C++ codebases fail security audits in enterprise deployments</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Slide 3: The Solution ═══ -->
+  <div class="slide" data-slide="3">
+    <div class="slide-label">The Solution</div>
+    <div class="slide-title">Kino</div>
+    <div class="slide-subtitle">
+      Memory-safe video engine written in <span class="accent">Rust</span>.<br>
+      Zero buffer overflows. Fearless concurrency.<br>
+      One codebase, every platform.
+    </div>
+    <div class="solution-grid">
+      <div class="solution-pill">Zero Buffer Overflows</div>
+      <div class="solution-pill">Fearless Concurrency</div>
+      <div class="solution-pill">Cross-Platform</div>
+      <div class="solution-pill">Memory Safe</div>
+    </div>
+  </div>
+
+  <!-- ═══ Slide 4: Market Fit ═══ -->
+  <div class="slide" data-slide="4">
+    <div class="slide-label">Market Fit</div>
+    <div class="slide-title">Deploy Everywhere</div>
+    <div class="market-grid">
+      <div class="market-card">
+        <span class="card-icon">&#x1f4fa;</span>
+        <h4>Smart TVs</h4>
+        <p>Embedded playback for connected television platforms</p>
+      </div>
+      <div class="market-card">
+        <span class="card-icon">&#x1f3e8;</span>
+        <h4>Hotel Kiosks</h4>
+        <p>Always-on lobby displays and in-room entertainment</p>
+      </div>
+      <div class="market-card">
+        <span class="card-icon">&#x1f5bc;&#xfe0f;</span>
+        <h4>Digital Signage</h4>
+        <p>Retail, transit, and venue display networks</p>
+      </div>
+      <div class="market-card">
+        <span class="card-icon">&#x1f310;</span>
+        <h4>Web Browsers</h4>
+        <p>WebAssembly-powered playback, no plugins required</p>
+      </div>
+      <div class="market-card">
+        <span class="card-icon">&#x1f5a5;&#xfe0f;</span>
+        <h4>Desktop Apps</h4>
+        <p>Native performance on macOS, Windows, and Linux</p>
+      </div>
+      <div class="market-card">
+        <span class="card-icon">&#x2699;&#xfe0f;</span>
+        <h4>Embedded / IoT</h4>
+        <p>Lightweight footprint for resource-constrained devices</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Slide 5: Architecture ═══ -->
+  <div class="slide" data-slide="5">
+    <div class="slide-label">Architecture</div>
+    <div class="slide-title">7 Modular Crates</div>
+    <div class="arch-diagram">
+      <div class="arch-layer">
+        <div class="arch-box">
+          <h4>kino-player</h4>
+          <p>Desktop app</p>
+        </div>
+        <div class="arch-box">
+          <h4>kino-web</h4>
+          <p>WASM player</p>
+        </div>
+        <div class="arch-box">
+          <h4>kino-server</h4>
+          <p>Streaming backend</p>
+        </div>
+      </div>
+      <div class="arch-connector"></div>
+      <div class="arch-layer">
+        <div class="arch-box core">
+          <h4>kino-core</h4>
+          <p>Decode / render / pipeline</p>
+        </div>
+      </div>
+      <div class="arch-connector"></div>
+      <div class="arch-layer">
+        <div class="arch-box">
+          <h4>kino-av</h4>
+          <p>AV codecs</p>
+        </div>
+        <div class="arch-box">
+          <h4>kino-gpu</h4>
+          <p>HW accel</p>
+        </div>
+        <div class="arch-box">
+          <h4>kino-audio</h4>
+          <p>Fingerprinting</p>
+        </div>
+      </div>
+    </div>
+    <div class="arch-note">Use only what you need &mdash; each crate is independently versioned</div>
+  </div>
+
+  <!-- ═══ Slide 6: Competitive Matrix ═══ -->
+  <div class="slide" data-slide="6">
+    <div class="slide-label">Competitive Landscape</div>
+    <div class="slide-title">Why Kino Wins</div>
+    <table class="matrix-table">
+      <thead>
+        <tr>
+          <th style="text-align:left">Capability</th>
+          <th class="kino-col">Kino (Rust)</th>
+          <th>Legacy C++<br><span style="font-weight:400;font-size:11px;opacity:0.6">VLC / FFmpeg</span></th>
+          <th>Web Players<br><span style="font-weight:400;font-size:11px;opacity:0.6">JS-based</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Memory Safety</td>
+          <td class="check">Guaranteed</td>
+          <td class="cross">Manual</td>
+          <td class="partial">GC-bound</td>
+        </tr>
+        <tr>
+          <td>4K / 8K Performance</td>
+          <td class="check">Native GPU</td>
+          <td class="check">Native</td>
+          <td class="cross">Limited</td>
+        </tr>
+        <tr>
+          <td>Security Audit Ready</td>
+          <td class="check">TLA+ verified</td>
+          <td class="cross">CVE-heavy</td>
+          <td class="partial">Varies</td>
+        </tr>
+        <tr>
+          <td>IoT / Embedded</td>
+          <td class="check">Minimal footprint</td>
+          <td class="partial">Heavy deps</td>
+          <td class="cross">Requires runtime</td>
+        </tr>
+        <tr>
+          <td>WebAssembly</td>
+          <td class="check">First-class</td>
+          <td class="cross">No</td>
+          <td class="check">Native</td>
+        </tr>
+        <tr>
+          <td>Audio Fingerprinting</td>
+          <td class="check">Built-in</td>
+          <td class="cross">Plugin</td>
+          <td class="cross">No</td>
+        </tr>
+        <tr>
+          <td>Formal Verification</td>
+          <td class="check">TLA+ specs</td>
+          <td class="cross">None</td>
+          <td class="cross">None</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══ Slide 7: Business Model ═══ -->
+  <div class="slide" data-slide="7">
+    <div class="slide-label">Business Model</div>
+    <div class="slide-title">Tiered Licensing</div>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="tier-label">Startup</div>
+        <div class="price">$2.5&ndash;5K</div>
+        <div class="price-note">per year</div>
+        <ul>
+          <li>Core SDK access</li>
+          <li>Community support</li>
+          <li>Single-platform license</li>
+          <li>Standard codecs</li>
+        </ul>
+      </div>
+      <div class="pricing-card featured">
+        <div class="tier-label">Professional</div>
+        <div class="price">$12&ndash;25K</div>
+        <div class="price-note">per year</div>
+        <ul>
+          <li>Multi-platform license</li>
+          <li>Priority support &amp; SLA</li>
+          <li>Audio fingerprinting</li>
+          <li>Custom codec modules</li>
+        </ul>
+      </div>
+      <div class="pricing-card">
+        <div class="tier-label">Enterprise</div>
+        <div class="price">$50K+</div>
+        <div class="price-note">per year</div>
+        <ul>
+          <li>Unlimited platforms</li>
+          <li>Dedicated engineering</li>
+          <li>Formal verification reports</li>
+          <li>Source code escrow</li>
+        </ul>
+      </div>
+    </div>
+    <div class="extras">
+      <span>+ Usage-based streaming fees</span>
+      <span>+ Integration services</span>
+      <span>+ Premium modules</span>
+    </div>
+  </div>
+
+  <!-- ═══ Slide 8: Roadmap ═══ -->
+  <div class="slide" data-slide="8">
+    <div class="slide-label">Roadmap</div>
+    <div class="slide-title">Path to Scale</div>
+    <div class="roadmap">
+      <div class="roadmap-phase">
+        <div class="phase-label">Year 1</div>
+        <h4>Foundation</h4>
+        <ul>
+          <li>3 beta partners onboarded</li>
+          <li>SDK developer portal live</li>
+          <li>Hospitality vertical focus</li>
+          <li>SOC 2 audit initiated</li>
+        </ul>
+        <span class="arr-badge">$500K ARR</span>
+      </div>
+      <div class="roadmap-phase">
+        <div class="phase-label">Years 1&ndash;3</div>
+        <h4>Expansion</h4>
+        <ul>
+          <li>IoT &amp; automotive verticals</li>
+          <li>Full media suite launch</li>
+          <li>Partner ecosystem program</li>
+          <li>APAC &amp; EU distribution</li>
+        </ul>
+        <span class="arr-badge">$3&ndash;5M ARR</span>
+      </div>
+      <div class="roadmap-phase">
+        <div class="phase-label">Years 3&ndash;5</div>
+        <h4>Dominance</h4>
+        <ul>
+          <li>Cloud infrastructure standard</li>
+          <li>Hardware OEM partnerships</li>
+          <li>Acquisition or IPO readiness</li>
+          <li>Open-source community tier</li>
+        </ul>
+        <span class="arr-badge">$10M+ ARR</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Slide 9: Traction ═══ -->
+  <div class="slide" data-slide="9">
+    <div class="slide-label">Traction</div>
+    <div class="slide-title">Built, Not Pitched</div>
+    <div class="traction-grid">
+      <div class="traction-card">
+        <div class="traction-value">7</div>
+        <div class="traction-label">Modular crates<br>independently versioned</div>
+      </div>
+      <div class="traction-card">
+        <div class="traction-value">0</div>
+        <div class="traction-label">Compiler warnings<br>clean Rust build</div>
+      </div>
+      <div class="traction-card">
+        <div class="traction-value">25+</div>
+        <div class="traction-label">TLA+ invariants<br>formally verified</div>
+      </div>
+      <div class="traction-card">
+        <div class="traction-value">GPU</div>
+        <div class="traction-label">Hardware acceleration<br>on all platforms</div>
+      </div>
+      <div class="traction-card">
+        <div class="traction-value">WASM</div>
+        <div class="traction-label">WebAssembly ready<br>browser-native</div>
+      </div>
+      <div class="traction-card">
+        <div class="traction-value">Python</div>
+        <div class="traction-label">Bindings available<br>ML pipeline ready</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Slide 10: Contact ═══ -->
+  <div class="slide" data-slide="10">
+    <div class="slide-label">Get In Touch</div>
+    <div class="slide-title">Let's Build Together</div>
+    <div class="slide-subtitle" style="margin-bottom: 8px;">
+      Kino is ready for partners who demand<br>
+      performance, safety, and scale.
+    </div>
+    <div class="contact-links">
+      <a class="contact-link" href="https://github.com/ExpertVagabond/kino" target="_blank" rel="noopener">
+        <span class="link-label">GitHub</span>
+        <span>github.com/ExpertVagabond/kino</span>
+      </a>
+      <a class="contact-link" href="https://kino-44q.pages.dev" target="_blank" rel="noopener">
+        <span class="link-label">Site</span>
+        <span>kino-44q.pages.dev</span>
+      </a>
+    </div>
+    <div class="title-org" style="margin-top: 48px;">Kino by Purple Squirrel Media</div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  const navHint = document.getElementById('navHint');
+  let current = 0;
+
+  function updateNavHint() {
+    if (current === 0) {
+      navHint.textContent = '\u2192 or click to start';
+    } else if (current === total - 1) {
+      navHint.textContent = '\u2190 to go back';
+    } else {
+      navHint.textContent = '\u2190 \u2192 arrow keys';
+    }
+  }
+
+  function goTo(index) {
+    if (index < 0 || index >= total || index === current) return;
+
+    const prev = slides[current];
+    const next = slides[index];
+
+    // Remove all state classes
+    slides.forEach(function (s) {
+      s.classList.remove('active', 'prev');
+    });
+
+    // Determine direction
+    if (index > current) {
+      // Going forward: old slide exits left
+      prev.classList.add('prev');
+      next.style.transform = 'translateX(60px)';
+    } else {
+      // Going backward: old slide exits right
+      prev.style.transform = 'translateX(60px)';
+      next.classList.add('prev');
+    }
+
+    // Force reflow
+    void next.offsetWidth;
+
+    // Activate
+    next.classList.remove('prev');
+    next.classList.add('active');
+
+    current = index;
+    counter.textContent = (current + 1) + ' / ' + total;
+    progress.style.width = ((current + 1) / total * 100) + '%';
+    updateNavHint();
+  }
+
+  function next() { goTo(current + 1); }
+  function prev() { goTo(current - 1); }
+
+  // Keyboard
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+      e.preventDefault();
+      next();
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      prev();
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      goTo(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      goTo(total - 1);
+    }
+  });
+
+  // Click to advance
+  document.addEventListener('click', function (e) {
+    // Don't advance on link clicks
+    if (e.target.closest('a')) return;
+    var rect = document.body.getBoundingClientRect();
+    if (e.clientX > rect.width / 2) {
+      next();
+    } else {
+      prev();
+    }
+  });
+
+  // Touch swipe
+  var touchStartX = 0;
+  document.addEventListener('touchstart', function (e) {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+  document.addEventListener('touchend', function (e) {
+    var diff = touchStartX - e.changedTouches[0].screenX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) next(); else prev();
+    }
+  }, { passive: true });
+
+  // Init
+  counter.textContent = '1 / ' + total;
+  progress.style.width = (1 / total * 100) + '%';
+  updateNavHint();
+})();
+</script>
+</body>
+</html>
