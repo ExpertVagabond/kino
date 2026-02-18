@@ -50,3 +50,8 @@ base64 = { workspace = true }
 
 [dev-dependencies]
 tokio-test = "0.4"
+criterion = "0.5"
+
+[[bench]]
+name = "core_benchmark"
+harness = false

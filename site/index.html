@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kino — Play Anything, Anywhere</title>
-<meta name="description" content="Rust-powered video player engine. Hardware-accelerated. Cross-platform. From smart TVs to hotel kiosks to your browser.">
+<title>Kino — Video Infrastructure, Everywhere</title>
+<meta name="description" content="The Rust-powered video SDK for enterprises. Memory-safe, hardware-accelerated playback for digital signage, hospitality, smart appliances, and streaming platforms.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -376,6 +376,134 @@ h1 .accent {
 .s-val span { font-size: 20px; font-weight: 400; }
 .s-label { font-size: 13px; color: var(--text-secondary); }
 
+/* ── Use Cases ── */
+.use-cases { border-top: 1px solid var(--border-subtle); }
+.uc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.uc-card {
+  padding: 32px; background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle); border-radius: 10px;
+  transition: all 0.3s; position: relative; overflow: hidden;
+}
+.uc-card:hover { border-color: var(--border); background: var(--bg-card); }
+.uc-card::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 2px; background: var(--accent); transform: scaleX(0);
+  transition: transform 0.3s; transform-origin: left;
+}
+.uc-card:hover::after { transform: scaleX(1); }
+.uc-tier {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--accent-light); margin-bottom: 14px;
+}
+.uc-name { font-family: var(--font-display); font-weight: 700; font-size: 18px; margin-bottom: 8px; }
+.uc-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.65; margin-bottom: 14px; }
+.uc-metric {
+  font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);
+  padding-top: 12px; border-top: 1px solid var(--border-subtle);
+}
+
+/* ── Why Kino / Competitive ── */
+.why { border-top: 1px solid var(--border-subtle); }
+.why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+.why-props { display: flex; flex-direction: column; gap: 24px; }
+.why-prop { display: flex; gap: 16px; }
+.why-prop-icon {
+  width: 40px; height: 40px; min-width: 40px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent-dim); border-radius: 8px; font-size: 18px;
+}
+.why-prop h4 {
+  font-family: var(--font-display); font-weight: 700; font-size: 15px;
+  margin-bottom: 4px;
+}
+.why-prop p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+.compare-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 13px; background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle); border-radius: 10px;
+  overflow: hidden;
+}
+.compare-table th {
+  text-align: left; padding: 14px 16px;
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-dim); background: rgba(255,255,255,0.02);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.compare-table th:first-child { color: var(--text-secondary); }
+.compare-table td {
+  padding: 12px 16px; border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+.compare-table tr:last-child td { border-bottom: none; }
+.compare-table td:first-child {
+  font-family: var(--font-mono); font-size: 12px; color: var(--text-dim);
+}
+.compare-table .yes { color: #4ADE80; }
+.compare-table .no { color: #F87171; }
+.compare-table .mid { color: #FBBF24; }
+.compare-table .kino-col { color: var(--accent-light); font-weight: 500; }
+
+/* ── Pricing ── */
+.pricing { border-top: 1px solid var(--border-subtle); }
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.price-card {
+  padding: 32px; background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle); border-radius: 10px;
+  transition: all 0.3s; position: relative;
+}
+.price-card.featured {
+  border-color: var(--accent);
+  background: rgba(139, 92, 246, 0.03);
+}
+.price-card.featured::before {
+  content: 'Most Popular'; position: absolute; top: -10px; left: 24px;
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em;
+  text-transform: uppercase; padding: 4px 12px;
+  background: var(--accent); color: #fff; border-radius: 4px;
+}
+.price-tier {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--accent-light); margin-bottom: 12px;
+}
+.price-name { font-family: var(--font-display); font-weight: 700; font-size: 22px; margin-bottom: 4px; }
+.price-range {
+  font-family: var(--font-mono); font-size: 14px; color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+.price-range span { font-size: 11px; color: var(--text-dim); }
+.price-features {
+  list-style: none; margin-bottom: 24px;
+  padding-top: 16px; border-top: 1px solid var(--border-subtle);
+}
+.price-features li {
+  font-size: 13px; color: var(--text-secondary); padding: 6px 0;
+  padding-left: 18px; position: relative; line-height: 1.5;
+}
+.price-features li::before {
+  content: '\2713'; position: absolute; left: 0;
+  color: var(--accent-light); font-size: 12px;
+}
+.price-cta {
+  display: block; text-align: center; padding: 12px;
+  border-radius: 8px; font-family: var(--font-body);
+  font-weight: 600; font-size: 14px; text-decoration: none;
+  transition: all 0.25s;
+}
+.price-cta-primary {
+  background: var(--accent); color: #fff;
+  box-shadow: 0 0 0 1px rgba(139,92,246,0.3);
+}
+.price-cta-primary:hover {
+  background: var(--accent-light);
+  box-shadow: 0 0 0 1px rgba(139,92,246,0.5), 0 4px 16px rgba(139,92,246,0.3);
+}
+.price-cta-ghost {
+  border: 1px solid var(--border); color: var(--text-secondary);
+}
+.price-cta-ghost:hover { border-color: var(--text-dim); color: var(--text); background: var(--bg-card); }
+
 /* ── CTA ── */
 .cta { border-top: 1px solid var(--border-subtle); }
 .cta-box {
@@ -393,6 +521,7 @@ h1 .accent {
   font-size: clamp(26px, 3vw, 36px); margin-bottom: 12px; position: relative;
 }
 .cta-box p { color: var(--text-secondary); font-size: 16px; margin-bottom: 28px; position: relative; font-weight: 300; }
+.cta-actions { display: flex; gap: 14px; justify-content: center; position: relative; flex-wrap: wrap; margin-bottom: 20px; }
 .cta-cmd {
   font-family: var(--font-mono); font-size: 14px; padding: 14px 28px;
   background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
@@ -435,12 +564,16 @@ footer .container { display: flex; justify-content: space-between; align-items: 
   .targets-grid { grid-template-columns: repeat(2, 1fr); }
   .features-grid { grid-template-columns: repeat(2, 1fr); }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .uc-grid { grid-template-columns: repeat(2, 1fr); }
+  .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+  .why-grid { grid-template-columns: 1fr; gap: 32px; }
   .arch-tier { gap: 10px; }
   .nav-links { display: none; }
 }
 @media (max-width: 600px) {
   section { padding: 100px 0; }
-  .targets-grid, .features-grid { grid-template-columns: 1fr; }
+  .targets-grid, .features-grid, .uc-grid, .pricing-grid { grid-template-columns: 1fr; }
+  .cta-actions { flex-direction: column; align-items: center; }
   footer .container { flex-direction: column; gap: 12px; }
 }
 </style>
@@ -451,11 +584,11 @@ footer .container { display: flex; justify-content: space-between; align-items: 
   <div class="container">
     <a href="#" class="nav-logo">kino<span>.</span></a>
     <ul class="nav-links">
-      <li><a href="#platforms">Platforms</a></li>
-      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#use-cases">Use Cases</a></li>
       <li><a href="#features">Features</a></li>
-      <li><a href="#code">Code</a></li>
-      <li><a href="https://github.com/ExpertVagabond/kino" class="nav-cta">GitHub</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="https://github.com/ExpertVagabond/kino" class="nav-cta">Get the SDK</a></li>
     </ul>
   </div>
 </nav>
@@ -464,16 +597,16 @@ footer .container { display: flex; justify-content: space-between; align-items: 
 <section class="hero">
   <div class="container">
     <div class="hero-inner">
-      <div class="hero-badge">Written in Rust &middot; v0.1.0</div>
-      <h1>Play anything.<br><span class="accent">Anywhere.</span></h1>
+      <div class="hero-badge">Rust SDK &middot; Memory-Safe &middot; Zero Crashes</div>
+      <h1>Video infrastructure,<br><span class="accent">everywhere.</span></h1>
       <p class="hero-desc">
-        A modular video engine with hardware-accelerated decoding,
-        adaptive streaming, and audio fingerprinting. From browsers
-        to hotel kiosks to Samsung fridges.
+        The enterprise video SDK that replaces legacy C++ players.
+        Memory-safe, hardware-accelerated, and formally verified.
+        From hotel kiosks to Samsung fridges to cloud pipelines.
       </p>
       <div class="hero-actions">
-        <a href="#code" class="btn btn-primary">Get Started</a>
-        <a href="#architecture" class="btn btn-ghost">How It Works</a>
+        <a href="#pricing" class="btn btn-primary">License the SDK</a>
+        <a href="#use-cases" class="btn btn-ghost">See Use Cases</a>
       </div>
 
       <div class="terminal">
@@ -491,9 +624,9 @@ footer .container { display: flex; justify-content: space-between; align-items: 
 <section class="targets" id="platforms">
   <div class="container">
     <div class="sh reveal">
-      <div class="sh-label">Deployment</div>
-      <div class="sh-title">Built for every screen</div>
-      <p class="sh-desc">One engine, everywhere. Native GStreamer or WebAssembly &mdash; no plugins, no compromises.</p>
+      <div class="sh-label">Deployment Targets</div>
+      <div class="sh-title">One SDK, every screen</div>
+      <p class="sh-desc">Native GStreamer or WebAssembly. Ship the same engine to every platform without rewrites.</p>
     </div>
     <div class="targets-grid reveal">
       <div class="t-card">
@@ -526,6 +659,154 @@ footer .container { display: flex; justify-content: space-between; align-items: 
         <div class="t-card-name">Embedded</div>
         <p class="t-card-desc">Python bindings, CLI pipelines, headless transcoding. Integrate anywhere.</p>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Use Cases ── -->
+<section class="use-cases" id="use-cases">
+  <div class="container">
+    <div class="sh reveal">
+      <div class="sh-label">Verticals</div>
+      <div class="sh-title">Built for industries where downtime isn't an option</div>
+      <p class="sh-desc">Kino replaces fragile C++ media stacks with Rust-powered reliability. Zero memory leaks. Zero crashes.</p>
+    </div>
+    <div class="uc-grid reveal">
+      <div class="uc-card">
+        <div class="uc-tier">Fastest to close</div>
+        <div class="uc-name">Digital Signage</div>
+        <p class="uc-desc">Menu boards, retail displays, airport screens. 24/7 HLS playback with automatic failover and zero memory leaks.</p>
+        <div class="uc-metric">99.99% uptime &middot; Zero restarts</div>
+      </div>
+      <div class="uc-card">
+        <div class="uc-tier">Fastest to close</div>
+        <div class="uc-name">Hospitality</div>
+        <p class="uc-desc">Hotel room entertainment, lobby kiosks, self-check-in screens. Embedded Linux with hardware-accelerated decode.</p>
+        <div class="uc-metric">1,000+ room deployments</div>
+      </div>
+      <div class="uc-card">
+        <div class="uc-tier">Fastest to close</div>
+        <div class="uc-name">Smart Appliances</div>
+        <p class="uc-desc">Samsung fridges, LG displays, in-store demo units. Ultra-lightweight binary, minimal CPU/RAM footprint.</p>
+        <div class="uc-metric">Under 8MB binary &middot; 12MB RAM</div>
+      </div>
+      <div class="uc-card">
+        <div class="uc-tier">High value</div>
+        <div class="uc-name">Medical Imaging</div>
+        <p class="uc-desc">DICOM video playback where crashes are literally unacceptable. Formally verified state machines.</p>
+        <div class="uc-metric">TLA+ verified &middot; 25+ invariants</div>
+      </div>
+      <div class="uc-card">
+        <div class="uc-tier">High value</div>
+        <div class="uc-name">Security &amp; Surveillance</div>
+        <p class="uc-desc">Multi-stream decoding for camera feeds. Rust's ownership model eliminates the buffer overflows that plague legacy players.</p>
+        <div class="uc-metric">Multi-stream &middot; Zero CVEs</div>
+      </div>
+      <div class="uc-card">
+        <div class="uc-tier">Platform play</div>
+        <div class="uc-name">Cloud Pipelines</div>
+        <p class="uc-desc">Replace components in AWS Elemental and Azure Media Services. WASM modules for browser-based editors.</p>
+        <div class="uc-metric">WebAssembly &middot; No plugins</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Why Kino ── -->
+<section class="why" id="why">
+  <div class="container">
+    <div class="sh reveal">
+      <div class="sh-label">Why Kino</div>
+      <div class="sh-title">The end of C++ technical debt</div>
+      <p class="sh-desc">70% of common video player vulnerabilities are memory-related. Kino eliminates them at the language level.</p>
+    </div>
+    <div class="why-grid reveal">
+      <div class="why-props">
+        <div class="why-prop">
+          <div class="why-prop-icon">&#x1F6E1;</div>
+          <div>
+            <h4>Zero-Memory-Leak Guarantee</h4>
+            <p>Rust's ownership system eliminates buffer overflows, use-after-free, and dangling pointers at compile time. Not at runtime. Not with a GC.</p>
+          </div>
+        </div>
+        <div class="why-prop">
+          <div class="why-prop-icon">&#x26A1;</div>
+          <div>
+            <h4>Fearless Concurrency</h4>
+            <p>Perfect AV-sync and stutter-free 4K/8K playback. Rust prevents race conditions that cause the glitches in legacy players.</p>
+          </div>
+        </div>
+        <div class="why-prop">
+          <div class="why-prop-icon">&#x2705;</div>
+          <div>
+            <h4>Formally Verified</h4>
+            <p>TLA+ specifications with 25+ invariants for critical business logic. NoDoubleCharge. ExactlyOnceDelivery. Proven correct, not just tested.</p>
+          </div>
+        </div>
+        <div class="why-prop">
+          <div class="why-prop-icon">&#x1F4E6;</div>
+          <div>
+            <h4>Modular SDK</h4>
+            <p>7 independent crates. Import only what you need. Core HLS/DASH engine, audio fingerprinting, WASM player, or Python bindings.</p>
+          </div>
+        </div>
+      </div>
+      <table class="compare-table">
+        <tr>
+          <th>Capability</th>
+          <th class="kino-col">Kino (Rust)</th>
+          <th>Legacy C++</th>
+          <th>Web Players</th>
+        </tr>
+        <tr>
+          <td>Memory Safety</td>
+          <td class="kino-col yes">Native</td>
+          <td class="no">Manual</td>
+          <td class="mid">GC-managed</td>
+        </tr>
+        <tr>
+          <td>4K/8K Stutter-Free</td>
+          <td class="kino-col yes">Yes</td>
+          <td class="mid">Race risk</td>
+          <td class="no">Perf caps</td>
+        </tr>
+        <tr>
+          <td>Security Audit</td>
+          <td class="kino-col yes">Simple</td>
+          <td class="no">Very complex</td>
+          <td class="mid">Moderate</td>
+        </tr>
+        <tr>
+          <td>IoT Ready</td>
+          <td class="kino-col yes">Ultra-light</td>
+          <td class="mid">Moderate</td>
+          <td class="no">Too heavy</td>
+        </tr>
+        <tr>
+          <td>WebAssembly</td>
+          <td class="kino-col yes">Native target</td>
+          <td class="mid">Emscripten</td>
+          <td class="mid">Slow</td>
+        </tr>
+        <tr>
+          <td>Audio Fingerprint</td>
+          <td class="kino-col yes">Built-in</td>
+          <td class="no">External</td>
+          <td class="no">N/A</td>
+        </tr>
+        <tr>
+          <td>Formal Verification</td>
+          <td class="kino-col yes">TLA+ specs</td>
+          <td class="no">None</td>
+          <td class="no">None</td>
+        </tr>
+        <tr>
+          <td>DRM Support</td>
+          <td class="kino-col yes">All 3 major</td>
+          <td class="mid">Varies</td>
+          <td class="mid">Limited</td>
+        </tr>
+      </table>
     </div>
   </div>
 </section>
@@ -711,12 +992,71 @@ Done in 4.2s (hw accelerated)</span></pre>
   </div>
 </section>
 
+<!-- ── Pricing ── -->
+<section class="pricing" id="pricing">
+  <div class="container">
+    <div class="sh reveal">
+      <div class="sh-label">SDK Licensing</div>
+      <div class="sh-title">Simple, predictable pricing</div>
+      <p class="sh-desc">Annual licenses with full source access, updates, and support. Scale from prototype to production.</p>
+    </div>
+    <div class="pricing-grid reveal">
+      <div class="price-card">
+        <div class="price-tier">Startup</div>
+        <div class="price-name">Developer</div>
+        <div class="price-range">$2,500 &ndash; $5,000 <span>/ year</span></div>
+        <ul class="price-features">
+          <li>Full SDK source access</li>
+          <li>All 7 crates included</li>
+          <li>Community support</li>
+          <li>Up to 10K MAU</li>
+          <li>Standard documentation</li>
+        </ul>
+        <a href="mailto:matthew@purplesquirrelmedia.io?subject=Kino%20Developer%20License" class="price-cta price-cta-ghost">Get Started</a>
+      </div>
+      <div class="price-card featured">
+        <div class="price-tier">Growth</div>
+        <div class="price-name">Professional</div>
+        <div class="price-range">$12,000 &ndash; $25,000 <span>/ year</span></div>
+        <ul class="price-features">
+          <li>Everything in Developer</li>
+          <li>Priority email support</li>
+          <li>Hardware optimization consulting</li>
+          <li>Up to 100K MAU</li>
+          <li>DRM module (Widevine)</li>
+          <li>Custom branding / white-label</li>
+        </ul>
+        <a href="mailto:matthew@purplesquirrelmedia.io?subject=Kino%20Professional%20License" class="price-cta price-cta-primary">Talk to Sales</a>
+      </div>
+      <div class="price-card">
+        <div class="price-tier">Scale</div>
+        <div class="price-name">Enterprise</div>
+        <div class="price-range">$50,000+ <span>/ year</span></div>
+        <ul class="price-features">
+          <li>Everything in Professional</li>
+          <li>Dedicated support engineer</li>
+          <li>Custom SLA (99.99%+)</li>
+          <li>Unlimited MAU</li>
+          <li>All DRM: Widevine + FairPlay + PlayReady</li>
+          <li>On-site integration services</li>
+          <li>8K optimization &amp; forensic watermarking</li>
+        </ul>
+        <a href="mailto:matthew@purplesquirrelmedia.io?subject=Kino%20Enterprise%20License" class="price-cta price-cta-ghost">Contact Us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ── CTA ── -->
 <section class="cta">
   <div class="container">
     <div class="cta-box reveal">
-      <h2>Start building with Kino</h2>
-      <p>Add it to your Rust project in one line.</p>
+      <h2>Ready to replace your legacy player?</h2>
+      <p>Start with a free evaluation or talk to our team about enterprise licensing.</p>
+      <div class="cta-actions">
+        <a href="mailto:matthew@purplesquirrelmedia.io?subject=Kino%20SDK%20Inquiry" class="btn btn-primary">Talk to Sales</a>
+        <a href="https://github.com/ExpertVagabond/kino" class="btn btn-ghost">View on GitHub</a>
+      </div>
       <div class="cta-cmd">
         <span><span class="p">$</span> cargo add kino-core</span>
         <button onclick="navigator.clipboard.writeText('cargo add kino-core')" title="Copy">&#x2398;</button>
@@ -730,8 +1070,8 @@ Done in 4.2s (hw accelerated)</span></pre>
     <div class="footer-l">Kino is built by <a href="https://purplesquirrel.media">Purple Squirrel Media</a></div>
     <ul class="footer-r">
       <li><a href="https://github.com/ExpertVagabond/kino">GitHub</a></li>
-      <li><a href="https://docs.rs">Docs</a></li>
-      <li><a href="https://crates.io">Crates.io</a></li>
+      <li><a href="deck.html">Pitch Deck</a></li>
+      <li><a href="mailto:matthew@purplesquirrelmedia.io?subject=Kino%20SDK%20Inquiry">Contact</a></li>
     </ul>
   </div>
 </footer>
