@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kino — Video Infrastructure, Everywhere</title>
+<meta name="description" content="Rust-powered video player engine. Hardware-accelerated. Cross-platform. From smart TVs to hotel kiosks to your browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #09090B;
+  --bg-elevated: #141416;
+  --bg-card: #1A1A1E;
+  --border: #2A2A2E;
+  --border-subtle: #1F1F23;
+  --text: #FAFAF9;
+  --text-secondary: #A8A8B3;
+  --text-dim: #63636E;
+  --accent: #F59E0B;
+  --accent-light: #FBBF24;
+  --accent-dim: rgba(245, 158, 11, 0.15);
+  --accent-glow: rgba(245, 158, 11, 0.08);
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'Outfit', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Grain Overlay ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+/* ── Selection ── */
+::selection { background: var(--accent); color: var(--bg); }
+
+/* ── Layout ── */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+section {
+  padding: 120px 0;
+  position: relative;
+}
+
+/* ── Navigation ── */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 16px 0;
+  background: rgba(9, 9, 11, 0.8);
+  backdrop-filter: blur(20px) saturate(1.2);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s;
+}
+
+nav.scrolled { border-bottom-color: var(--border-subtle); }
+
+nav .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.nav-logo span { color: var(--accent); }
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--text); }
+
+.nav-cta {
+  font-family: var(--font-mono) !important;
+  font-size: 13px !important;
+  padding: 8px 16px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 6px;
+  color: var(--accent-light) !important;
+  transition: all 0.2s !important;
+}
+
+.nav-cta:hover {
+  background: rgba(245, 158, 11, 0.2) !important;
+  border-color: var(--accent) !important;
+}
+
+/* ── Hero ── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding-top: 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Projector beam effect */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -200px;
+  right: 10%;
+  width: 500px;
+  height: 800px;
+  background: conic-gradient(from 180deg at 50% 0%, transparent 40%, rgba(245, 158, 11, 0.04) 48%, rgba(245, 158, 11, 0.06) 50%, rgba(245, 158, 11, 0.04) 52%, transparent 60%);
+  pointer-events: none;
+  animation: beam-sway 12s ease-in-out infinite;
+}
+
+@keyframes beam-sway {
+  0%, 100% { transform: rotate(-2deg); opacity: 1; }
+  50% { transform: rotate(2deg); opacity: 0.7; }
+}
+
+/* Grid lines */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--border-subtle) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px);
+  background-size: 80px 80px;
+  opacity: 0.3;
+  mask-image: radial-gradient(ellipse at 60% 50%, black 20%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.hero-text { max-width: 540px; }
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 100px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent);
+  margin-bottom: 32px;
+  animation: fade-up 0.8s ease both;
+}
+
+.hero-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(56px, 7vw, 88px);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  margin-bottom: 24px;
+  animation: fade-up 0.8s ease 0.1s both;
+}
+
+h1 .accent { color: var(--accent); }
+
+.hero-tagline {
+  font-size: 18px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin-bottom: 40px;
+  max-width: 440px;
+  animation: fade-up 0.8s ease 0.2s both;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  animation: fade-up 0.8s ease 0.3s both;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  transition: all 0.25s;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--bg);
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.3), 0 4px 24px rgba(245, 158, 11, 0.2);
+}
+
+.btn-primary:hover {
+  background: var(--accent-light);
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.5), 0 8px 32px rgba(245, 158, 11, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--bg-card);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-elevated);
+  border-color: var(--text-dim);
+}
+
+/* ── Terminal ── */
+.terminal {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03) inset;
+  animation: fade-up 0.8s ease 0.4s both;
+  width: 100%;
+  max-width: 520px;
+  justify-self: end;
+}
+
+.terminal-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px;
+  background: rgba(255,255,255,0.02);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.terminal-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border);
+}
+
+.terminal-dot:nth-child(1) { background: #EF4444; }
+.terminal-dot:nth-child(2) { background: #F59E0B; }
+.terminal-dot:nth-child(3) { background: #22C55E; }
+
+.terminal-title {
+  flex: 1;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.terminal-body {
+  padding: 20px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.8;
+  min-height: 240px;
+}
+
+.terminal-line {
+  opacity: 0;
+  animation: type-line 0.4s ease forwards;
+}
+
+.terminal-prompt { color: var(--accent); }
+.terminal-cmd { color: var(--text); }
+.terminal-comment { color: var(--text-dim); }
+.terminal-output { color: var(--text-secondary); }
+.terminal-success { color: #22C55E; }
+
+@keyframes type-line {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.terminal-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 16px;
+  background: var(--accent);
+  vertical-align: middle;
+  animation: blink 1s step-end infinite;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* ── Section headers ── */
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(32px, 4vw, 48px);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+
+.section-subtitle {
+  font-size: 17px;
+  color: var(--text-secondary);
+  max-width: 560px;
+  line-height: 1.7;
+}
+
+/* ── Deployment targets ── */
+.targets-section {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.targets-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 64px;
+}
+
+.target-card {
+  background: var(--bg);
+  padding: 40px 32px;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.target-card:hover {
+  background: var(--bg-elevated);
+}
+
+.target-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: radial-gradient(400px at var(--mx, 50%) var(--my, 50%), var(--accent-glow), transparent);
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.target-card:hover::after { opacity: 1; }
+
+.target-icon {
+  font-size: 28px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.target-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+  margin-bottom: 8px;
+}
+
+.target-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* ── Architecture ── */
+.arch-section {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.arch-diagram {
+  margin-top: 64px;
+  position: relative;
+}
+
+.arch-row {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.arch-crate {
+  padding: 20px 28px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s;
+  position: relative;
+  cursor: default;
+  text-align: center;
+  min-width: 160px;
+}
+
+.arch-crate:hover {
+  border-color: var(--accent);
+  background: var(--bg-card);
+  box-shadow: 0 0 24px var(--accent-glow), 0 0 0 1px var(--accent);
+  transform: translateY(-2px);
+}
+
+.arch-crate .crate-name {
+  color: var(--accent-light);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.arch-crate .crate-desc {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-dim);
+  font-weight: 400;
+}
+
+.arch-connector {
+  display: flex;
+  justify-content: center;
+  margin: 8px 0;
+}
+
+.arch-connector svg { color: var(--border); }
+
+.arch-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: center;
+  margin-bottom: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── Features ── */
+.features-section {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 64px;
+}
+
+.feature-card {
+  padding: 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  transition: all 0.3s;
+}
+
+.feature-card:hover {
+  border-color: var(--border);
+  background: var(--bg-card);
+}
+
+.feature-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-dim);
+  border: 1px solid rgba(245, 158, 11, 0.15);
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+.feature-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+  margin-bottom: 8px;
+}
+
+.feature-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* ── Code examples ── */
+.code-section {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.code-tabs {
+  display: flex;
+  gap: 0;
+  margin-top: 64px;
+  border-bottom: 1px solid var(--border);
+}
+
+.code-tab {
+  padding: 12px 24px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-dim);
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  margin-bottom: -1px;
+}
+
+.code-tab:hover { color: var(--text-secondary); }
+
+.code-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.code-panels { position: relative; }
+
+.code-panel {
+  display: none;
+  padding: 28px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+}
+
+.code-panel.active { display: block; }
+
+.code-panel pre {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.8;
+  overflow-x: auto;
+  color: var(--text-secondary);
+}
+
+.code-panel .kw { color: #C084FC; }
+.code-panel .fn { color: #60A5FA; }
+.code-panel .str { color: #34D399; }
+.code-panel .cm { color: var(--text-dim); }
+.code-panel .ty { color: var(--accent-light); }
+.code-panel .num { color: #FB923C; }
+.code-panel .mc { color: #F472B6; }
+.code-panel .op { color: var(--text-dim); }
+
+/* ── Stats ── */
+.stats-section {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-top: 64px;
+}
+
+.stat-card {
+  padding: 32px;
+  text-align: center;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+}
+
+.stat-value {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 42px;
+  color: var(--accent);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.stat-unit {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* ── CTA banner ── */
+.cta-section {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.cta-banner {
+  text-align: center;
+  padding: 80px 40px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(600px circle at 50% 0%, var(--accent-glow), transparent);
+  pointer-events: none;
+}
+
+.cta-banner h2 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(28px, 3.5vw, 40px);
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.cta-banner p {
+  color: var(--text-secondary);
+  font-size: 17px;
+  margin-bottom: 32px;
+  position: relative;
+}
+
+.cta-install {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  padding: 16px 32px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cta-install:hover {
+  border-color: var(--accent);
+}
+
+.cta-install .prompt { color: var(--accent); }
+
+.copy-btn {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.2s;
+  font-size: 14px;
+}
+
+.copy-btn:hover { color: var(--accent); }
+
+/* ── Footer ── */
+footer {
+  padding: 40px 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+footer .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-left {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.footer-left a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-left a:hover { color: var(--accent); }
+
+.footer-links {
+  display: flex;
+  gap: 24px;
+  list-style: none;
+}
+
+.footer-links a {
+  font-size: 13px;
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-links a:hover { color: var(--text-secondary); }
+
+/* ── Animations ── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .hero-content {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+
+  .terminal { max-width: 100%; justify-self: start; }
+  .targets-grid { grid-template-columns: repeat(2, 1fr); }
+  .features-grid { grid-template-columns: repeat(2, 1fr); }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .arch-row { flex-wrap: wrap; }
+
+  .nav-links { display: none; }
+}
+
+@media (max-width: 600px) {
+  section { padding: 80px 0; }
+  .targets-grid { grid-template-columns: 1fr; }
+  .features-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  footer .container { flex-direction: column; gap: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Navigation ── -->
+<nav>
+  <div class="container">
+    <a href="#" class="nav-logo">KINO<span>.</span></a>
+    <ul class="nav-links">
+      <li><a href="#targets">Platforms</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#code">Code</a></li>
+      <li><a href="https://github.com/ExpertVagabond/kino" class="nav-cta">GitHub</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-text">
+        <div class="hero-badge">Rust-Powered &middot; v0.1.0</div>
+        <h1>Video infra&shy;structure, <span class="accent">every&shy;where.</span></h1>
+        <p class="hero-tagline">
+          A modular video player engine written in Rust. Hardware-accelerated decoding,
+          adaptive streaming, audio fingerprinting. From browsers to hotel kiosks.
+        </p>
+        <div class="hero-actions">
+          <a href="#code" class="btn btn-primary">Get Started</a>
+          <a href="#architecture" class="btn btn-secondary">Architecture</a>
+        </div>
+      </div>
+
+      <div class="terminal">
+        <div class="terminal-header">
+          <div class="terminal-dot"></div>
+          <div class="terminal-dot"></div>
+          <div class="terminal-dot"></div>
+          <div class="terminal-title">terminal</div>
+        </div>
+        <div class="terminal-body" id="terminal-body"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Deployment Targets ── -->
+<section class="targets-section" id="targets">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Deployment</div>
+      <div class="section-title">Built for everywhere</div>
+      <p class="section-subtitle">
+        One engine, every screen. Kino runs natively or through WebAssembly &mdash; no plugins,
+        no compromises.
+      </p>
+    </div>
+
+    <div class="targets-grid reveal">
+      <div class="target-card">
+        <span class="target-icon">&#x1F4FA;</span>
+        <div class="target-name">Smart TVs</div>
+        <p class="target-desc">Samsung, LG, Android TV. GStreamer native or WASM in the built-in browser.</p>
+      </div>
+      <div class="target-card">
+        <span class="target-icon">&#x1F3E8;</span>
+        <div class="target-name">Hotel Kiosks</div>
+        <p class="target-desc">Self-registration screens, lobby displays. Embedded Linux with hardware decode.</p>
+      </div>
+      <div class="target-card">
+        <span class="target-icon">&#x1F5BC;</span>
+        <div class="target-name">Digital Signage</div>
+        <p class="target-desc">Menu boards, retail screens, airport displays. 24/7 HLS playback with failover.</p>
+      </div>
+      <div class="target-card">
+        <span class="target-icon">&#x1F310;</span>
+        <div class="target-name">Web Browsers</div>
+        <p class="target-desc">WebAssembly module. Drop into any page. No native install, works everywhere.</p>
+      </div>
+      <div class="target-card">
+        <span class="target-icon">&#x1F5A5;</span>
+        <div class="target-name">Desktop Apps</div>
+        <p class="target-desc">Tauri 2 wrapper for macOS, Windows, Linux. Native performance, tiny bundle.</p>
+      </div>
+      <div class="target-card">
+        <span class="target-icon">&#x1F50C;</span>
+        <div class="target-name">Embedded</div>
+        <p class="target-desc">Python bindings, CLI pipelines, headless transcoding. Integrate anywhere.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Architecture ── -->
+<section class="arch-section" id="architecture">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Architecture</div>
+      <div class="section-title">Seven crates. Use what you need.</div>
+      <p class="section-subtitle">
+        Kino is a workspace of independent Rust crates. Import the whole stack or cherry-pick
+        individual modules.
+      </p>
+    </div>
+
+    <div class="arch-diagram reveal">
+      <!-- Application layer -->
+      <div class="arch-label">Application Layer</div>
+      <div class="arch-row">
+        <div class="arch-crate">
+          <span class="crate-name">kino-desktop</span>
+          <span class="crate-desc">GStreamer native player</span>
+        </div>
+        <div class="arch-crate">
+          <span class="crate-name">kino-tauri</span>
+          <span class="crate-desc">Cross-platform desktop</span>
+        </div>
+        <div class="arch-crate">
+          <span class="crate-name">kino-wasm</span>
+          <span class="crate-desc">Browser via WebAssembly</span>
+        </div>
+        <div class="arch-crate">
+          <span class="crate-name">kino-cli</span>
+          <span class="crate-desc">Terminal &amp; pipelines</span>
+        </div>
+      </div>
+
+      <!-- Connector -->
+      <div class="arch-connector">
+        <svg width="400" height="32" viewBox="0 0 400 32" fill="none">
+          <line x1="50" y1="0" x2="50" y2="32" stroke="currentColor" stroke-width="1" stroke-dasharray="4 4"/>
+          <line x1="150" y1="0" x2="150" y2="32" stroke="currentColor" stroke-width="1" stroke-dasharray="4 4"/>
+          <line x1="250" y1="0" x2="250" y2="32" stroke="currentColor" stroke-width="1" stroke-dasharray="4 4"/>
+          <line x1="350" y1="0" x2="350" y2="32" stroke="currentColor" stroke-width="1" stroke-dasharray="4 4"/>
+        </svg>
+      </div>
+
+      <!-- Core layer -->
+      <div class="arch-label">Core</div>
+      <div class="arch-row">
+        <div class="arch-crate" style="border-color: var(--accent); background: rgba(245, 158, 11, 0.03);">
+          <span class="crate-name">kino-core</span>
+          <span class="crate-desc">HLS/DASH, ABR, buffers, DRM</span>
+        </div>
+      </div>
+
+      <!-- Connector -->
+      <div class="arch-connector">
+        <svg width="200" height="32" viewBox="0 0 200 32" fill="none">
+          <line x1="100" y1="0" x2="100" y2="32" stroke="currentColor" stroke-width="1" stroke-dasharray="4 4"/>
+        </svg>
+      </div>
+
+      <!-- Extension layer -->
+      <div class="arch-label">Extensions</div>
+      <div class="arch-row">
+        <div class="arch-crate">
+          <span class="crate-name">kino-frequency</span>
+          <span class="crate-desc">Audio fingerprinting &amp; analysis</span>
+        </div>
+        <div class="arch-crate">
+          <span class="crate-name">kino-python</span>
+          <span class="crate-desc">PyO3 bindings for Python</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Features ── -->
+<section class="features-section" id="features">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Capabilities</div>
+      <div class="section-title">Everything a video engine needs</div>
+      <p class="section-subtitle">
+        Production-grade features built into the core. No plugins, no third-party runtime.
+      </p>
+    </div>
+
+    <div class="features-grid reveal">
+      <div class="feature-card">
+        <div class="feature-icon">&#x26A1;</div>
+        <div class="feature-name">Hardware Acceleration</div>
+        <p class="feature-desc">VA-API, VideoToolbox, NVDEC, D3D11VA. Automatic backend detection. Falls back to software gracefully.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#x1F4E1;</div>
+        <div class="feature-name">Adaptive Streaming</div>
+        <p class="feature-desc">HLS and DASH with hybrid ABR (BOLA + throughput). Buffer-aware quality switching. Zero-stall playback.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#x1F3B5;</div>
+        <div class="feature-name">Audio Fingerprinting</div>
+        <p class="feature-desc">Shazam-style spectral peak matching. Content identification, duplicate detection, and similarity scoring.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#x1F9E9;</div>
+        <div class="feature-name">WebAssembly</div>
+        <p class="feature-desc">Full player in WASM. Drop a script tag, get adaptive streaming. No native install. Works on any modern browser.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#x1F510;</div>
+        <div class="feature-name">DRM Support</div>
+        <p class="feature-desc">Widevine, FairPlay, PlayReady integration points. Content protection for commercial deployments.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#x2705;</div>
+        <div class="feature-name">Formally Verified</div>
+        <p class="feature-desc">TLA+ specifications for critical paths. 25+ invariants including NoDoubleCharge and ExactlyOnceDelivery.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Code examples ── -->
+<section class="code-section" id="code">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Integration</div>
+      <div class="section-title">Works with your stack</div>
+      <p class="section-subtitle">
+        Native Rust, Python bindings, WebAssembly, or the CLI. Pick the interface that fits.
+      </p>
+    </div>
+
+    <div class="reveal">
+      <div class="code-tabs">
+        <button class="code-tab active" data-panel="rust">Rust</button>
+        <button class="code-tab" data-panel="python">Python</button>
+        <button class="code-tab" data-panel="javascript">JavaScript</button>
+        <button class="code-tab" data-panel="cli">CLI</button>
+      </div>
+
+      <div class="code-panels">
+        <div class="code-panel active" id="panel-rust">
+<pre><span class="kw">use</span> <span class="ty">kino_core</span>::{<span class="ty">PlayerConfig</span>, <span class="ty">PlayerSession</span>};
+<span class="kw">use</span> <span class="ty">kino_desktop</span>::{<span class="ty">DesktopPlayer</span>, <span class="ty">DesktopPlayerConfig</span>};
+
+<span class="kw">fn</span> <span class="fn">main</span>() -> <span class="ty">anyhow</span>::<span class="ty">Result</span>&lt;()&gt; {
+    <span class="cm">// Hardware acceleration is automatic</span>
+    <span class="kw">let mut</span> player = <span class="ty">DesktopPlayer</span>::<span class="fn">new</span>(
+        <span class="ty">DesktopPlayerConfig</span>::<span class="fn">default</span>()
+    )?;
+
+    <span class="cm">// Load HLS stream</span>
+    player.<span class="fn">load</span>(<span class="str">"https://stream.example.com/live.m3u8"</span>)?;
+    player.<span class="fn">play</span>();
+
+    <span class="cm">// Quality metrics are always available</span>
+    <span class="kw">let</span> metrics = player.<span class="fn">quality_metrics</span>();
+    <span class="fn">println!</span>(<span class="str">"Resolution: {:?}"</span>, metrics.resolution);
+
+    <span class="ty">Ok</span>(())
+}</pre>
+        </div>
+
+        <div class="code-panel" id="panel-python">
+<pre><span class="kw">from</span> <span class="ty">kino_frequency</span> <span class="kw">import</span> <span class="ty">FrequencyAnalyzer</span>, <span class="ty">Fingerprinter</span>
+
+<span class="cm"># Analyze audio content</span>
+analyzer = <span class="ty">FrequencyAnalyzer</span>(fft_size=<span class="num">2048</span>)
+result = analyzer.<span class="fn">analyze_file</span>(<span class="str">"content.wav"</span>)
+
+<span class="fn">print</span>(<span class="str">f"Dominant frequency: </span>{result.dominant_hz}<span class="str"> Hz"</span>)
+<span class="fn">print</span>(<span class="str">f"Genre prediction:   </span>{result.tags.genre}<span class="str">"</span>)
+
+<span class="cm"># Generate audio fingerprint</span>
+fp = <span class="ty">Fingerprinter</span>()
+fingerprint = fp.<span class="fn">fingerprint</span>(<span class="str">"content.wav"</span>)
+<span class="fn">print</span>(<span class="str">f"Hash: </span>{fingerprint.hash}<span class="str">"</span>)
+
+<span class="cm"># Compare two files for similarity</span>
+score = fp.<span class="fn">compare</span>(<span class="str">"file_a.wav"</span>, <span class="str">"file_b.wav"</span>)
+<span class="fn">print</span>(<span class="str">f"Similarity: </span>{score:.1%}<span class="str">"</span>)</pre>
+        </div>
+
+        <div class="code-panel" id="panel-javascript">
+<pre><span class="kw">import</span> init, {
+  <span class="ty">KinoAbrController</span>,
+  <span class="ty">KinoBranding</span>
+} <span class="kw">from</span> <span class="str">'@kino/wasm'</span>;
+
+<span class="kw">await</span> <span class="fn">init</span>();
+
+<span class="cm">// Drop-in ABR controller for hls.js</span>
+<span class="kw">const</span> abr = <span class="kw">new</span> <span class="ty">KinoAbrController</span>();
+
+hls.<span class="fn">on</span>(<span class="ty">Hls</span>.Events.<span class="ty">FRAG_LOADED</span>, (e, data) => {
+  abr.<span class="fn">record_download</span>(data.frag.loaded, data.frag.duration);
+  <span class="kw">const</span> level = abr.<span class="fn">select_level</span>(
+    hls.levels, videoEl.buffered, bandwidth
+  );
+  hls.nextLoadLevel = level;
+});
+
+<span class="cm">// Inject Kino theme</span>
+<span class="kw">const</span> css = <span class="ty">KinoBranding</span>.<span class="fn">get_css_variables</span>();
+document.head.<span class="fn">appendChild</span>(style);</pre>
+        </div>
+
+        <div class="code-panel" id="panel-cli">
+<pre><span class="cm"># Fingerprint a video file</span>
+<span class="ty">$</span> <span class="fn">kino</span> fingerprint video.mp4
+<span class="output">Hash:   a7f3b2c9e1d045...
+Peaks:  1,247
+Match:  content-id-38291</span>
+
+<span class="cm"># Analyze audio frequencies</span>
+<span class="ty">$</span> <span class="fn">kino</span> analyze audio.wav --format json
+<span class="output">{
+  "dominant_hz": 440.0,
+  "genre": "electronic",
+  "bpm": 128,
+  "energy": 0.82
+}</span>
+
+<span class="cm"># Transcode with Kino presets</span>
+<span class="ty">$</span> <span class="fn">kino</span> encode input.mov --preset hls-adaptive
+<span class="output">Encoding: 1080p, 720p, 480p, 360p
+Output:   ./output/stream.m3u8
+Done in 4.2s (hardware accelerated)</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Stats ── -->
+<section class="stats-section" id="stats">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Performance</div>
+      <div class="section-title">Numbers that matter</div>
+    </div>
+
+    <div class="stats-grid reveal">
+      <div class="stat-card">
+        <div class="stat-value">7</div>
+        <div class="stat-label">Modular crates</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">4<span class="stat-unit">ms</span></div>
+        <div class="stat-label">Startup latency</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">0</div>
+        <div class="stat-label">Unsafe blocks in core</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">25<span class="stat-unit">+</span></div>
+        <div class="stat-label">TLA+ invariants verified</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-banner reveal">
+      <h2>Start building with Kino</h2>
+      <p>Add it to your Rust project in one line.</p>
+      <div class="cta-install">
+        <span><span class="prompt">$</span> cargo add kino-core</span>
+        <button class="copy-btn" onclick="navigator.clipboard.writeText('cargo add kino-core')" title="Copy">
+          &#x2398;
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer>
+  <div class="container">
+    <div class="footer-left">
+      Kino is built by <a href="https://purplesquirrel.media">Purple Squirrel Media</a>
+    </div>
+    <ul class="footer-links">
+      <li><a href="https://github.com/ExpertVagabond/kino">GitHub</a></li>
+      <li><a href="https://docs.rs">Docs</a></li>
+      <li><a href="https://crates.io">Crates.io</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script>
+// ── Nav scroll effect ──
+const nav = document.querySelector('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 20);
+});
+
+// ── Terminal animation ──
+const terminalLines = [
+  { type: 'comment', text: '# Install Kino' },
+  { type: 'command', text: 'cargo add kino-core kino-frequency' },
+  { type: 'output', text: 'Updating crates.io index...' },
+  { type: 'success', text: 'Added kino-core v0.1.0' },
+  { type: 'success', text: 'Added kino-frequency v0.1.0' },
+  { type: 'empty' },
+  { type: 'comment', text: '# Build and run' },
+  { type: 'command', text: 'cargo run --release' },
+  { type: 'output', text: 'Compiling kino-core v0.1.0' },
+  { type: 'output', text: 'Compiling kino-frequency v0.1.0' },
+  { type: 'success', text: 'Hardware backend: VideoToolbox (macOS)' },
+  { type: 'success', text: 'Player ready. 0 warnings.' },
+];
+
+const termBody = document.getElementById('terminal-body');
+
+function renderTerminal() {
+  termBody.innerHTML = '';
+  terminalLines.forEach((line, i) => {
+    const div = document.createElement('div');
+    div.className = 'terminal-line';
+    div.style.animationDelay = `${0.8 + i * 0.15}s`;
+
+    if (line.type === 'empty') {
+      div.innerHTML = '&nbsp;';
+    } else if (line.type === 'command') {
+      div.innerHTML = `<span class="terminal-prompt">$</span> <span class="terminal-cmd">${line.text}</span>`;
+    } else if (line.type === 'comment') {
+      div.innerHTML = `<span class="terminal-comment">${line.text}</span>`;
+    } else if (line.type === 'success') {
+      div.innerHTML = `<span class="terminal-success">&#x2713;</span> <span class="terminal-output">${line.text}</span>`;
+    } else {
+      div.innerHTML = `<span class="terminal-output">${line.text}</span>`;
+    }
+
+    termBody.appendChild(div);
+  });
+
+  // Add cursor at end
+  const cursor = document.createElement('div');
+  cursor.className = 'terminal-line';
+  cursor.style.animationDelay = `${0.8 + terminalLines.length * 0.15}s`;
+  cursor.innerHTML = '<span class="terminal-prompt">$</span> <span class="terminal-cursor"></span>';
+  termBody.appendChild(cursor);
+}
+
+renderTerminal();
+
+// ── Code tabs ──
+document.querySelectorAll('.code-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(`panel-${tab.dataset.panel}`).classList.add('active');
+  });
+});
+
+// ── Scroll reveal ──
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── Card glow follow ──
+document.querySelectorAll('.target-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+    card.style.setProperty('--my', `${e.clientY - rect.top}px`);
+  });
+});
+</script>
+
+</body>
+</html>
