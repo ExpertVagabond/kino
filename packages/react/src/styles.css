@@ -1,69 +1,69 @@
-/* PSM Player - React Component Styles */
+/* Kino - React Component Styles */
 
 :root {
-  --psm-primary: #9b30ff;
-  --psm-primary-dark: #7a1fe8;
-  --psm-primary-deep: #5a10b8;
-  --psm-background: #0c0a12;
-  --psm-background-light: #120f1a;
-  --psm-surface: #1a1625;
-  --psm-text: #f6f2ff;
-  --psm-text-soft: #d4cde9;
+  --kino-primary: #9b30ff;
+  --kino-primary-dark: #7a1fe8;
+  --kino-primary-deep: #5a10b8;
+  --kino-background: #0c0a12;
+  --kino-background-light: #120f1a;
+  --kino-surface: #1a1625;
+  --kino-text: #f6f2ff;
+  --kino-text-soft: #d4cde9;
 }
 
-.psm-player {
+.kino {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: var(--psm-background);
+  background: var(--kino-background);
   border-radius: 8px;
   overflow: hidden;
 }
 
-.psm-player video {
+.kino video {
   display: block;
   background: #000;
 }
 
 /* Custom controls styling when native controls are hidden */
-.psm-player video::-webkit-media-controls {
+.kino video::-webkit-media-controls {
   background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
 }
 
-.psm-player video::-webkit-media-controls-panel {
+.kino video::-webkit-media-controls-panel {
   background: linear-gradient(transparent, rgba(12, 10, 18, 0.95));
 }
 
-.psm-player video::-webkit-media-controls-play-button {
-  background-color: var(--psm-primary);
+.kino video::-webkit-media-controls-play-button {
+  background-color: var(--kino-primary);
   border-radius: 50%;
 }
 
-.psm-player video::-webkit-media-controls-current-time-display,
-.psm-player video::-webkit-media-controls-time-remaining-display {
-  color: var(--psm-text);
+.kino video::-webkit-media-controls-current-time-display,
+.kino video::-webkit-media-controls-time-remaining-display {
+  color: var(--kino-text);
 }
 
-.psm-player video::-webkit-media-controls-timeline {
+.kino video::-webkit-media-controls-timeline {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 2px;
 }
 
-.psm-player video::-webkit-media-controls-volume-slider {
-  background: var(--psm-primary);
+.kino video::-webkit-media-controls-volume-slider {
+  background: var(--kino-primary);
 }
 
 /* Fullscreen styles */
-.psm-player:fullscreen {
+.kino:fullscreen {
   border-radius: 0;
 }
 
-.psm-player:fullscreen video {
+.kino:fullscreen video {
   width: 100vw;
   height: 100vh;
   object-fit: contain;
 }
 
 /* Loading state */
-.psm-player.loading::after {
+.kino.loading::after {
   content: '';
   position: absolute;
   top: 50%;
@@ -72,7 +72,7 @@
   width: 48px;
   height: 48px;
   border: 3px solid rgba(155, 48, 255, 0.3);
-  border-top-color: var(--psm-primary);
+  border-top-color: var(--kino-primary);
   border-radius: 50%;
   animation: psm-spin 1s linear infinite;
 }
@@ -84,15 +84,15 @@
 }
 
 /* Error state */
-.psm-player.error {
+.kino.error {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 200px;
 }
 
-.psm-player.error::before {
+.kino.error::before {
   content: 'Unable to play video';
-  color: var(--psm-text-soft);
+  color: var(--kino-text-soft);
   font-size: 14px;
 }

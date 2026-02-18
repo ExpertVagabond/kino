@@ -1,5 +1,5 @@
 /**
- * PSM Player Analytics Server
+ * Kino Analytics Server
  *
  * Collects and serves video player analytics data including:
  * - Playback sessions

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * PSM Player - HLS Encoding Tool
+ * Kino - HLS Encoding Tool
  *
  * Node.js wrapper for FFmpeg HLS encoding with progress tracking
  *
@@ -17,7 +17,7 @@ const { spawn, execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-// PSM Branding colors
+// Kino Branding colors
 const colors = {
     purple: '\x1b[35m',
     green: '\x1b[32m',

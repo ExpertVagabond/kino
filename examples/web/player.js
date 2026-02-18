@@ -1,22 +1,22 @@
 /**
- * PSM Player Demo - Web Integration Example
+ * Kino Demo - Web Integration Example
  *
- * This demonstrates how to use the PSM Player WASM module alongside hls.js
+ * This demonstrates how to use the Kino WASM module alongside hls.js
  * for enhanced adaptive bitrate selection and analytics.
  */
 
 // Import the WASM module (adjust path based on your build setup)
-// In production, this would be: import init, { ... } from '@purplesquirrel/player-wasm';
+// In production, this would be: import init, { ... } from '@kino/wasm';
 import init, {
-    PsmBranding,
-    PsmAnalytics,
-    PsmBufferController,
-    PsmAbrController,
+    KinoBranding,
+    KinoAnalytics,
+    KinoBufferController,
+    KinoAbrController,
     WasmConfig,
     version
-} from '../../crates/psm-player-wasm/pkg/psm_player_wasm.js';
+} from '../../crates/kino-wasm/pkg/kino_wasm.js';
 
-class PsmPlayer {
+class KinoPlayer {
     constructor() {
         this.video = document.getElementById('video');
         this.hls = null;
@@ -34,17 +34,17 @@ class PsmPlayer {
     async init() {
         // Initialize WASM
         await init();
-        console.log(`PSM Player v${version()} initialized`);
+        console.log(`Kino v${version()} initialized`);
 
-        // Apply PSM branding CSS
+        // Apply Kino branding CSS
         const themeStyle = document.getElementById('psm-theme');
-        themeStyle.textContent = PsmBranding.get_css_variables();
+        themeStyle.textContent = KinoBranding.get_css_variables();
 
         // Initialize analytics
-        this.analytics = new PsmAnalytics();
+        this.analytics = new KinoAnalytics();
 
         // Initialize buffer controller
-        this.bufferController = new PsmBufferController();
+        this.bufferController = new KinoBufferController();
 
         this.initialized = true;
         this.setupEventListeners();
@@ -118,7 +118,7 @@ class PsmPlayer {
         this.bufferController.reset();
 
         // Create new ABR controller with selected algorithm
-        this.abrController = PsmAbrController.with_algorithm(abrAlgorithm);
+        this.abrController = KinoAbrController.with_algorithm(abrAlgorithm);
 
         // Check for HLS support
         if (Hls.isSupported()) {
@@ -228,7 +228,7 @@ class PsmPlayer {
      */
     renderQualityLevels(levels) {
         const container = document.getElementById('quality-levels');
-        container.innerHTML = '<h3 style="color: var(--psm-text); margin: 0 0 0.5rem 0;">Quality Levels</h3>';
+        container.innerHTML = '<h3 style="color: var(--kino-text); margin: 0 0 0.5rem 0;">Quality Levels</h3>';
 
         const list = document.createElement('div');
         list.style.display = 'flex';
@@ -348,5 +348,5 @@ class PsmPlayer {
 }
 
 // Initialize the player when the page loads
-const player = new PsmPlayer();
+const player = new KinoPlayer();
 player.init().catch(console.error);

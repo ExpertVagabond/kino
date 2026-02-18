@@ -1,0 +1,27 @@
+[package]
+name = "kino-tauri"
+description = "Cross-platform desktop video player using Tauri for Kino"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "kino"
+path = "src/main.rs"
+
+[dependencies]
+kino-core = { workspace = true }
+tokio = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+url = { workspace = true }
+
+# Tauri
+tauri = { version = "2", features = [] }
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }

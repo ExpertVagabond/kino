@@ -1,10 +1,10 @@
-# PSM Player TLA+ Specifications
+# Kino TLA+ Specifications
 
 Formal specifications for the Purple Squirrel Media video player using TLA+ (Temporal Logic of Actions).
 
 ## Overview
 
-These specifications model and verify the correctness of the PSM Player's core behaviors:
+These specifications model and verify the correctness of the Kino's core behaviors:
 
 | Specification | Description |
 |---------------|-------------|

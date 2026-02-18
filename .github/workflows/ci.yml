@@ -83,14 +83,14 @@ jobs:
           key: wasm-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build WASM
-        working-directory: crates/psm-player-wasm
+        working-directory: crates/kino-wasm
         run: wasm-pack build --target web --release
 
       - name: Upload WASM artifact
         uses: actions/upload-artifact@v4
         with:
           name: wasm-pkg
-          path: crates/psm-player-wasm/pkg/
+          path: crates/kino-wasm/pkg/
 
   # ============================================================================
   # Tauri Desktop Build
@@ -134,7 +134,7 @@ jobs:
           key: tauri-${{ matrix.platform }}-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build Tauri app
-        working-directory: crates/psm-player-tauri
+        working-directory: crates/kino-tauri
         run: cargo tauri build
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
@@ -146,7 +146,7 @@ jobs:
           path: |
             target/release/bundle/
             target/release/*.exe
-            target/release/psm-player
+            target/release/kino
 
   # ============================================================================
   # Docker Build
@@ -166,7 +166,7 @@ jobs:
         with:
           context: .
           push: false
-          tags: psm-player:${{ github.sha }}
+          tags: kino:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -195,15 +195,15 @@ jobs:
           key: frequency-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build frequency crate
-        working-directory: crates/psm-player-frequency
+        working-directory: crates/kino-frequency
         run: cargo build --all-features
 
       - name: Run frequency tests
-        working-directory: crates/psm-player-frequency
+        working-directory: crates/kino-frequency
         run: cargo test --all-features
 
       - name: Run frequency benchmarks (dry-run)
-        working-directory: crates/psm-player-frequency
+        working-directory: crates/kino-frequency
         run: cargo bench --no-run
 
   # ============================================================================
@@ -237,13 +237,13 @@ jobs:
           key: python-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build Python wheel
-        working-directory: crates/psm-player-python
+        working-directory: crates/kino-python
         run: maturin build --release
 
       - name: Install and test wheel
         run: |
           pip install target/wheels/*.whl
-          python -c "import psm_player; print(psm_player.__version__ if hasattr(psm_player, '__version__') else 'OK')"
+          python -c "import kino; print(kino.__version__ if hasattr(kino, '__version__') else 'OK')"
 
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v4

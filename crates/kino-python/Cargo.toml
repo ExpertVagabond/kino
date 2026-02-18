@@ -1,0 +1,16 @@
+[package]
+name = "kino-python"
+description = "Python bindings for Kino frequency analysis"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[lib]
+name = "kino_frequency"
+crate-type = ["cdylib"]
+
+[dependencies]
+kino-frequency = { path = "../kino-frequency" }
+pyo3 = { version = "0.22", features = ["extension-module"] }
+numpy = "0.22"

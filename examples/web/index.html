@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PSM Player Demo</title>
+    <title>Kino Demo</title>
     <style id="psm-theme"></style>
     <style>
         * {
@@ -33,7 +33,7 @@
         .logo {
             width: 48px;
             height: 48px;
-            background: var(--psm-primary);
+            background: var(--kino-primary);
             border-radius: 12px;
             display: flex;
             align-items: center;
@@ -42,12 +42,12 @@
         }
 
         h1 {
-            color: var(--psm-text);
+            color: var(--kino-text);
             margin: 0;
         }
 
         .player-container {
-            background: var(--psm-surface);
+            background: var(--kino-surface);
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
@@ -79,27 +79,27 @@
         }
 
         label {
-            color: var(--psm-text-soft);
+            color: var(--kino-text-soft);
             font-size: 0.875rem;
         }
 
         input[type="text"], select {
-            background: var(--psm-background);
+            background: var(--kino-background);
             border: 1px solid rgba(155, 48, 255, 0.3);
             border-radius: 8px;
             padding: 0.5rem 1rem;
-            color: var(--psm-text);
+            color: var(--kino-text);
             font-size: 1rem;
             min-width: 200px;
         }
 
         input[type="text"]:focus, select:focus {
             outline: none;
-            border-color: var(--psm-primary);
+            border-color: var(--kino-primary);
         }
 
         button {
-            background: var(--psm-primary);
+            background: var(--kino-primary);
             color: white;
             border: none;
             border-radius: 8px;
@@ -110,7 +110,7 @@
         }
 
         button:hover {
-            background: var(--psm-primary-dark);
+            background: var(--kino-primary-dark);
         }
 
         button:disabled {
@@ -119,14 +119,14 @@
         }
 
         .stats {
-            background: var(--psm-surface);
+            background: var(--kino-surface);
             border-radius: 12px;
             padding: 1.5rem;
             margin-top: 2rem;
         }
 
         .stats h2 {
-            color: var(--psm-text);
+            color: var(--kino-text);
             margin: 0 0 1rem 0;
             font-size: 1.25rem;
         }
@@ -138,19 +138,19 @@
         }
 
         .stat-card {
-            background: var(--psm-background);
+            background: var(--kino-background);
             border-radius: 8px;
             padding: 1rem;
         }
 
         .stat-label {
-            color: var(--psm-text-soft);
+            color: var(--kino-text-soft);
             font-size: 0.875rem;
             margin-bottom: 0.25rem;
         }
 
         .stat-value {
-            color: var(--psm-text);
+            color: var(--kino-text);
             font-size: 1.5rem;
             font-weight: 600;
         }
@@ -192,7 +192,7 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: var(--psm-primary);
+            background: var(--kino-primary);
         }
 
         .captions-display {
@@ -218,18 +218,18 @@
             display: flex;
             gap: 0.5rem;
             padding: 0.5rem 1rem;
-            background: var(--psm-background);
+            background: var(--kino-background);
             overflow-x: auto;
         }
 
         .chapter {
             flex-shrink: 0;
-            background: var(--psm-surface);
+            background: var(--kino-surface);
             border-radius: 4px;
             padding: 0.5rem 1rem;
             cursor: pointer;
             font-size: 0.875rem;
-            color: var(--psm-text-soft);
+            color: var(--kino-text-soft);
             transition: all 0.2s;
         }
 
@@ -238,7 +238,7 @@
         }
 
         .chapter.active {
-            background: var(--psm-primary);
+            background: var(--kino-primary);
             color: white;
         }
     </style>
@@ -247,7 +247,7 @@
     <div class="container">
         <div class="header">
             <div class="logo">PS</div>
-            <h1>PSM Player Demo</h1>
+            <h1>Kino Demo</h1>
         </div>
 
         <div class="player-container">

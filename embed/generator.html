@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PSM Player - Embed Code Generator</title>
+    <title>Kino - Embed Code Generator</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -263,7 +263,7 @@
     <div class="container">
         <div class="header">
             <div class="logo">PS</div>
-            <h1>PSM Player Embed Code Generator</h1>
+            <h1>Kino Embed Code Generator</h1>
         </div>
 
         <div class="grid">
@@ -454,24 +454,24 @@
 
             <h2 style="margin-top: 1.5rem;">Example: Control from Parent</h2>
             <pre class="code-output" style="max-height: none;">// Get reference to iframe
-const iframe = document.getElementById('psm-player');
+const iframe = document.getElementById('kino');
 
 // Send command to player
 iframe.contentWindow.postMessage({
-    target: 'psm-player',
+    target: 'kino',
     action: 'play'
 }, '*');
 
 // Seek to 30 seconds
 iframe.contentWindow.postMessage({
-    target: 'psm-player',
+    target: 'kino',
     action: 'seek',
     time: 30
 }, '*');
 
 // Listen for events from player
 window.addEventListener('message', (e) => {
-    if (e.data.source === 'psm-player') {
+    if (e.data.source === 'kino') {
         console.log('Event:', e.data.type, e.data);
     }
 });</pre>
@@ -527,7 +527,7 @@ window.addEventListener('message', (e) => {
 
             if (currentTab === 'iframe') {
                 return `<iframe
-  id="psm-player"
+  id="kino"
   src="${url}"
   width="${width}"
   height="${height}"
@@ -536,24 +536,24 @@ window.addEventListener('message', (e) => {
   allowfullscreen
 ></iframe>`;
             } else {
-                return `<!-- PSM Player Embed -->
-<div id="psm-player-container"></div>
+                return `<!-- Kino Embed -->
+<div id="kino-container"></div>
 <script>
 (function() {
     var iframe = document.createElement('iframe');
-    iframe.id = 'psm-player';
+    iframe.id = 'kino';
     iframe.src = '${url}';
     iframe.width = '${width}';
     iframe.height = '${height}';
     iframe.frameBorder = '0';
     iframe.allow = 'autoplay; fullscreen; picture-in-picture';
     iframe.allowFullscreen = true;
-    document.getElementById('psm-player-container').appendChild(iframe);
+    document.getElementById('kino-container').appendChild(iframe);
 
     // Optional: Listen for player events
     window.addEventListener('message', function(e) {
-        if (e.data.source === 'psm-player') {
-            console.log('PSM Player:', e.data.type, e.data);
+        if (e.data.source === 'kino') {
+            console.log('Kino:', e.data.type, e.data);
         }
     });
 })();

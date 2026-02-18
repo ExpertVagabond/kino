@@ -1,5 +1,5 @@
 /**
- * PSM Player Frequency Analysis Demo
+ * Kino Frequency Analysis Demo
  *
  * This example demonstrates how to use the frequency analysis
  * hooks and visualizer components in a React application.

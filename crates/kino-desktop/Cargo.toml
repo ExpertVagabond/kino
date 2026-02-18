@@ -1,0 +1,25 @@
+[package]
+name = "kino-desktop"
+description = "Native desktop video player using GStreamer for Kino"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+kino-core = { workspace = true }
+tokio = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+# GStreamer bindings
+gstreamer = "0.23"
+gstreamer-app = "0.23"
+gstreamer-video = "0.23"
+gstreamer-audio = "0.23"
+gstreamer-player = "0.23"
+
+# GUI
+winit = "0.30"
+raw-window-handle = "0.6"

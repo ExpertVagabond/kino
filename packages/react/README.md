@@ -1,6 +1,6 @@
 # @purplesquirrel/player-react
 
-React component wrapper for PSM Player with HLS streaming support.
+React component wrapper for Kino with HLS streaming support.
 
 ## Installation
 
@@ -15,12 +15,12 @@ pnpm add @purplesquirrel/player-react
 ## Quick Start
 
 ```tsx
-import { PsmPlayer } from '@purplesquirrel/player-react';
+import { KinoPlayer } from '@purplesquirrel/player-react';
 import '@purplesquirrel/player-react/styles.css';
 
 function App() {
   return (
-    <PsmPlayer
+    <KinoPlayer
       src="https://example.com/stream.m3u8"
       autoPlay
       controls
@@ -33,10 +33,10 @@ function App() {
 
 ## Using the Hook
 
-For more control over the player, use the `usePsmPlayer` hook:
+For more control over the player, use the `useKinoPlayer` hook:
 
 ```tsx
-import { PsmPlayer, usePsmPlayer } from '@purplesquirrel/player-react';
+import { KinoPlayer, useKinoPlayer } from '@purplesquirrel/player-react';
 import '@purplesquirrel/player-react/styles.css';
 
 function App() {
@@ -53,11 +53,11 @@ function App() {
     toggleMute,
     setQuality,
     toggleFullscreen,
-  } = usePsmPlayer();
+  } = useKinoPlayer();
 
   return (
     <div>
-      <PsmPlayer
+      <KinoPlayer
         ref={ref}
         src="https://example.com/stream.m3u8"
         controls={false}
@@ -134,7 +134,7 @@ function App() {
 Access these methods via the `ref`:
 
 ```tsx
-const playerRef = useRef<PsmPlayerRef>(null);
+const playerRef = useRef<KinoPlayerRef>(null);
 
 // Later...
 playerRef.current?.play();
@@ -175,8 +175,8 @@ Full TypeScript support with exported types:
 
 ```tsx
 import type {
-  PsmPlayerProps,
-  PsmPlayerRef,
+  KinoPlayerProps,
+  KinoPlayerRef,
   PlayerState,
   QualityLevel,
   SubtitleTrack,

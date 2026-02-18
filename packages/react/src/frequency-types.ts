@@ -1,5 +1,5 @@
 /**
- * TypeScript types for PSM Player Frequency Analysis WASM module
+ * TypeScript types for Kino Frequency Analysis WASM module
  * @module @purplesquirrel/player-frequency
  */
 
@@ -206,9 +206,9 @@ export interface ThumbnailInfo {
 // ============================================================================
 
 /**
- * PsmFrequencyAnalyzer WASM class
+ * KinoFrequencyAnalyzer WASM class
  */
-export interface PsmFrequencyAnalyzer {
+export interface KinoFrequencyAnalyzer {
   /** Analyze audio samples */
   analyze(samples: Float32Array, sampleRate: number): {
     spectral_centroid: number;
@@ -233,9 +233,9 @@ export interface PsmFrequencyAnalyzer {
 }
 
 /**
- * PsmFingerprinter WASM class
+ * KinoFingerprinter WASM class
  */
-export interface PsmFingerprinter {
+export interface KinoFingerprinter {
   /** Generate fingerprint hash from audio samples */
   fingerprint(samples: Float32Array, sampleRate: number): string;
 
@@ -247,9 +247,9 @@ export interface PsmFingerprinter {
 }
 
 /**
- * PsmStreamingAnalyzer WASM class
+ * KinoStreamingAnalyzer WASM class
  */
-export interface PsmStreamingAnalyzer {
+export interface KinoStreamingAnalyzer {
   /** Push samples and get analysis if buffer is full */
   push(samples: Float32Array): {
     dominant_frequency: number;
@@ -266,24 +266,24 @@ export interface PsmStreamingAnalyzer {
 }
 
 /**
- * Constructor for PsmFrequencyAnalyzer
+ * Constructor for KinoFrequencyAnalyzer
  */
-export interface PsmFrequencyAnalyzerConstructor {
-  new(fftSize: number): PsmFrequencyAnalyzer;
+export interface KinoFrequencyAnalyzerConstructor {
+  new(fftSize: number): KinoFrequencyAnalyzer;
 }
 
 /**
- * Constructor for PsmFingerprinter
+ * Constructor for KinoFingerprinter
  */
-export interface PsmFingerprinterConstructor {
-  new(): PsmFingerprinter;
+export interface KinoFingerprinterConstructor {
+  new(): KinoFingerprinter;
 }
 
 /**
- * Constructor for PsmStreamingAnalyzer
+ * Constructor for KinoStreamingAnalyzer
  */
-export interface PsmStreamingAnalyzerConstructor {
-  new(fftSize: number, sampleRate: number): PsmStreamingAnalyzer;
+export interface KinoStreamingAnalyzerConstructor {
+  new(fftSize: number, sampleRate: number): KinoStreamingAnalyzer;
 }
 
 // ============================================================================

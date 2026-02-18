@@ -3400,6 +3400,139 @@ dependencies = [
 ]
 
 [[package]]
+name = "kino-cli"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "clap",
+ "console",
+ "indicatif",
+ "kino-core",
+ "kino-frequency",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tabled",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "url",
+ "uuid",
+]
+
+[[package]]
+name = "kino-core"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "base64 0.22.1",
+ "bytes",
+ "chrono",
+ "m3u8-rs",
+ "nom 8.0.0",
+ "reqwest",
+ "ring",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.17",
+ "tokio",
+ "tokio-test",
+ "tracing",
+ "url",
+ "uuid",
+]
+
+[[package]]
+name = "kino-desktop"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "gstreamer",
+ "gstreamer-app",
+ "gstreamer-audio",
+ "gstreamer-player",
+ "gstreamer-video",
+ "kino-core",
+ "raw-window-handle",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "winit",
+]
+
+[[package]]
+name = "kino-frequency"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+ "anyhow",
+ "async-trait",
+ "base64 0.22.1",
+ "criterion",
+ "hound",
+ "image",
+ "kino-core",
+ "ndarray",
+ "num-complex",
+ "ort",
+ "realfft",
+ "ring",
+ "rustfft",
+ "serde",
+ "serde_json",
+ "solana-sdk",
+ "symphonia",
+ "tempfile",
+ "thiserror 2.0.17",
+ "tokio",
+ "tokio-test",
+ "tracing",
+ "tracing-subscriber",
+ "uuid",
+]
+
+[[package]]
+name = "kino-python"
+version = "0.1.0"
+dependencies = [
+ "kino-frequency",
+ "numpy",
+ "pyo3",
+]
+
+[[package]]
+name = "kino-tauri"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "kino-core",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "url",
+]
+
+[[package]]
+name = "kino-wasm"
+version = "0.1.0"
+dependencies = [
+ "console_error_panic_hook",
+ "js-sys",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+]
+
+[[package]]
 name = "kuchikiki"
 version = "0.8.8-speedreader"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5049,139 +5182,6 @@ checksum = "52717f9a02b6965224f95ca2a81e2e0c5c43baacd28ca057577988930b6c3d5b"
 dependencies = [
  "quote",
  "syn 2.0.114",
-]
-
-[[package]]
-name = "psm-player-cli"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "chrono",
- "clap",
- "console",
- "indicatif",
- "psm-player-core",
- "psm-player-frequency",
- "reqwest",
- "serde",
- "serde_json",
- "tabled",
- "tokio",
- "tracing",
- "tracing-subscriber",
- "url",
- "uuid",
-]
-
-[[package]]
-name = "psm-player-core"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "base64 0.22.1",
- "bytes",
- "chrono",
- "m3u8-rs",
- "nom 8.0.0",
- "reqwest",
- "ring",
- "serde",
- "serde_json",
- "thiserror 2.0.17",
- "tokio",
- "tokio-test",
- "tracing",
- "url",
- "uuid",
-]
-
-[[package]]
-name = "psm-player-desktop"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "gstreamer",
- "gstreamer-app",
- "gstreamer-audio",
- "gstreamer-player",
- "gstreamer-video",
- "psm-player-core",
- "raw-window-handle",
- "tokio",
- "tracing",
- "tracing-subscriber",
- "winit",
-]
-
-[[package]]
-name = "psm-player-frequency"
-version = "0.1.0"
-dependencies = [
- "anchor-lang",
- "anyhow",
- "async-trait",
- "base64 0.22.1",
- "criterion",
- "hound",
- "image",
- "ndarray",
- "num-complex",
- "ort",
- "psm-player-core",
- "realfft",
- "ring",
- "rustfft",
- "serde",
- "serde_json",
- "solana-sdk",
- "symphonia",
- "tempfile",
- "thiserror 2.0.17",
- "tokio",
- "tokio-test",
- "tracing",
- "tracing-subscriber",
- "uuid",
-]
-
-[[package]]
-name = "psm-player-python"
-version = "0.1.0"
-dependencies = [
- "numpy",
- "psm-player-frequency",
- "pyo3",
-]
-
-[[package]]
-name = "psm-player-tauri"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "psm-player-core",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tokio",
- "tracing",
- "tracing-subscriber",
- "url",
-]
-
-[[package]]
-name = "psm-player-wasm"
-version = "0.1.0"
-dependencies = [
- "console_error_panic_hook",
- "js-sys",
- "serde",
- "serde-wasm-bindgen",
- "serde_json",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
 ]
 
 [[package]]
