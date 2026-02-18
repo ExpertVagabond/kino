@@ -24,7 +24,6 @@
 
 use crate::error::{Error, Result};
 use crate::types::{TextCue, CueSettings, CueAlignment};
-use std::str::FromStr;
 
 /// WebVTT parser
 pub struct WebVttParser;

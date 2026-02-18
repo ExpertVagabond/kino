@@ -9,11 +9,10 @@
 use std::path::Path;
 use std::process::Command;
 use anyhow::{Result, bail, Context};
-use image::{GrayImage, ImageBuffer, Luma};
+use image::GrayImage;
 use rustfft::{FftPlanner, num_complex::Complex};
 use tracing::{debug, info, warn};
 
-use crate::fft::FrequencyAnalyzer;
 use crate::types::*;
 
 /// Configuration for thumbnail selection.

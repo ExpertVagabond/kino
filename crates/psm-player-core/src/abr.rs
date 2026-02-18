@@ -277,7 +277,7 @@ pub struct BolaAlgorithm {
     /// Minimum buffer (seconds)
     buffer_min: f64,
     /// Maximum buffer (seconds)
-    buffer_max: f64,
+    _buffer_max: f64,
     /// BOLA parameter V
     v: f64,
     /// BOLA parameter gamma
@@ -288,7 +288,7 @@ impl BolaAlgorithm {
     pub fn new() -> Self {
         Self {
             buffer_min: 5.0,
-            buffer_max: 30.0,
+            _buffer_max: 30.0,
             v: 0.93,
             gamma: 5.0,
         }
@@ -363,7 +363,7 @@ pub struct HybridAlgorithm {
     throughput: ThroughputAlgorithm,
     bola: BolaAlgorithm,
     /// Weight for throughput (0.0-1.0)
-    throughput_weight: f64,
+    _throughput_weight: f64,
 }
 
 impl HybridAlgorithm {
@@ -371,7 +371,7 @@ impl HybridAlgorithm {
         Self {
             throughput: ThroughputAlgorithm::new(),
             bola: BolaAlgorithm::new(),
-            throughput_weight: 0.5,
+            _throughput_weight: 0.5,
         }
     }
 }

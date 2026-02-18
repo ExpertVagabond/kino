@@ -9,7 +9,7 @@
 
 use std::collections::HashMap;
 use anyhow::Result;
-use tracing::{debug, info};
+use tracing::info;
 
 use crate::fft::FrequencyAnalyzer;
 use crate::types::*;
@@ -79,7 +79,7 @@ impl RecommendationEngine {
         self.content_index.insert(content_id.to_string(), ContentEntry {
             content_id: content_id.to_string(),
             signature,
-            metadata,
+            _metadata: metadata,
         });
 
         Ok(())
@@ -95,7 +95,7 @@ impl RecommendationEngine {
         self.content_index.insert(content_id.to_string(), ContentEntry {
             content_id: content_id.to_string(),
             signature,
-            metadata,
+            _metadata: metadata,
         });
     }
 
@@ -411,7 +411,7 @@ impl RecommendationEngine {
             self.content_index.insert(id.clone(), ContentEntry {
                 content_id: id,
                 signature,
-                metadata: None,
+                _metadata: None,
             });
         }
     }
@@ -428,7 +428,7 @@ impl Default for RecommendationEngine {
 struct ContentEntry {
     content_id: String,
     signature: FrequencySignature,
-    metadata: Option<ContentMetadata>,
+    _metadata: Option<ContentMetadata>,
 }
 
 /// Optional metadata for content items.

@@ -5,7 +5,7 @@
 //! - Generating HLS/DASH manifests
 //! - Applying PSM-optimized encoding presets
 
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::process::Command;
 use anyhow::{Context, Result, bail};
 use serde::{Deserialize, Serialize};
@@ -232,7 +232,7 @@ pub fn encode_hls(
     output_dir: &Path,
     preset: EncodingPreset,
     segment_duration: f64,
-    progress_callback: Option<Box<dyn Fn(f64)>>,
+    _progress_callback: Option<Box<dyn Fn(f64)>>,
 ) -> Result<()> {
     let input_info = probe_input(input)?;
     let renditions = preset.renditions();

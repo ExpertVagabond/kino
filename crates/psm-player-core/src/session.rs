@@ -11,7 +11,7 @@ use crate::{
     abr::{AbrContext, AbrEngine},
     analytics::{AnalyticsEmitter, AnalyticsEvent},
     buffer::{BufferConfig, BufferManager},
-    error::Error,
+    Error,
     manifest::{create_parser, Manifest},
     types::*,
     Result,
@@ -19,8 +19,8 @@ use crate::{
 use reqwest::Client;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
-use tokio::sync::{mpsc, RwLock, watch};
-use tracing::{debug, error, info, instrument, warn};
+use tokio::sync::{RwLock, watch};
+use tracing::{debug, info, instrument, warn};
 use url::Url;
 
 /// Player session managing a single playback

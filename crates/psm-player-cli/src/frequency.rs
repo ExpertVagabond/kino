@@ -7,10 +7,10 @@
 //! - Recommendation similarity
 
 use std::path::PathBuf;
-use anyhow::{Result, Context};
+use anyhow::Result;
 use psm_player_frequency::{
     AudioAnalyzer,
-    fingerprint::{Fingerprinter, FingerprintDatabase},
+    fingerprint::Fingerprinter,
     tagging::ContentTagger,
     thumbnail::ThumbnailSelector,
     recommend::RecommendationEngine,

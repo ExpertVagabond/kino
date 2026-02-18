@@ -1,12 +1,11 @@
 //! CLI command implementations
 
-use psm_player_core::manifest::{create_parser, Manifest};
-use psm_player_core::types::*;
+use psm_player_core::manifest::create_parser;
 use std::path::PathBuf;
 use url::Url;
 
 /// Analyze a manifest
-pub async fn analyze(manifest_url: &str, format: &str) -> anyhow::Result<()> {
+pub async fn analyze(manifest_url: &str, _format: &str) -> anyhow::Result<()> {
     println!("Analyzing manifest: {}", manifest_url);
 
     let url = Url::parse(manifest_url)?;
@@ -37,7 +36,7 @@ pub async fn validate(
     manifest_url: &str,
     segments: usize,
     all_renditions: bool,
-    format: &str,
+    _format: &str,
 ) -> anyhow::Result<()> {
     println!("Validating stream: {}", manifest_url);
     println!("  Testing {} segments", segments);
@@ -114,7 +113,7 @@ pub async fn qc(
     manifest_url: &str,
     output: Option<PathBuf>,
     strict: bool,
-    format: &str,
+    _format: &str,
 ) -> anyhow::Result<()> {
     println!("Running QC on: {}", manifest_url);
 
@@ -123,7 +122,7 @@ pub async fn qc(
     let manifest = parser.parse(&url).await?;
 
     let mut warnings: Vec<&str> = Vec::new();
-    let mut errors: Vec<&str> = Vec::new();
+    let errors: Vec<&str> = Vec::new();
 
     // Check: Must have at least 2 renditions for ABR
     if manifest.renditions.len() < 2 {
@@ -194,7 +193,7 @@ pub async fn qc(
 }
 
 /// Extract metadata
-pub async fn extract(manifest_url: &str, what: &str, format: &str) -> anyhow::Result<()> {
+pub async fn extract(manifest_url: &str, what: &str, _format: &str) -> anyhow::Result<()> {
     let url = Url::parse(manifest_url)?;
     let parser = create_parser(&url);
     let manifest = parser.parse(&url).await?;
@@ -232,7 +231,7 @@ pub async fn extract(manifest_url: &str, what: &str, format: &str) -> anyhow::Re
 }
 
 /// Compare two streams
-pub async fn compare(manifest1: &str, manifest2: &str, format: &str) -> anyhow::Result<()> {
+pub async fn compare(manifest1: &str, manifest2: &str, _format: &str) -> anyhow::Result<()> {
     println!("Comparing streams:");
     println!("  1: {}", manifest1);
     println!("  2: {}", manifest2);
@@ -264,7 +263,7 @@ pub async fn monitor(
     manifest_url: &str,
     interval: u64,
     duration: u64,
-    format: &str,
+    _format: &str,
 ) -> anyhow::Result<()> {
     println!("Monitoring: {}", manifest_url);
     println!("  Interval: {}s", interval);

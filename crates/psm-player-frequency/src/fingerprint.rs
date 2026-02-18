@@ -18,7 +18,7 @@
 //! verification, ensuring creator ownership without centralized control.
 
 use std::collections::HashMap;
-use anyhow::{Result, bail};
+use anyhow::Result;
 use ring::digest::{Context, SHA256};
 use tracing::{debug, info};
 
@@ -227,13 +227,13 @@ impl Fingerprinter {
         }
 
         // Count matches
-        let mut match_count = 0;
+        let mut _match_count = 0;
         let mut time_offsets: HashMap<i64, u32> = HashMap::new();
 
         for pair in &pairs2 {
             let key = (pair.anchor_freq, pair.target_freq, pair.time_delta);
             if let Some(fp1_times) = fp1_hashes.get(&key) {
-                match_count += 1;
+                _match_count += 1;
                 for &t1 in fp1_times {
                     let offset = pair.anchor_time as i64 - t1 as i64;
                     *time_offsets.entry(offset).or_default() += 1;

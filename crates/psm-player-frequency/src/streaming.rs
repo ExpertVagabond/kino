@@ -34,7 +34,7 @@
 
 use std::collections::VecDeque;
 use std::sync::{Arc, Mutex};
-use tracing::{debug, trace};
+use tracing::trace;
 
 use crate::fft::FrequencyAnalyzer;
 use crate::types::*;
@@ -44,32 +44,44 @@ use crate::types::*;
 pub enum AnalysisEvent {
     /// Dominant frequency changed significantly
     DominantChange {
+        /// Previous dominant frequency in Hz
         old: f32,
+        /// New dominant frequency in Hz
         new: f32,
+        /// Time of the change in seconds
         timestamp: f64,
     },
     /// Beat/onset detected
     BeatDetected {
+        /// Time of the beat in seconds
         timestamp: f64,
+        /// Beat intensity relative to average energy
         strength: f32,
     },
     /// Spectral shift detected (e.g., song section change)
     SpectralShift {
+        /// Time of the shift in seconds
         timestamp: f64,
+        /// Magnitude of the spectral change
         magnitude: f32,
     },
     /// Silence detected
     SilenceStart {
+        /// Time silence began in seconds
         timestamp: f64,
     },
     /// Silence ended
     SilenceEnd {
+        /// Time silence ended in seconds
         timestamp: f64,
+        /// Duration of the silent period in seconds
         duration: f64,
     },
     /// New frame analyzed
     FrameAnalyzed {
+        /// Frame timestamp in seconds
         timestamp: f64,
+        /// The analysis data for this frame
         frame: AnalysisFrame,
     },
 }

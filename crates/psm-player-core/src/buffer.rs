@@ -7,14 +7,11 @@
 //! - Memory-efficient storage
 
 use crate::{
-    error::Error,
     types::*,
     Result,
 };
 use bytes::Bytes;
 use std::collections::{BTreeMap, VecDeque};
-use std::sync::Arc;
-use std::time::Duration;
 use tokio::sync::{Mutex, RwLock};
 use tracing::{debug, warn, instrument};
 
@@ -381,6 +378,7 @@ pub struct BufferStats {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::time::Duration;
     use url::Url;
 
     fn create_test_segment(num: u64) -> Segment {

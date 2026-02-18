@@ -1,7 +1,6 @@
 //! PSM Branding - WASM-compatible color palette and theming
 
 use wasm_bindgen::prelude::*;
-use serde::{Serialize, Deserialize};
 
 /// PSM color palette constants
 pub struct Colors;

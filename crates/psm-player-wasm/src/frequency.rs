@@ -346,7 +346,7 @@ impl PsmFingerprinter {
 
     /// Generate a fingerprint hash from audio samples
     #[wasm_bindgen]
-    pub fn fingerprint(&self, samples: &Float32Array, sample_rate: u32) -> String {
+    pub fn fingerprint(&self, samples: &Float32Array, _sample_rate: u32) -> String {
         let samples_vec: Vec<f32> = samples.to_vec();
 
         if samples_vec.len() < self.fft_size {

@@ -275,7 +275,7 @@ impl PsmAnalytics {
         (weighted_sum / total_duration) as u32
     }
 
-    fn calculate_qoe_score(&self, watch_time: f64, avg_bitrate: u32) -> f64 {
+    fn calculate_qoe_score(&self, _watch_time: f64, avg_bitrate: u32) -> f64 {
         let mut score = 100.0;
 
         // Penalize startup time (target < 2s)
