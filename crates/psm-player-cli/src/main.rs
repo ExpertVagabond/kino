@@ -9,13 +9,7 @@
 //! - FFmpeg encoding pipeline
 
 use clap::{Parser, Subcommand};
-use psm_player_core::{
-    manifest::{create_parser, ManifestType},
-    types::*,
-};
 use std::path::PathBuf;
-use tracing::info;
-use url::Url;
 
 mod commands;
 mod encoding;

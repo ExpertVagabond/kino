@@ -14,7 +14,7 @@ use crate::{
 };
 use super::{Manifest, ManifestParser, ManifestType};
 use async_trait::async_trait;
-use m3u8_rs::{self, Playlist, MediaPlaylist, MasterPlaylist};
+use m3u8_rs::{self, MediaPlaylist, MasterPlaylist};
 use reqwest::Client;
 use std::time::Duration;
 use tracing::{debug, instrument};
@@ -224,7 +224,7 @@ impl ManifestParser for HlsParser {
             self.parse_master(&content, url)
         } else {
             // Single rendition (media playlist as entry point)
-            let (segments, is_live, duration) = self.parse_media(&content, url)?;
+            let (_segments, is_live, duration) = self.parse_media(&content, url)?;
 
             // Create synthetic rendition
             let rendition = Rendition {

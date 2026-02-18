@@ -12,8 +12,8 @@
 //! - **Quality**: high-fidelity, compressed, noisy
 
 use std::collections::HashMap;
-use anyhow::{Result, bail};
-use tracing::{debug, info, warn};
+use anyhow::Result;
+use tracing::{debug, info};
 
 use crate::fft::FrequencyAnalyzer;
 use crate::types::*;
@@ -248,7 +248,7 @@ impl ContentTagger {
 
         Ok(AudioFeatures {
             spectral_centroid: analysis.spectral_centroid,
-            spectral_rolloff: analysis.spectral_rolloff,
+            _spectral_rolloff: analysis.spectral_rolloff,
             spectral_flatness: analysis.spectral_flatness,
             zero_crossing_rate: analysis.zero_crossing_rate,
             band_energies: analysis.band_energies,
@@ -486,7 +486,7 @@ impl Default for ContentTagger {
 #[derive(Debug, Clone)]
 struct AudioFeatures {
     spectral_centroid: f32,
-    spectral_rolloff: f32,
+    _spectral_rolloff: f32,
     spectral_flatness: f32,
     zero_crossing_rate: f32,
     band_energies: BandEnergies,

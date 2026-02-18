@@ -3,10 +3,8 @@
 //! This module provides the fundamental frequency analysis operations
 //! used throughout the PSM frequency analysis system.
 
-use std::sync::Arc;
 use anyhow::{Result, bail};
 use rustfft::{FftPlanner, num_complex::Complex};
-use tracing::debug;
 
 use crate::types::*;
 

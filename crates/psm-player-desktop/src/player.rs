@@ -8,7 +8,6 @@
 
 use anyhow::{Context, Result};
 use gstreamer as gst;
-use gstreamer::prelude::*;
 use gstreamer_player as gst_player;
 use psm_player_core::{PlayerConfig, PlayerSession, PlayerState, QualityMetrics, Resolution, PsmColors};
 use std::sync::{Arc, Mutex};

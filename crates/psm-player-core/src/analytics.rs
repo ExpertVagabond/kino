@@ -9,7 +9,6 @@
 use crate::types::*;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
 use tokio::sync::{mpsc, RwLock};
 use tracing::{debug, info};
 use uuid::Uuid;
@@ -258,7 +257,7 @@ pub struct QoeCalculator {
     /// Total rebuffer duration
     rebuffer_duration: f64,
     /// Playback start time
-    start_time: f64,
+    _start_time: f64,
     /// Quality switches
     quality_switches: Vec<(f64, u64)>, // (timestamp, bitrate)
     /// Average bitrate (weighted by time)
@@ -271,7 +270,7 @@ impl QoeCalculator {
             initial_buffer_time: 0.0,
             rebuffer_count: 0,
             rebuffer_duration: 0.0,
-            start_time: 0.0,
+            _start_time: 0.0,
             quality_switches: Vec::new(),
             bitrate_samples: Vec::new(),
         }

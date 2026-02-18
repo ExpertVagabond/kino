@@ -43,7 +43,6 @@
 
 use numpy::{PyArray1, PyReadonlyArray1};
 use pyo3::prelude::*;
-use pyo3::types::PyDict;
 
 // ============================================================================
 // Data Types
@@ -209,7 +208,7 @@ impl FrequencySignature {
 pub struct FrequencyAnalyzer {
     sample_rate: u32,
     fft_size: usize,
-    hop_size: usize,
+    _hop_size: usize,
 }
 
 #[pymethods]
@@ -221,7 +220,7 @@ impl FrequencyAnalyzer {
         Self {
             sample_rate,
             fft_size,
-            hop_size,
+            _hop_size: hop_size,
         }
     }
 

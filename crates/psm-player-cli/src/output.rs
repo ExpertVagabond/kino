@@ -3,6 +3,7 @@
 use serde::Serialize;
 
 /// Output format options
+#[allow(dead_code)]
 pub enum OutputFormat {
     Text,
     Json,
@@ -20,6 +21,7 @@ impl From<&str> for OutputFormat {
 }
 
 /// Format output based on selected format
+#[allow(dead_code)]
 pub fn format_output<T: Serialize>(data: &T, format: &str) -> String {
     match OutputFormat::from(format) {
         OutputFormat::Json => {

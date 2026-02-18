@@ -47,7 +47,7 @@ pub struct Level {
 struct BandwidthSample {
     bytes: usize,
     duration_ms: f64,
-    timestamp: f64,
+    _timestamp: f64,
 }
 
 impl BandwidthSample {
@@ -132,7 +132,7 @@ impl PsmAbrController {
         let sample = BandwidthSample {
             bytes,
             duration_ms,
-            timestamp: js_sys::Date::now(),
+            _timestamp: js_sys::Date::now(),
         };
 
         // Update history

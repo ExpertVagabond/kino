@@ -175,7 +175,7 @@ impl DashParser {
         Ok(base_url.clone())
     }
 
-    /// Generate segment URLs from SegmentTemplate
+    #[allow(dead_code)]
     fn generate_segment_urls(
         &self,
         template: &str,
