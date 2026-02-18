@@ -1,8 +1,8 @@
-export { PsmPlayer } from './PsmPlayer';
-export { usePsmPlayer } from './usePsmPlayer';
+export { KinoPlayer } from './KinoPlayer';
+export { useKinoPlayer } from './useKinoPlayer';
 export type {
-  PsmPlayerProps,
-  PsmPlayerRef,
+  KinoPlayerProps,
+  KinoPlayerRef,
   PlayerState,
   QualityLevel,
   SubtitleTrack,
@@ -38,9 +38,9 @@ export type {
   Recommendation,
   ThumbnailCandidate,
   ThumbnailInfo,
-  PsmFrequencyAnalyzer,
-  PsmFingerprinter,
-  PsmStreamingAnalyzer,
+  KinoFrequencyAnalyzer,
+  KinoFingerprinter,
+  KinoStreamingAnalyzer,
   AnalyzeRequest,
   AnalysisResponse,
   VerifyRequest,

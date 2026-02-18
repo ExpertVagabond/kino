@@ -1,6 +1,6 @@
 version: '3.8'
 
-# PSM Player - Docker Compose Configuration
+# Kino - Docker Compose Configuration
 #
 # Usage:
 #   docker-compose up        # Start all services
@@ -64,4 +64,4 @@ services:
 
 networks:
   default:
-    name: psm-player-network
+    name: kino-network

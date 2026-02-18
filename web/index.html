@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PSM Player</title>
+    <title>Kino</title>
     <style id="psm-theme"></style>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -29,7 +29,7 @@
         .logo {
             width: 48px;
             height: 48px;
-            background: linear-gradient(135deg, var(--psm-primary, #9b30ff), var(--psm-primary-dark, #7a1fe8));
+            background: linear-gradient(135deg, var(--kino-primary, #9b30ff), var(--kino-primary-dark, #7a1fe8));
             border-radius: 12px;
             display: flex;
             align-items: center;
@@ -40,13 +40,13 @@
             box-shadow: 0 4px 12px rgba(155, 48, 255, 0.4);
         }
 
-        h1 { color: var(--psm-text, #f6f2ff); font-size: 1.5rem; }
+        h1 { color: var(--kino-text, #f6f2ff); font-size: 1.5rem; }
 
         .version {
             margin-left: auto;
-            color: var(--psm-text-soft, #d4cde9);
+            color: var(--kino-text-soft, #d4cde9);
             font-size: 0.875rem;
-            background: var(--psm-surface, #1a1625);
+            background: var(--kino-surface, #1a1625);
             padding: 0.25rem 0.75rem;
             border-radius: 20px;
         }
@@ -57,16 +57,16 @@
             justify-content: center;
             width: 40px;
             height: 40px;
-            background: var(--psm-surface, #1a1625);
+            background: var(--kino-surface, #1a1625);
             border-radius: 10px;
-            color: var(--psm-text-soft, #d4cde9);
+            color: var(--kino-text-soft, #d4cde9);
             text-decoration: none;
             transition: all 0.2s;
         }
 
         .analytics-link:hover {
             background: rgba(155, 48, 255, 0.2);
-            color: var(--psm-primary, #9b30ff);
+            color: var(--kino-primary, #9b30ff);
         }
 
         .main-grid {
@@ -80,7 +80,7 @@
         }
 
         .player-wrapper {
-            background: var(--psm-surface, #1a1625);
+            background: var(--kino-surface, #1a1625);
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
@@ -145,7 +145,7 @@
 
         .progress-fill {
             height: 100%;
-            background: var(--psm-primary, #9b30ff);
+            background: var(--kino-primary, #9b30ff);
             width: 0%;
             position: relative;
         }
@@ -200,12 +200,12 @@
         .play-btn {
             width: 44px;
             height: 44px;
-            background: var(--psm-primary, #9b30ff);
+            background: var(--kino-primary, #9b30ff);
             border-radius: 50%;
         }
 
         .play-btn:hover {
-            background: var(--psm-primary-dark, #7a1fe8);
+            background: var(--kino-primary-dark, #7a1fe8);
             transform: scale(1.05);
         }
 
@@ -299,7 +299,7 @@
 
         .captions-menu-header {
             padding: 0.5rem 1rem;
-            color: var(--psm-text-soft, #d4cde9);
+            color: var(--kino-text-soft, #d4cde9);
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -311,7 +311,7 @@
             align-items: center;
             gap: 0.5rem;
             padding: 0.5rem 1rem;
-            color: var(--psm-text, #f6f2ff);
+            color: var(--kino-text, #f6f2ff);
             font-size: 0.875rem;
             cursor: pointer;
             transition: background 0.15s;
@@ -322,7 +322,7 @@
         }
 
         .captions-menu-item.active {
-            color: var(--psm-primary, #9b30ff);
+            color: var(--kino-primary, #9b30ff);
         }
 
         .captions-menu-item .check {
@@ -336,7 +336,7 @@
         }
 
         .cc-btn.active {
-            color: var(--psm-primary, #9b30ff);
+            color: var(--kino-primary, #9b30ff);
         }
 
         .cc-indicator {
@@ -346,7 +346,7 @@
             transform: translateX(-50%);
             width: 4px;
             height: 4px;
-            background: var(--psm-primary, #9b30ff);
+            background: var(--kino-primary, #9b30ff);
             border-radius: 50%;
             opacity: 0;
         }
@@ -384,7 +384,7 @@
             gap: 0.5rem;
             padding: 0.875rem 1rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--psm-text, #f6f2ff);
+            color: var(--kino-text, #f6f2ff);
             font-weight: 600;
             font-size: 0.9rem;
         }
@@ -397,7 +397,7 @@
         .settings-back {
             background: none;
             border: none;
-            color: var(--psm-text, #f6f2ff);
+            color: var(--kino-text, #f6f2ff);
             cursor: pointer;
             padding: 4px;
             border-radius: 4px;
@@ -428,12 +428,12 @@
         }
 
         .settings-item-label {
-            color: var(--psm-text, #f6f2ff);
+            color: var(--kino-text, #f6f2ff);
             font-size: 0.875rem;
         }
 
         .settings-item-value {
-            color: var(--psm-text-soft, #d4cde9);
+            color: var(--kino-text-soft, #d4cde9);
             font-size: 0.8rem;
             display: flex;
             align-items: center;
@@ -452,7 +452,7 @@
             padding: 0.625rem 1rem;
             cursor: pointer;
             transition: background 0.15s;
-            color: var(--psm-text, #f6f2ff);
+            color: var(--kino-text, #f6f2ff);
         }
 
         .settings-option:hover {
@@ -460,7 +460,7 @@
         }
 
         .settings-option.active {
-            color: var(--psm-primary, #9b30ff);
+            color: var(--kino-primary, #9b30ff);
         }
 
         .settings-option .check {
@@ -491,7 +491,7 @@
         }
 
         .settings-toggle.active {
-            background: var(--psm-primary, #9b30ff);
+            background: var(--kino-primary, #9b30ff);
         }
 
         .settings-toggle::after {
@@ -533,7 +533,7 @@
         }
 
         .chapter-marker:hover {
-            background: var(--psm-primary, #9b30ff);
+            background: var(--kino-primary, #9b30ff);
         }
 
         .chapter-marker::after {
@@ -578,13 +578,13 @@
         }
 
         .chapter-tooltip-title {
-            color: var(--psm-text, #f6f2ff);
+            color: var(--kino-text, #f6f2ff);
             font-size: 13px;
             font-weight: 500;
         }
 
         .chapter-tooltip-time {
-            color: var(--psm-text-soft, #d4cde9);
+            color: var(--kino-text-soft, #d4cde9);
             font-size: 11px;
             margin-top: 2px;
         }
@@ -619,7 +619,7 @@
         .chapter-thumb {
             width: 64px;
             height: 36px;
-            background: var(--psm-background, #0c0a12);
+            background: var(--kino-background, #0c0a12);
             border-radius: 4px;
             display: flex;
             align-items: center;
@@ -635,7 +635,7 @@
         }
 
         .chapter-thumb-placeholder {
-            color: var(--psm-text-soft, #d4cde9);
+            color: var(--kino-text-soft, #d4cde9);
             font-size: 10px;
         }
 
@@ -645,7 +645,7 @@
         }
 
         .chapter-title {
-            color: var(--psm-text, #f6f2ff);
+            color: var(--kino-text, #f6f2ff);
             font-size: 0.875rem;
             white-space: nowrap;
             overflow: hidden;
@@ -653,17 +653,17 @@
         }
 
         .chapter-time {
-            color: var(--psm-text-soft, #d4cde9);
+            color: var(--kino-text-soft, #d4cde9);
             font-size: 0.75rem;
             margin-top: 2px;
         }
 
         .chapter-item.active .chapter-title {
-            color: var(--psm-primary, #9b30ff);
+            color: var(--kino-primary, #9b30ff);
         }
 
         .no-chapters {
-            color: var(--psm-text-soft, #d4cde9);
+            color: var(--kino-text-soft, #d4cde9);
             font-size: 0.875rem;
             text-align: center;
             padding: 1rem;
@@ -674,7 +674,7 @@
             position: absolute;
             bottom: 35px;
             transform: translateX(-50%);
-            background: var(--psm-surface, #1a1625);
+            background: var(--kino-surface, #1a1625);
             border-radius: 8px;
             padding: 4px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
@@ -708,14 +708,14 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: var(--psm-text-soft, #d4cde9);
+            color: var(--kino-text-soft, #d4cde9);
             font-size: 12px;
         }
 
         .scrub-preview-time {
             text-align: center;
             padding: 4px 8px;
-            color: var(--psm-text, #f6f2ff);
+            color: var(--kino-text, #f6f2ff);
             font-size: 12px;
             font-variant-numeric: tabular-nums;
             background: rgba(0, 0, 0, 0.5);
@@ -737,7 +737,7 @@
         }
 
         .playlist-title {
-            color: var(--psm-text, #f6f2ff);
+            color: var(--kino-text, #f6f2ff);
             font-size: 1rem;
             display: flex;
             align-items: center;
@@ -745,7 +745,7 @@
         }
 
         .playlist-count {
-            color: var(--psm-text-soft, #d4cde9);
+            color: var(--kino-text-soft, #d4cde9);
             font-size: 0.75rem;
         }
 
@@ -755,22 +755,22 @@
         }
 
         .playlist-btn {
-            background: var(--psm-background, #0c0a12);
+            background: var(--kino-background, #0c0a12);
             border: none;
             border-radius: 6px;
             padding: 0.35rem 0.5rem;
-            color: var(--psm-text-soft, #d4cde9);
+            color: var(--kino-text-soft, #d4cde9);
             cursor: pointer;
             transition: all 0.15s;
         }
 
         .playlist-btn:hover {
             background: rgba(155, 48, 255, 0.2);
-            color: var(--psm-text, #f6f2ff);
+            color: var(--kino-text, #f6f2ff);
         }
 
         .playlist-btn.active {
-            color: var(--psm-primary, #9b30ff);
+            color: var(--kino-primary, #9b30ff);
         }
 
         .playlist-btn svg {
@@ -802,13 +802,13 @@
         }
 
         .playlist-item.playing .playlist-item-index {
-            color: var(--psm-primary, #9b30ff);
+            color: var(--kino-primary, #9b30ff);
         }
 
         .playlist-item-thumb {
             width: 80px;
             height: 45px;
-            background: var(--psm-background, #0c0a12);
+            background: var(--kino-background, #0c0a12);
             border-radius: 4px;
             flex-shrink: 0;
             overflow: hidden;
@@ -850,13 +850,13 @@
         }
 
         .playlist-item-index {
-            color: var(--psm-text-soft, #d4cde9);
+            color: var(--kino-text-soft, #d4cde9);
             font-size: 0.7rem;
             margin-bottom: 2px;
         }
 
         .playlist-item-title {
-            color: var(--psm-text, #f6f2ff);
+            color: var(--kino-text, #f6f2ff);
             font-size: 0.85rem;
             white-space: nowrap;
             overflow: hidden;
@@ -864,17 +864,17 @@
         }
 
         .playlist-item.playing .playlist-item-title {
-            color: var(--psm-primary, #9b30ff);
+            color: var(--kino-primary, #9b30ff);
         }
 
         .playlist-item-duration {
-            color: var(--psm-text-soft, #d4cde9);
+            color: var(--kino-text-soft, #d4cde9);
             font-size: 0.75rem;
             margin-top: 2px;
         }
 
         .no-playlist {
-            color: var(--psm-text-soft, #d4cde9);
+            color: var(--kino-text-soft, #d4cde9);
             font-size: 0.875rem;
             text-align: center;
             padding: 1rem;
@@ -914,22 +914,22 @@
         }
 
         input[type="text"], select {
-            background: var(--psm-background, #0c0a12);
+            background: var(--kino-background, #0c0a12);
             border: 1px solid rgba(155, 48, 255, 0.3);
             border-radius: 8px;
             padding: 0.75rem 1rem;
-            color: var(--psm-text, #f6f2ff);
+            color: var(--kino-text, #f6f2ff);
             font-size: 0.9rem;
             flex: 1;
         }
 
         input:focus, select:focus {
             outline: none;
-            border-color: var(--psm-primary, #9b30ff);
+            border-color: var(--kino-primary, #9b30ff);
         }
 
         button.load-btn {
-            background: var(--psm-primary, #9b30ff);
+            background: var(--kino-primary, #9b30ff);
             color: white;
             border: none;
             border-radius: 8px;
@@ -940,7 +940,7 @@
         }
 
         button.load-btn:hover {
-            background: var(--psm-primary-dark, #7a1fe8);
+            background: var(--kino-primary-dark, #7a1fe8);
         }
 
         /* Sidebar */
@@ -951,13 +951,13 @@
         }
 
         .panel {
-            background: var(--psm-surface, #1a1625);
+            background: var(--kino-surface, #1a1625);
             border-radius: 12px;
             padding: 1rem;
         }
 
         .panel h2 {
-            color: var(--psm-text, #f6f2ff);
+            color: var(--kino-text, #f6f2ff);
             font-size: 1rem;
             margin-bottom: 0.75rem;
             display: flex;
@@ -972,20 +972,20 @@
         }
 
         .stat-card {
-            background: var(--psm-background, #0c0a12);
+            background: var(--kino-background, #0c0a12);
             border-radius: 8px;
             padding: 0.75rem;
         }
 
         .stat-label {
-            color: var(--psm-text-soft, #d4cde9);
+            color: var(--kino-text-soft, #d4cde9);
             font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .stat-value {
-            color: var(--psm-text, #f6f2ff);
+            color: var(--kino-text, #f6f2ff);
             font-size: 1.25rem;
             font-weight: 600;
             margin-top: 0.125rem;
@@ -1004,17 +1004,17 @@
         }
 
         .key {
-            background: var(--psm-background, #0c0a12);
+            background: var(--kino-background, #0c0a12);
             padding: 0.25rem 0.5rem;
             border-radius: 4px;
             font-family: monospace;
-            color: var(--psm-primary, #9b30ff);
+            color: var(--kino-primary, #9b30ff);
             text-align: center;
             min-width: 28px;
         }
 
         .key-desc {
-            color: var(--psm-text-soft, #d4cde9);
+            color: var(--kino-text-soft, #d4cde9);
         }
 
         /* Quality list */
@@ -1031,7 +1031,7 @@
             padding: 0.5rem;
             border-radius: 6px;
             cursor: pointer;
-            color: var(--psm-text-soft, #d4cde9);
+            color: var(--kino-text-soft, #d4cde9);
             font-size: 0.875rem;
         }
 
@@ -1041,14 +1041,14 @@
 
         .quality-item.active {
             background: rgba(155, 48, 255, 0.2);
-            color: var(--psm-text, #f6f2ff);
+            color: var(--kino-text, #f6f2ff);
         }
 
         .quality-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: var(--psm-primary, #9b30ff);
+            background: var(--kino-primary, #9b30ff);
             opacity: 0.3;
         }
 
@@ -1064,7 +1064,7 @@
             transform: translate(-50%, -50%);
             width: 80px;
             height: 80px;
-            background: var(--psm-primary, #9b30ff);
+            background: var(--kino-primary, #9b30ff);
             border: none;
             border-radius: 50%;
             cursor: pointer;
@@ -1279,7 +1279,7 @@
         }
 
         .share-modal-content {
-            background: var(--psm-surface, #1a1625);
+            background: var(--kino-surface, #1a1625);
             border-radius: 16px;
             width: 90%;
             max-width: 480px;
@@ -1300,7 +1300,7 @@
         }
 
         .share-modal-header h3 {
-            color: var(--psm-text, #f6f2ff);
+            color: var(--kino-text, #f6f2ff);
             font-size: 1.25rem;
             margin: 0;
         }
@@ -1308,7 +1308,7 @@
         .share-modal-close {
             background: none;
             border: none;
-            color: var(--psm-text-soft, #d4cde9);
+            color: var(--kino-text-soft, #d4cde9);
             font-size: 24px;
             cursor: pointer;
             padding: 0;
@@ -1316,7 +1316,7 @@
         }
 
         .share-modal-close:hover {
-            color: var(--psm-text, #f6f2ff);
+            color: var(--kino-text, #f6f2ff);
         }
 
         .share-modal-body {
@@ -1331,12 +1331,12 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            color: var(--psm-text, #f6f2ff);
+            color: var(--kino-text, #f6f2ff);
             cursor: pointer;
         }
 
         .share-checkbox input {
-            accent-color: var(--psm-primary, #9b30ff);
+            accent-color: var(--kino-primary, #9b30ff);
             width: 18px;
             height: 18px;
         }
@@ -1349,16 +1349,16 @@
 
         .share-url {
             flex: 1;
-            background: var(--psm-background, #0c0a12);
+            background: var(--kino-background, #0c0a12);
             border: 1px solid rgba(155, 48, 255, 0.3);
             border-radius: 8px;
             padding: 0.75rem 1rem;
-            color: var(--psm-text, #f6f2ff);
+            color: var(--kino-text, #f6f2ff);
             font-size: 0.875rem;
         }
 
         .share-copy-btn {
-            background: var(--psm-primary, #9b30ff);
+            background: var(--kino-primary, #9b30ff);
             color: white;
             border: none;
             border-radius: 8px;
@@ -1369,7 +1369,7 @@
         }
 
         .share-copy-btn:hover {
-            background: var(--psm-primary-dark, #7a1fe8);
+            background: var(--kino-primary-dark, #7a1fe8);
         }
 
         .share-copy-btn.copied {
@@ -1381,18 +1381,18 @@
         }
 
         .share-embed-section h4 {
-            color: var(--psm-text-soft, #d4cde9);
+            color: var(--kino-text-soft, #d4cde9);
             font-size: 0.875rem;
             margin-bottom: 0.5rem;
         }
 
         .share-embed {
             width: 100%;
-            background: var(--psm-background, #0c0a12);
+            background: var(--kino-background, #0c0a12);
             border: 1px solid rgba(155, 48, 255, 0.3);
             border-radius: 8px;
             padding: 0.75rem;
-            color: var(--psm-text, #f6f2ff);
+            color: var(--kino-text, #f6f2ff);
             font-family: monospace;
             font-size: 0.75rem;
             resize: none;
@@ -1410,9 +1410,9 @@
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            background: var(--psm-background, #0c0a12);
+            background: var(--kino-background, #0c0a12);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--psm-text, #f6f2ff);
+            color: var(--kino-text, #f6f2ff);
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -1422,7 +1422,7 @@
 
         .share-social-btn:hover {
             background: rgba(155, 48, 255, 0.2);
-            border-color: var(--psm-primary, #9b30ff);
+            border-color: var(--kino-primary, #9b30ff);
         }
 
         .share-social-btn svg {
@@ -1455,7 +1455,7 @@
     <div class="container">
         <div class="header">
             <div class="logo">PS</div>
-            <h1>PSM Player</h1>
+            <h1>Kino</h1>
             <span class="version" id="version">Loading...</span>
             <a href="analytics.html" target="_blank" class="analytics-link" title="Open Analytics Dashboard">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
@@ -1805,12 +1805,12 @@
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script type="module">
         import init, {
-            PsmBranding,
-            PsmAnalytics,
-            PsmBufferController,
-            PsmAbrController,
+            KinoBranding,
+            KinoAnalytics,
+            KinoBufferController,
+            KinoAbrController,
             version
-        } from '../crates/psm-player-wasm/pkg/psm_player_wasm.js';
+        } from '../crates/kino-wasm/pkg/kino_wasm.js';
 
         let hls = null;
         let analytics = null;
@@ -1851,13 +1851,13 @@
             await init();
 
             // Apply branding
-            document.getElementById('psm-theme').textContent = PsmBranding.get_css_variables();
+            document.getElementById('psm-theme').textContent = KinoBranding.get_css_variables();
             document.getElementById('version').textContent = `v${version()}`;
 
-            analytics = new PsmAnalytics();
-            bufferController = new PsmBufferController();
+            analytics = new KinoAnalytics();
+            bufferController = new KinoBufferController();
 
-            console.log('PSM Player v' + version() + ' ready');
+            console.log('Kino v' + version() + ' ready');
             setupEventListeners();
             setInterval(updateStats, 500);
         }
@@ -1959,7 +1959,7 @@
             if (hls) hls.destroy();
             analytics.reset();
             bufferController.reset();
-            abrController = PsmAbrController.with_algorithm('bola');
+            abrController = KinoAbrController.with_algorithm('bola');
 
             if (Hls.isSupported()) {
                 hls = new Hls({ startLevel: -1 });
@@ -3396,7 +3396,7 @@
             btn.addEventListener('click', () => {
                 const platform = btn.dataset.platform;
                 const url = encodeURIComponent(getShareUrl());
-                const title = encodeURIComponent('Check out this video on PSM Player');
+                const title = encodeURIComponent('Check out this video on Kino');
 
                 let shareLink = '';
                 switch (platform) {

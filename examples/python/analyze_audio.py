@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-PSM Player Frequency Analysis Example
+Kino Frequency Analysis Example
 
-This script demonstrates how to use the psm-player-python bindings
+This script demonstrates how to use the kino-python bindings
 to analyze audio files and extract frequency features.
 
 Requirements:
-    pip install psm-player numpy matplotlib
+    pip install kino numpy matplotlib
 
 Usage:
     python analyze_audio.py input.wav
@@ -21,11 +21,11 @@ import struct
 from pathlib import Path
 
 try:
-    import psm_player
+    import kino
     HAS_PSM = True
 except ImportError:
     HAS_PSM = False
-    print("Warning: psm_player not installed. Using fallback implementation.")
+    print("Warning: kino not installed. Using fallback implementation.")
 
 try:
     import numpy as np
@@ -70,11 +70,11 @@ def load_wav(filepath: str) -> tuple[list[float], int]:
 
 
 def analyze_with_psm(samples: list[float], sample_rate: int) -> dict:
-    """Analyze audio using PSM Player library."""
+    """Analyze audio using Kino library."""
     if not HAS_PSM:
-        raise RuntimeError("psm_player is not installed")
+        raise RuntimeError("kino is not installed")
 
-    analyzer = psm_player.FrequencyAnalyzer(
+    analyzer = kino.FrequencyAnalyzer(
         fft_size=4096,
         hop_size=2048,
         sample_rate=sample_rate
@@ -222,7 +222,7 @@ def plot_analysis(samples: list[float], result: dict, sample_rate: int):
         return
 
     fig, axes = plt.subplots(2, 2, figsize=(12, 8))
-    fig.suptitle('PSM Player Frequency Analysis', fontsize=14, fontweight='bold')
+    fig.suptitle('Kino Frequency Analysis', fontsize=14, fontweight='bold')
 
     # Waveform
     ax = axes[0, 0]
@@ -276,7 +276,7 @@ def plot_analysis(samples: list[float], result: dict, sample_rate: int):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Analyze audio files using PSM Player frequency analysis'
+        description='Analyze audio files using Kino frequency analysis'
     )
     parser.add_argument('input', help='Input audio file (WAV format)')
     parser.add_argument('--plot', action='store_true', help='Show visualization plots')

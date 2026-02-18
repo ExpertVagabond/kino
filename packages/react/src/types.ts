@@ -65,7 +65,7 @@ export interface PlayerEvents {
   onSubtitleChange?: (track: SubtitleTrack | null) => void;
 }
 
-export interface PsmPlayerProps extends PlayerEvents {
+export interface KinoPlayerProps extends PlayerEvents {
   src: string;
   autoPlay?: boolean;
   muted?: boolean;
@@ -85,7 +85,7 @@ export interface PsmPlayerProps extends PlayerEvents {
   abrAlgorithm?: 'throughput' | 'bola' | 'hybrid';
 }
 
-export interface PsmPlayerRef {
+export interface KinoPlayerRef {
   play: () => Promise<void>;
   pause: () => void;
   seek: (time: number) => void;

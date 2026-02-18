@@ -1,7 +1,7 @@
 {
   "name": "@purplesquirrel/player-analytics-server",
   "version": "0.1.0",
-  "description": "Analytics API server for PSM Player",
+  "description": "Analytics API server for Kino",
   "type": "module",
   "main": "src/index.js",
   "scripts": {

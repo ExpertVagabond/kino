@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PSM Player Widget</title>
+    <title>Kino Widget</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --psm-primary: #9b30ff;
-            --psm-primary-dark: #7a1fe8;
-            --psm-surface: #1a1625;
-            --psm-background: #0c0a12;
+            --kino-primary: #9b30ff;
+            --kino-primary-dark: #7a1fe8;
+            --kino-surface: #1a1625;
+            --kino-background: #0c0a12;
         }
 
         html, body {
@@ -109,7 +109,7 @@
             position: absolute;
             left: 0;
             height: 3px;
-            background: var(--psm-primary);
+            background: var(--kino-primary);
             border-radius: 2px;
             pointer-events: none;
         }
@@ -167,12 +167,12 @@
         .psm-play-btn {
             width: 36px;
             height: 36px;
-            background: var(--psm-primary);
+            background: var(--kino-primary);
             border-radius: 50%;
         }
 
         .psm-play-btn:hover {
-            background: var(--psm-primary-dark);
+            background: var(--kino-primary-dark);
         }
 
         .psm-time {
@@ -215,7 +215,7 @@
             transform: translate(-50%, -50%);
             width: 64px;
             height: 64px;
-            background: var(--psm-primary);
+            background: var(--kino-primary);
             border: none;
             border-radius: 50%;
             cursor: pointer;
@@ -251,7 +251,7 @@
             width: 48px;
             height: 48px;
             border: 3px solid rgba(255, 255, 255, 0.2);
-            border-top-color: var(--psm-primary);
+            border-top-color: var(--kino-primary);
             border-radius: 50%;
             opacity: 0;
             z-index: 15;
@@ -289,7 +289,7 @@
         .psm-logo-icon {
             width: 28px;
             height: 28px;
-            background: linear-gradient(135deg, var(--psm-primary), var(--psm-primary-dark));
+            background: linear-gradient(135deg, var(--kino-primary), var(--kino-primary-dark));
             border-radius: 6px;
             display: flex;
             align-items: center;
@@ -397,7 +397,7 @@
 
         // Apply custom color
         if (config.color !== '#9b30ff') {
-            document.documentElement.style.setProperty('--psm-primary', config.color);
+            document.documentElement.style.setProperty('--kino-primary', config.color);
             // Darken for hover state
             const darken = (hex, percent) => {
                 const num = parseInt(hex.replace('#', ''), 16);
@@ -407,7 +407,7 @@
                 const B = Math.max(0, (num & 0x0000FF) - amt);
                 return '#' + (1 << 24 | R << 16 | G << 8 | B).toString(16).slice(1);
             };
-            document.documentElement.style.setProperty('--psm-primary-dark', darken(config.color, 15));
+            document.documentElement.style.setProperty('--kino-primary-dark', darken(config.color, 15));
         }
 
         const widget = document.getElementById('widget');
@@ -559,13 +559,13 @@
         // PostMessage API for external control
         function postMessage(type, data = {}) {
             if (window.parent !== window) {
-                window.parent.postMessage({ source: 'psm-player', type, ...data }, '*');
+                window.parent.postMessage({ source: 'kino', type, ...data }, '*');
             }
         }
 
         // Listen for messages from parent
         window.addEventListener('message', (e) => {
-            if (!e.data || e.data.target !== 'psm-player') return;
+            if (!e.data || e.data.target !== 'kino') return;
 
             switch (e.data.action) {
                 case 'play':

@@ -30,7 +30,7 @@ jobs:
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
-          name: PSM Player v${{ steps.get_version.outputs.version }}
+          name: Kino v${{ steps.get_version.outputs.version }}
           draft: true
           prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
           generate_release_notes: true
@@ -55,11 +55,11 @@ jobs:
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
       - name: Build WASM
-        working-directory: crates/psm-player-wasm
+        working-directory: crates/kino-wasm
         run: wasm-pack build --target web --release
 
       - name: Update version in package.json
-        working-directory: crates/psm-player-wasm/pkg
+        working-directory: crates/kino-wasm/pkg
         run: |
           npm version ${{ needs.create-release.outputs.version }} --no-git-tag-version
 
@@ -70,20 +70,20 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Publish to npm
-        working-directory: crates/psm-player-wasm/pkg
+        working-directory: crates/kino-wasm/pkg
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create tarball
         run: |
-          cd crates/psm-player-wasm
-          tar -czvf psm-player-wasm-${{ needs.create-release.outputs.version }}.tar.gz pkg/
+          cd crates/kino-wasm
+          tar -czvf kino-wasm-${{ needs.create-release.outputs.version }}.tar.gz pkg/
 
       - name: Upload to release
         uses: softprops/action-gh-release@v1
         with:
-          files: crates/psm-player-wasm/psm-player-wasm-${{ needs.create-release.outputs.version }}.tar.gz
+          files: crates/kino-wasm/kino-wasm-${{ needs.create-release.outputs.version }}.tar.gz
 
   # ============================================================================
   # Build Desktop Apps
@@ -98,16 +98,16 @@ jobs:
         include:
           - platform: linux
             os: ubuntu-latest
-            artifact: psm-player_${{ needs.create-release.outputs.version }}_amd64.deb
+            artifact: kino_${{ needs.create-release.outputs.version }}_amd64.deb
           - platform: macos-intel
             os: macos-13
-            artifact: PSM Player.app
+            artifact: Kino.app
           - platform: macos-arm
             os: macos-latest
-            artifact: PSM Player.app
+            artifact: Kino.app
           - platform: windows
             os: windows-latest
-            artifact: PSM Player.msi
+            artifact: Kino.msi
 
     steps:
       - uses: actions/checkout@v4
@@ -125,7 +125,7 @@ jobs:
         run: cargo install tauri-cli
 
       - name: Build Tauri
-        working-directory: crates/psm-player-tauri
+        working-directory: crates/kino-tauri
         run: cargo tauri build
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
@@ -186,7 +186,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            purplesquirrel/psm-player
+            purplesquirrel/kino
             ghcr.io/${{ github.repository }}
           tags: |
             type=semver,pattern={{version}}
@@ -228,7 +228,7 @@ jobs:
         run: pip install maturin twine
 
       - name: Build wheels
-        working-directory: crates/psm-player-python
+        working-directory: crates/kino-python
         run: maturin build --release
 
       - name: Publish to PyPI
@@ -256,13 +256,13 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-action@stable
 
-      - name: Publish psm-player-frequency
-        working-directory: crates/psm-player-frequency
+      - name: Publish kino-frequency
+        working-directory: crates/kino-frequency
         run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
         continue-on-error: true
 
-      - name: Publish psm-player-core
-        working-directory: crates/psm-player-core
+      - name: Publish kino-core
+        working-directory: crates/kino-core
         run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
         continue-on-error: true
 

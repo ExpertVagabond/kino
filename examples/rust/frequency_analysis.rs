@@ -1,6 +1,6 @@
-//! PSM Player Frequency Analysis Example
+//! Kino Frequency Analysis Example
 //!
-//! This example demonstrates how to use the psm-player-frequency crate
+//! This example demonstrates how to use the kino-frequency crate
 //! to analyze audio files.
 //!
 //! # Usage
@@ -17,7 +17,7 @@ use std::io::Read;
 use std::path::Path;
 
 // Simplified types for the example
-// In production, use the actual psm-player-frequency crate
+// In production, use the actual kino-frequency crate
 
 /// Band energy distribution
 #[derive(Debug, Clone)]

@@ -1,13 +1,13 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/psm-player-core",
-    "crates/psm-player-desktop",
-    "crates/psm-player-wasm",
-    "crates/psm-player-tauri",
-    "crates/psm-player-cli",
-    "crates/psm-player-frequency",
-    "crates/psm-player-python",
+    "crates/kino-core",
+    "crates/kino-desktop",
+    "crates/kino-wasm",
+    "crates/kino-tauri",
+    "crates/kino-cli",
+    "crates/kino-frequency",
+    "crates/kino-python",
 ]
 
 [workspace.package]
@@ -15,7 +15,7 @@ version = "0.1.0"
 edition = "2021"
 authors = ["Purple Squirrel Media <dev@purplesquirrel.media>"]
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/purplesquirrel-media/psm-player"
+repository = "https://github.com/purplesquirrel-media/kino"
 
 [workspace.dependencies]
 # Core dependencies
@@ -50,8 +50,8 @@ ring = "0.17"
 base64 = "0.22"
 
 # Internal crates
-psm-player-core = { path = "crates/psm-player-core" }
-psm-player-frequency = { path = "crates/psm-player-frequency" }
+kino-core = { path = "crates/kino-core" }
+kino-frequency = { path = "crates/kino-frequency" }
 
 # FFT and signal processing
 rustfft = "6.2"
