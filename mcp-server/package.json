@@ -1,0 +1,14 @@
+{
+  "name": "kino-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for AI-agent video analysis — HLS/DASH streaming, audio fingerprinting, quality monitoring",
+  "main": "index.js",
+  "type": "module",
+  "bin": { "kino-mcp": "index.js" },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.8.0",
+    "zod": "^3.22.0"
+  },
+  "keywords": ["mcp", "video", "hls", "audio-fingerprinting", "ai-agent"],
+  "license": "MIT"
+}
