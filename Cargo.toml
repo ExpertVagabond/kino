@@ -22,7 +22,9 @@ version = "0.1.0"
 edition = "2021"
 authors = ["Purple Squirrel Media <dev@purplesquirrel.media>"]
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/purplesquirrel-media/kino"
+repository = "https://github.com/ExpertVagabond/kino"
+homepage = "https://kino-player.pages.dev"
+documentation = "https://docs.rs/kino-core"
 
 [workspace.dependencies]
 # Core dependencies
