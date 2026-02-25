@@ -9,6 +9,13 @@ members = [
     "crates/kino-frequency",
     "crates/kino-python",
 ]
+default-members = [
+    "crates/kino-core",
+    "crates/kino-desktop",
+    "crates/kino-tauri",
+    "crates/kino-cli",
+    "crates/kino-frequency",
+]
 
 [workspace.package]
 version = "0.1.0"
