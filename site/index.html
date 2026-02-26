@@ -3,1938 +3,1658 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kino — Video Intelligence for AI Agents</title>
-<meta name="description" content="The first formally verified, Rust-native video infrastructure designed for the Model Context Protocol (MCP). Built by Purple Squirrel Media.">
+<title>Kino — The Video Intelligence Engine</title>
+<meta name="description" content="The first formally verified, Rust-native video SDK built for the AI era. MCP-native integration for Claude, GPT, and custom agents. Built by Purple Squirrel Media.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=DM+Serif+Display&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;0,9..40,900;1,9..40,400&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --bg: #1E1E22;
-  --bg-dark: #1A1A1E;
-  --bg-card: #252529;
-  --border: #3A3A40;
-  --border-dim: #2E2E34;
-  --grid: rgba(100, 100, 120, 0.08);
-  --copper: #D4956A;
-  --copper-light: #E8B898;
-  --copper-dim: rgba(212, 149, 106, 0.15);
-  --copper-glow: rgba(212, 149, 106, 0.06);
-  --blue: #5B9BD5;
-  --blue-dim: rgba(91, 155, 213, 0.2);
+  --bg: #F5F3EF;
+  --bg-card: #EDEAE5;
+  --bg-code: #E8E5E0;
+  --border: #C8C4BC;
+  --border-light: #D8D4CC;
+  --border-blue: #B8CBE0;
+  --accent: #D4956A;
+  --accent-dark: #B87A52;
+  --text: #1A1A1A;
+  --text-mid: #4A4A4A;
+  --text-dim: #7A7A7A;
   --green: #5CB85C;
   --red: #D9534F;
-  --text: #E8E8EC;
-  --text-dim: #8A8A96;
-  --text-faint: #55555F;
+  --blue: #5B9BD5;
+  --sans: 'DM Sans', system-ui, sans-serif;
   --mono: 'JetBrains Mono', monospace;
-  --display: 'Inter', sans-serif;
-  --serif: 'DM Serif Display', serif;
 }
 
 html { scroll-behavior: smooth; background: var(--bg); color: var(--text); }
-body { font-family: var(--mono); font-weight: 400; line-height: 1.6; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+body { font-family: var(--sans); font-weight: 400; line-height: 1.6; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 
-::selection { background: var(--copper); color: #111; }
+::selection { background: var(--accent); color: #fff; }
 ::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: var(--bg-dark); }
+::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   BLUEPRINT GRID BACKGROUND
-   ═══════════════════════════════════════════════════════════════════════ */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-image:
-    linear-gradient(var(--grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size: 60px 60px;
-}
+a { color: var(--accent-dark); text-decoration: none; }
+a:hover { text-decoration: underline; }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   SECTION — BLUEPRINT FRAME
-   ═══════════════════════════════════════════════════════════════════════ */
-.bp-section {
-  position: relative;
-  padding: 80px 0;
-  z-index: 1;
-}
+/* ── Section Frame ──────────────────────────────────────────── */
 
-.bp-frame {
+.section {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 80px 40px;
+}
+
+.frame {
+  border: 1px solid var(--border);
   position: relative;
+  padding: 60px;
+  background: rgba(255,255,255,0.3);
 }
 
-.bp-inner {
-  border: 1px solid var(--border-dim);
-  padding: 60px 56px;
-  position: relative;
-  background: rgba(30, 30, 34, 0.85);
-}
-
-/* Column numbers along top */
-.bp-inner::before {
-  content: '1              2              3              4              5              6              7              8';
+.frame::before,
+.frame::after,
+.frame .corner-bl,
+.frame .corner-br {
+  content: '+';
   position: absolute;
-  top: -18px;
-  left: 20px;
-  right: 20px;
   font-family: var(--mono);
-  font-size: 10px;
-  color: var(--text-faint);
-  letter-spacing: 0;
-  white-space: nowrap;
-  overflow: hidden;
+  font-size: 14px;
+  color: var(--border);
+  line-height: 1;
 }
+.frame::before { top: -8px; left: -4px; }
+.frame::after { top: -8px; right: -4px; }
+.frame .corner-bl { bottom: -8px; left: -4px; }
+.frame .corner-br { bottom: -8px; right: -4px; }
 
-/* Row letters along left */
-.bp-inner::after {
-  content: 'A\A\AC\A\AB\A\AA';
-  white-space: pre;
-  position: absolute;
-  top: 30px;
-  left: -14px;
+.section-label {
   font-family: var(--mono);
-  font-size: 10px;
-  color: var(--text-faint);
-  line-height: 3.5;
-}
-
-/* Corner crosshairs */
-.bp-corner {
-  position: absolute;
-  width: 16px;
-  height: 16px;
-}
-.bp-corner::before,
-.bp-corner::after {
-  content: '';
-  position: absolute;
-  background: var(--text-faint);
-}
-.bp-corner::before { width: 16px; height: 1px; top: 7px; left: 0; }
-.bp-corner::after { width: 1px; height: 16px; top: 0; left: 7px; }
-.bp-corner.tl { top: -8px; left: -8px; }
-.bp-corner.tr { top: -8px; right: -8px; }
-.bp-corner.bl { bottom: -8px; left: -8px; }
-.bp-corner.br { bottom: -8px; right: -8px; }
-
-/* Drawing title block (bottom bar) */
-.bp-titleblock {
-  display: flex;
-  border-top: 1px solid var(--border-dim);
-  margin-top: 48px;
-  padding-top: 12px;
-  font-size: 10px;
-  color: var(--text-faint);
-  gap: 0;
-}
-.bp-titleblock div {
-  padding: 0 16px;
-  border-right: 1px solid var(--border-dim);
-  white-space: nowrap;
-}
-.bp-titleblock div:first-child { padding-left: 0; }
-.bp-titleblock div:last-child { border-right: none; }
-
-/* Topographic contour decoration */
-.bp-topo {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  width: 180px;
-  height: 140px;
-  opacity: 0.06;
-  pointer-events: none;
-}
-.bp-topo svg { width: 100%; height: 100%; }
-
-/* ═══════════════════════════════════════════════════════════════════════
-   TYPOGRAPHY
-   ═══════════════════════════════════════════════════════════════════════ */
-.bp-headline {
-  font-family: var(--display);
-  font-weight: 800;
-  font-size: clamp(32px, 5vw, 54px);
-  line-height: 1.1;
-  color: var(--text);
-  letter-spacing: -0.02em;
-  margin-bottom: 24px;
-}
-.bp-headline .copper { color: var(--copper); }
-
-.bp-sub {
-  font-family: var(--mono);
-  font-size: 15px;
-  color: var(--text-dim);
-  line-height: 1.7;
-  max-width: 620px;
-  font-weight: 400;
-}
-.bp-sub .copper { color: var(--copper); }
-.bp-sub .blue { color: var(--blue); }
-
-.bp-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  text-transform: uppercase;
+  font-size: 11px;
   letter-spacing: 0.15em;
-  color: var(--text-faint);
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+h1 {
+  font-family: var(--sans);
+  font-weight: 900;
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+h2 {
+  font-family: var(--sans);
+  font-weight: 800;
+  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: var(--text);
   margin-bottom: 8px;
 }
 
-.section-title {
-  font-family: var(--display);
-  font-weight: 800;
-  font-size: clamp(28px, 4vw, 46px);
-  line-height: 1.15;
-  color: var(--text);
-  text-align: center;
-  margin-bottom: 48px;
-  letter-spacing: -0.02em;
-}
-.section-title .copper { color: var(--copper); }
-
-/* ═══════════════════════════════════════════════════════════════════════
-   NAV
-   ═══════════════════════════════════════════════════════════════════════ */
-nav {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 100;
-  padding: 14px 0;
-  background: rgba(30, 30, 34, 0.85);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.3s;
-}
-nav.scrolled { border-bottom-color: var(--border-dim); }
-.nav-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.nav-logo {
-  font-family: var(--mono);
+h3 {
+  font-family: var(--sans);
   font-weight: 700;
-  font-size: 16px;
+  font-size: 1.2rem;
   color: var(--text);
-  text-decoration: none;
-  letter-spacing: 0.06em;
-}
-.nav-logo .copper { color: var(--copper); }
-.nav-links { display: flex; gap: 28px; list-style: none; align-items: center; }
-.nav-links a {
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--text-dim);
-  text-decoration: none;
-  transition: color 0.2s;
-  letter-spacing: 0.02em;
-}
-.nav-links a:hover { color: var(--copper); }
-.nav-cta {
-  font-size: 11px !important;
-  padding: 6px 14px;
-  border: 1px solid var(--copper);
-  color: var(--copper) !important;
-  transition: all 0.2s !important;
-}
-.nav-cta:hover { background: var(--copper-dim); }
-
-/* ═══════════════════════════════════════════════════════════════════════
-   HERO
-   ═══════════════════════════════════════════════════════════════════════ */
-.hero { padding-top: 140px; }
-.hero .bp-inner { padding: 72px 56px 56px; }
-
-.hero-spec {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--text-faint);
-  position: absolute;
-  top: 16px;
-  left: 20px;
-  line-height: 1.8;
+  margin-bottom: 6px;
 }
 
-.hero-grid {
+.subtitle {
+  font-size: 1.1rem;
+  color: var(--text-mid);
+  line-height: 1.5;
+  max-width: 700px;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 40px 0;
+}
+
+/* ── Grid Layouts ──────────────────────────────────────────── */
+
+.grid-2x2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 60px;
-  align-items: center;
+  gap: 0;
+  border: 1px solid var(--border);
+  margin-top: 40px;
 }
 
-.hero-title {
-  font-family: var(--display);
-  font-weight: 900;
-  font-size: clamp(36px, 5.5vw, 62px);
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  margin-bottom: 24px;
-}
-.hero-title .copper { color: var(--copper); }
-
-.hero-desc {
-  font-family: var(--mono);
-  font-size: 15px;
-  color: var(--text-dim);
-  line-height: 1.8;
-  max-width: 500px;
-}
-.hero-desc .copper { color: var(--copper); }
-.hero-desc .blue { color: var(--blue); }
-
-.hero-badge {
+.grid-2x2 .cell {
+  padding: 40px;
   display: flex;
   gap: 20px;
-  margin-top: 32px;
-  font-size: 11px;
-  color: var(--text-faint);
+  align-items: flex-start;
 }
-.hero-badge div {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.hero-badge .icon { color: var(--copper); font-size: 14px; }
 
-/* Eye illustration */
-.hero-eye {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1;
+.grid-2x2 .cell:nth-child(1) { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.grid-2x2 .cell:nth-child(2) { border-bottom: 1px solid var(--border); }
+.grid-2x2 .cell:nth-child(3) { border-right: 1px solid var(--border); }
+
+.cell-icon {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.eye-ring {
-  position: absolute;
-  border-radius: 50%;
-  border: 1px solid var(--border-dim);
-}
-.eye-ring:nth-child(1) { width: 90%; height: 90%; border-color: var(--border); }
-.eye-ring:nth-child(2) { width: 72%; height: 72%; border-style: dashed; animation: spin 60s linear infinite; }
-.eye-ring:nth-child(3) { width: 54%; height: 54%; border-color: var(--copper); opacity: 0.4; animation: spin 40s linear infinite reverse; }
-.eye-ring:nth-child(4) { width: 36%; height: 36%; border-style: dashed; border-color: var(--blue); opacity: 0.3; animation: spin 30s linear infinite; }
-.eye-core {
-  width: 22%;
-  height: 22%;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, var(--copper-light), var(--copper), #8B5A3A);
-  box-shadow: 0 0 40px rgba(212, 149, 106, 0.3), 0 0 80px rgba(212, 149, 106, 0.1);
-  z-index: 2;
-  position: relative;
-}
-.eye-core::after {
-  content: '';
-  position: absolute;
-  top: 22%;
-  left: 22%;
-  width: 28%;
-  height: 28%;
-  background: rgba(0,0,0,0.6);
-  border-radius: 50%;
+.cell-icon svg {
+  width: 48px;
+  height: 48px;
+  stroke: var(--text-dim);
+  fill: none;
+  stroke-width: 1.5;
 }
 
-/* Data labels orbiting */
-.eye-label {
-  position: absolute;
-  font-family: var(--mono);
-  font-size: 8px;
-  color: var(--text-faint);
-  white-space: nowrap;
-  opacity: 0.5;
-}
-.eye-label:nth-child(6) { top: 8%; left: 20%; }
-.eye-label:nth-child(7) { top: 25%; right: 2%; }
-.eye-label:nth-child(8) { bottom: 30%; left: 0; }
-.eye-label:nth-child(9) { bottom: 8%; right: 15%; }
-.eye-label:nth-child(10) { top: 50%; left: 5%; }
-.eye-label:nth-child(11) { top: 15%; right: 20%; color: var(--blue); opacity: 0.4; }
+.cell-text h3 { margin-bottom: 8px; }
+.cell-text p { color: var(--text-mid); font-size: 0.95rem; line-height: 1.5; }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+/* ── Split Layout ──────────────────────────────────────────── */
 
-/* ═══════════════════════════════════════════════════════════════════════
-   PROBLEM SECTION
-   ═══════════════════════════════════════════════════════════════════════ */
-.problem-compare {
+.split {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 40px;
-  margin-bottom: 48px;
+  gap: 0;
+  margin-top: 40px;
 }
-.problem-side {
-  border: 1px solid var(--border-dim);
+
+.split-left, .split-right {
+  padding: 40px;
+}
+
+.split-left {
+  border-right: 1px solid var(--border);
+}
+
+/* ── Three Column ──────────────────────────────────────────── */
+
+.cols-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 24px;
+  margin-top: 40px;
+}
+
+.card {
+  border: 1px solid var(--border);
   padding: 32px;
+  background: rgba(255,255,255,0.3);
   position: relative;
 }
-.problem-side h3 {
-  font-family: var(--display);
-  font-weight: 700;
-  font-size: 20px;
-  margin-bottom: 20px;
-  color: var(--text);
-}
-.problem-side.good h3 { color: var(--copper-light); }
-.problem-side.bad h3 { color: var(--red); }
 
-.problem-metric {
-  font-size: 12px;
-  color: var(--text-dim);
-  margin-bottom: 8px;
+.card-header {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
 }
-.problem-metric .val { color: var(--copper); }
-.problem-metric.bad-val .val { color: var(--red); }
 
-.problem-cards {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-}
-.problem-card {
-  border: 1px solid var(--border-dim);
-  padding: 28px 24px;
-}
-.problem-card .label-row {
+.card-icon {
+  width: 36px;
+  height: 36px;
   display: flex;
-  justify-content: space-between;
-  font-size: 9px;
-  color: var(--text-faint);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 12px;
+  align-items: center;
+  justify-content: center;
 }
-.problem-card h4 {
-  font-family: var(--display);
+
+.card-icon svg {
+  width: 28px;
+  height: 28px;
+  stroke: var(--accent);
+  fill: none;
+  stroke-width: 1.5;
+}
+
+/* ── Comparison Table ──────────────────────────────────────── */
+
+.comp-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 40px;
+  font-size: 0.95rem;
+}
+
+.comp-table th {
+  text-align: left;
+  padding: 16px 20px;
   font-weight: 700;
-  font-size: 22px;
-  margin-bottom: 12px;
+  border-bottom: 2px solid var(--text);
+  font-size: 1rem;
 }
-.problem-card p {
-  font-size: 13px;
-  color: var(--text-dim);
+
+.comp-table td {
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.comp-table td:first-child {
+  font-weight: 600;
+  width: 140px;
+}
+
+.comp-table .check { color: var(--green); font-size: 1.2rem; }
+.comp-table .warn { color: var(--text-dim); }
+
+/* ── Toolset Table ─────────────────────────────────────────── */
+
+.tool-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 32px;
+}
+
+.tool-table tr {
+  border-bottom: 1px solid var(--border);
+}
+
+.tool-table tr:last-child { border-bottom: none; }
+
+.tool-table td {
+  padding: 20px 16px;
+  vertical-align: top;
+}
+
+.tool-table .tool-icon {
+  width: 48px;
+  text-align: center;
+}
+
+.tool-table .tool-icon svg {
+  width: 32px;
+  height: 32px;
+  stroke: var(--accent);
+  fill: none;
+  stroke-width: 1.5;
+}
+
+.tool-table .tool-cat {
+  font-weight: 700;
+  width: 140px;
+  font-size: 1.05rem;
+}
+
+.tool-table .tool-desc {
+  color: var(--text-mid);
   line-height: 1.6;
 }
-.problem-card .copper { color: var(--copper); }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   SOLUTION / FLOW SECTION
-   ═══════════════════════════════════════════════════════════════════════ */
+.tool-table .tool-desc code {
+  font-family: var(--mono);
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+/* ── Code Blocks ───────────────────────────────────────────── */
+
+.code-block {
+  background: var(--bg-code);
+  border: 1px solid var(--border-light);
+  padding: 20px 24px;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  line-height: 1.7;
+  overflow-x: auto;
+  margin-top: 12px;
+  border-radius: 2px;
+}
+
+.code-block .kw { color: #7B3FA0; }
+.code-block .str { color: #2E7D32; }
+.code-block .num { color: #1565C0; }
+.code-block .cm { color: var(--text-dim); }
+
+.code-label {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-top: 28px;
+  margin-bottom: 0;
+}
+
+.code-label:first-child { margin-top: 0; }
+
+/* ── Flow Diagram ──────────────────────────────────────────── */
+
 .flow {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 32px;
-  margin-bottom: 32px;
+  gap: 0;
+  margin: 40px 0;
   flex-wrap: wrap;
 }
-.flow-col {
+
+.flow-node {
+  border: 1px solid var(--border);
+  padding: 20px 24px;
   text-align: center;
+  background: rgba(255,255,255,0.4);
+  min-width: 140px;
 }
-.flow-col h4 {
-  font-family: var(--display);
+
+.flow-node-icon {
+  font-size: 1.8rem;
+  margin-bottom: 6px;
+}
+
+.flow-node-label {
   font-weight: 700;
-  font-size: 18px;
-  margin-bottom: 16px;
-  color: var(--copper-light);
+  font-size: 0.85rem;
 }
-.flow-items {
+
+.flow-arrow {
   display: flex;
   flex-direction: column;
-  gap: 10px;
   align-items: center;
-}
-.flow-item {
-  border: 1px dashed var(--blue);
-  padding: 10px 20px;
-  font-size: 13px;
+  padding: 0 8px;
   color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+}
+
+.flow-arrow::after {
+  content: '→';
+  font-size: 1.4rem;
+  color: var(--accent);
+}
+
+.flow-arrow.blue::after { color: var(--blue); }
+.flow-arrow.gray::after { color: var(--text-dim); }
+
+/* ── Architecture Tree ─────────────────────────────────────── */
+
+.arch-tree {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.arch-top {
+  border: 1px solid var(--border);
+  padding: 20px 40px;
+  display: inline-block;
+  background: rgba(255,255,255,0.3);
+  margin-bottom: 0;
+}
+
+.arch-connector {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  height: 40px;
+  position: relative;
+}
+
+.arch-connector::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+}
+
+.arch-connector::after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: calc(16.67%);
+  right: calc(16.67%);
+  height: 1px;
+  background: var(--border);
+}
+
+.arch-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-top: 0;
+  position: relative;
+}
+
+.arch-row::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: calc(16.67% + 8px);
+  right: calc(16.67% + 8px);
+  height: 1px;
+  background: var(--border);
+}
+
+.arch-node {
+  border: 1px solid var(--border);
+  padding: 16px;
+  text-align: center;
+  background: rgba(255,255,255,0.3);
+  position: relative;
+}
+
+.arch-node::before {
+  content: '';
+  position: absolute;
+  top: -21px;
+  left: 50%;
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+}
+
+.arch-node strong {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.9rem;
+}
+
+.arch-node span {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.arch-note {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  text-align: right;
+  margin-top: -60px;
+  margin-right: -20px;
+  line-height: 1.6;
+}
+
+/* ── Spectrogram ───────────────────────────────────────────── */
+
+.spectrogram-wrap {
+  position: relative;
+  margin: 20px 0 32px;
+  border: 1px solid var(--border-blue);
+  background: linear-gradient(180deg, rgba(91,155,213,0.03) 0%, rgba(91,155,213,0.08) 100%);
+  padding: 20px;
+  height: 200px;
+  overflow: hidden;
+}
+
+.spectrogram-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.spec-label {
+  position: absolute;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  background: rgba(255,255,255,0.9);
+  border: 1px solid var(--accent);
+  padding: 3px 8px;
+  color: var(--text);
+}
+
+.spec-label-a { top: 12px; left: 22%; }
+.spec-label-b { top: 12px; right: 18%; }
+
+.spec-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.spec-dot-a { bottom: 55%; left: 24%; }
+.spec-dot-b { bottom: 40%; right: 20%; }
+
+.spec-line {
+  position: absolute;
+  width: 1px;
+  background: var(--accent);
+}
+
+.spec-line-a { top: 32px; left: calc(24% + 4px); height: calc(45% - 12px); }
+.spec-line-b { top: 32px; right: calc(20% + 4px); height: calc(60% - 32px); }
+
+/* ── Seal Badge ────────────────────────────────────────────── */
+
+.seal {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: #fff;
+  position: relative;
+  box-shadow: inset 0 0 0 8px rgba(255,255,255,0.2), inset 0 0 0 12px rgba(0,0,0,0.1);
+}
+
+.seal-text {
+  font-family: var(--sans);
+  font-weight: 900;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* ── Hub Diagram ───────────────────────────────────────────── */
+
+.hub {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-rows: auto auto;
+  gap: 24px;
+  margin-top: 40px;
+  align-items: center;
+  justify-items: center;
+}
+
+.hub-center {
+  grid-row: 1 / 3;
+  grid-column: 2;
+  width: 120px;
+  height: 120px;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background: rgba(255,255,255,0.4);
+  transform: rotate(45deg);
+}
+
+.hub-center-text {
+  transform: rotate(-45deg);
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  line-height: 1.3;
+}
+
+.hub-node {
+  border: 1px solid var(--border);
+  padding: 20px;
+  background: rgba(255,255,255,0.3);
+  width: 100%;
+  max-width: 280px;
+}
+
+.hub-node h4 {
+  font-weight: 700;
+  margin-bottom: 8px;
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.flow-item .icon { color: var(--blue); font-size: 16px; }
 
-.flow-arrow {
-  font-size: 28px;
-  color: var(--blue);
-  padding: 0 8px;
-}
-
-.flow-box {
-  border: 2px solid var(--copper);
-  background: rgba(212, 149, 106, 0.06);
-  padding: 28px 36px;
-  text-align: center;
-}
-.flow-box h4 {
+.hub-node p {
   font-family: var(--mono);
-  font-weight: 700;
-  font-size: 16px;
-  color: var(--text);
-  margin-bottom: 12px;
-}
-.flow-box ul {
-  list-style: none;
-  font-size: 13px;
-  color: var(--text-dim);
-}
-.flow-box ul li::before { content: '• '; color: var(--copper); }
-.flow-box .sublabel {
-  font-size: 10px;
-  color: var(--text-faint);
-  margin-top: 8px;
-  font-style: italic;
+  font-size: 0.8rem;
+  color: var(--text-mid);
+  line-height: 1.5;
 }
 
-.flow-json {
-  border: 1px solid var(--border);
-  padding: 20px 24px;
-  font-size: 12px;
-  background: var(--bg-dark);
-}
-.flow-json .key { color: var(--copper); }
-.flow-json .str { color: var(--blue); }
-.flow-json .num { color: var(--green); }
+/* ── Tier Cards ────────────────────────────────────────────── */
 
-.flow-caption {
-  text-align: center;
-  font-size: 14px;
-  color: var(--text-dim);
-  margin-top: 24px;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   ARCHITECTURE
-   ═══════════════════════════════════════════════════════════════════════ */
-.arch-grid {
+.tiers {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 40px;
-  align-items: start;
-}
-.crate-map {
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
+  margin-top: 40px;
   position: relative;
-  padding: 40px;
-  border: 1px dashed var(--border-dim);
 }
-.crate-map h4 {
-  text-align: center;
-  font-size: 12px;
-  color: var(--text-faint);
-  margin-bottom: 32px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
+
+.tier {
+  border: 1px solid var(--border);
+  padding: 32px;
+  background: rgba(255,255,255,0.3);
+  position: relative;
 }
-.crate-nodes {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  text-align: center;
+
+.tier + .tier { border-left: none; }
+
+.tier-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
 }
-.crate-node {
-  border: 1px solid var(--border-dim);
-  padding: 16px 8px;
-  font-size: 12px;
+
+.tier-header h3 { margin-bottom: 0; }
+
+.tier-price {
+  font-family: var(--mono);
+  font-size: 0.8rem;
   color: var(--text-dim);
-  transition: all 0.2s;
+  margin-bottom: 16px;
 }
-.crate-node:hover { border-color: var(--copper); color: var(--copper); }
-.crate-node.core {
-  border-color: var(--copper);
-  background: var(--copper-dim);
-  color: var(--copper-light);
-  box-shadow: 0 0 20px rgba(212, 149, 106, 0.1);
-  grid-column: 2;
+
+.tier ul {
+  list-style: none;
+  padding: 0;
 }
-.crate-node .sub {
-  font-size: 9px;
-  color: var(--text-faint);
-  margin-top: 4px;
+
+.tier ul li {
+  font-size: 0.9rem;
+  color: var(--text-mid);
+  padding: 3px 0;
+  line-height: 1.5;
+}
+
+.tier-arrow {
+  position: absolute;
+  right: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  color: var(--text-dim);
+  z-index: 2;
+  background: var(--bg);
+  padding: 2px;
+}
+
+/* ── CTA Section ───────────────────────────────────────────── */
+
+.cta-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 24px;
+  margin-top: 40px;
+}
+
+.cta-card {
+  border: 2px solid var(--text);
+  padding: 28px;
+  text-align: center;
+  position: relative;
+  background: rgba(255,255,255,0.3);
+}
+
+.cta-card::before,
+.cta-card::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--text);
+}
+
+.cta-card::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+.cta-card::after { top: -1px; right: -1px; border-left: none; border-bottom: none; }
+
+.cta-card h3 {
+  font-size: 1.3rem;
+  margin-bottom: 16px;
+}
+
+.cta-card .cta-bar {
+  height: 3px;
+  background: var(--accent);
+  margin: 0 auto 16px;
+  width: 80%;
+}
+
+.cta-card code {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--text-mid);
   display: block;
 }
 
-.specs-panel {
-  border: 1px solid var(--border-dim);
-  padding: 32px;
-}
-.specs-panel h4 {
-  font-family: var(--display);
-  font-weight: 700;
-  font-size: 20px;
-  margin-bottom: 28px;
-  color: var(--copper-light);
-}
-.spec-row {
-  margin-bottom: 20px;
-}
-.spec-row .spec-key {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--copper);
-  margin-bottom: 4px;
-}
-.spec-row .spec-val {
-  font-size: 13px;
-  color: var(--text-dim);
-}
+/* ── Prism Hero Illustration ───────────────────────────────── */
 
-/* ═══════════════════════════════════════════════════════════════════════
-   THREE-COLUMN FEATURES
-   ═══════════════════════════════════════════════════════════════════════ */
-.three-col {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+.hero-illustration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 0;
-}
-.three-item {
-  border: 1px solid var(--border-dim);
-  padding: 40px 32px;
-  text-align: center;
-  margin-left: -1px;
-}
-.three-item:first-child { margin-left: 0; }
-.three-item h4 {
-  font-family: var(--display);
-  font-weight: 700;
-  font-size: 20px;
-  color: var(--copper-light);
-  margin-bottom: 8px;
-}
-.three-item .bracket {
-  font-size: 9px;
-  color: var(--text-faint);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 20px;
-}
-.three-item .icon-box {
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 20px;
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  color: var(--text-dim);
-}
-.three-item p {
-  font-size: 13px;
-  color: var(--text-dim);
-  line-height: 1.7;
-}
-.three-item .copper { color: var(--copper); }
-
-/* ═══════════════════════════════════════════════════════════════════════
-   TLA+ / VERIFICATION
-   ═══════════════════════════════════════════════════════════════════════ */
-.tla-section .bp-inner { position: relative; overflow: hidden; }
-.tla-bg {
-  position: absolute;
-  inset: 0;
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--text-faint);
-  opacity: 0.08;
-  padding: 30px;
-  line-height: 1.8;
-  white-space: pre;
-  overflow: hidden;
-  pointer-events: none;
-}
-.tla-center {
+  margin: 40px 0 48px;
   position: relative;
-  z-index: 2;
-  max-width: 700px;
-  margin: 0 auto;
-  border: 2px solid var(--copper);
-  background: rgba(30, 30, 34, 0.95);
-  padding: 40px 48px;
-  box-shadow: 0 0 40px rgba(212, 149, 106, 0.08), 0 0 80px rgba(212, 149, 106, 0.04);
+  height: 280px;
 }
-.tla-center h3 {
-  font-family: var(--display);
-  font-weight: 800;
-  font-size: 22px;
-  text-align: center;
-  margin-bottom: 24px;
-}
-.tla-item {
-  font-size: 13px;
-  color: var(--text-dim);
-  margin-bottom: 12px;
-  padding-left: 20px;
+
+.prism-container {
   position: relative;
-}
-.tla-item::before {
-  content: '⇒';
-  position: absolute;
-  left: 0;
-  color: var(--copper);
-}
-.tla-item strong { color: var(--copper-light); }
-
-.tla-quote {
-  text-align: center;
-  font-family: var(--serif);
-  font-size: clamp(20px, 3vw, 30px);
-  font-style: italic;
-  color: var(--text);
-  margin-top: 40px;
-  position: relative;
-  z-index: 2;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   WAVEFORM / AUDIO
-   ═══════════════════════════════════════════════════════════════════════ */
-.wave-visual {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  height: 120px;
-  margin-bottom: 40px;
-  overflow: hidden;
-}
-.wave-bar {
-  width: 3px;
-  background: var(--text);
-  border-radius: 2px;
-  opacity: 0.4;
-  transition: opacity 0.3s;
-}
-.wave-visual:hover .wave-bar { opacity: 0.7; }
-.wave-divider {
-  width: 2px;
-  height: 140px;
-  background: linear-gradient(transparent, var(--copper-light), transparent);
-  margin: 0 16px;
-  flex-shrink: 0;
-}
-.wave-label-top {
-  font-size: 10px;
-  color: var(--copper);
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.audio-features {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 32px;
-  text-align: center;
-}
-.audio-feat h4 {
-  font-family: var(--display);
-  font-weight: 700;
-  font-size: 16px;
-  color: var(--copper-light);
-  margin-bottom: 8px;
-}
-.audio-feat p {
-  font-size: 12px;
-  color: var(--text-dim);
-  line-height: 1.6;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   MCP TOOLS
-   ═══════════════════════════════════════════════════════════════════════ */
-.mcp-split {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  border: 1px solid var(--border);
-}
-.mcp-col {
-  padding: 32px;
-}
-.mcp-col:first-child { border-right: 1px solid var(--border); }
-.mcp-col h4 {
-  font-family: var(--mono);
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 20px;
-  text-align: center;
-  color: var(--text);
-}
-.mcp-tool {
-  font-size: 13px;
-  color: var(--copper);
-  margin-bottom: 8px;
-}
-.mcp-tool::before { content: '> '; color: var(--text-faint); }
-.mcp-json {
-  font-size: 12px;
-  line-height: 1.7;
-}
-.mcp-json .key { color: var(--copper); }
-.mcp-json .str { color: var(--blue); }
-.mcp-json .num { color: var(--green); }
-.mcp-json .bracket { color: var(--text-dim); }
-
-.mcp-caption {
-  text-align: center;
-  font-size: 13px;
-  color: var(--text-dim);
-  margin-top: 24px;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   BATTLE TESTED
-   ═══════════════════════════════════════════════════════════════════════ */
-.test-list { max-width: 700px; }
-.test-item {
-  font-size: 14px;
-  color: var(--text-dim);
-  margin-bottom: 16px;
-  display: flex;
-  gap: 12px;
-  align-items: baseline;
-}
-.test-pass {
-  font-weight: 700;
-  color: var(--green);
-  font-size: 12px;
-  flex-shrink: 0;
-}
-.test-item strong { color: var(--copper-light); font-weight: 600; }
-
-.stable-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border: 2px solid var(--copper);
-  padding: 12px 24px;
-  margin-top: 32px;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--copper-light);
-  border-radius: 50px;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   USE CASES 2x2
-   ═══════════════════════════════════════════════════════════════════════ */
-.usecases-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  border: 1px solid var(--border);
-}
-.usecase {
-  padding: 36px 32px;
-  border-bottom: 1px solid var(--border);
-}
-.usecase:nth-child(odd) { border-right: 1px solid var(--border); }
-.usecase:nth-child(n+3) { border-bottom: none; }
-.usecase h4 {
-  font-family: var(--display);
-  font-weight: 700;
-  font-size: 18px;
-  color: var(--copper-light);
-  margin-bottom: 8px;
-}
-.usecase p {
-  font-size: 13px;
-  color: var(--text-dim);
-  line-height: 1.6;
-}
-.usecase .uc-icon {
-  font-size: 20px;
-  color: var(--text-dim);
-  margin-bottom: 12px;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   VENN / MARKET
-   ═══════════════════════════════════════════════════════════════════════ */
-.venn-container {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 48px;
-}
-.venn {
-  position: relative;
-  width: 420px;
-  height: 260px;
-}
-.venn-circle {
-  position: absolute;
-  width: 240px;
+  width: 200px;
   height: 240px;
-  border-radius: 50%;
-  border: 2px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--display);
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--text-dim);
-  text-align: center;
 }
-.venn-circle.left { left: 0; top: 10px; }
-.venn-circle.left span { margin-right: 60px; }
-.venn-circle.right { right: 0; top: 10px; }
-.venn-circle.right span { margin-left: 60px; }
-.venn-overlap {
+
+.prism-svg {
+  width: 200px;
+  height: 240px;
+}
+
+.prism-label {
   position: absolute;
-  top: 50%;
+  font-family: var(--sans);
+  font-weight: 900;
+  font-size: 1.8rem;
+  letter-spacing: 0.05em;
+  top: 55%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 80px;
+}
+
+.input-rays {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 35%;
   height: 120px;
-  background: var(--copper);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--display);
-  font-weight: 700;
-  font-size: 13px;
-  color: #111;
-  text-align: center;
-  z-index: 2;
+  transform: translateY(-50%);
 }
 
-.market-points {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 32px;
-  text-align: center;
-}
-.market-point h4 {
-  font-size: 14px;
-  color: var(--copper-light);
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-.market-point p {
-  font-size: 12px;
-  color: var(--text-dim);
-  line-height: 1.6;
+.output-rays {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 30%;
+  height: 120px;
+  transform: translateY(-50%);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   STRATEGIC FIT
-   ═══════════════════════════════════════════════════════════════════════ */
-.strat-grid {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 32px;
-  align-items: start;
-}
-.strat-card {
-  border: 1px solid var(--border-dim);
-  padding: 28px 24px;
-}
-.strat-card h4 {
-  font-family: var(--mono);
-  font-weight: 700;
-  font-size: 14px;
-  color: var(--text);
-  margin-bottom: 4px;
-}
-.strat-card .strat-sub {
-  font-size: 11px;
-  color: var(--text-faint);
-  margin-bottom: 16px;
-}
-.strat-card p {
-  font-size: 13px;
-  color: var(--text-dim);
-  line-height: 1.6;
-}
-.strat-center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding-top: 20px;
-}
-.strat-center .gear {
-  width: 80px;
-  height: 80px;
-  border: 2px solid var(--border);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 32px;
-  color: var(--text-dim);
-  margin-bottom: 12px;
-}
-.strat-center .label {
-  font-size: 12px;
-  color: var(--copper);
-  font-weight: 600;
+.ai-chip {
+  position: absolute;
+  right: 40px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   TIMELINE
-   ═══════════════════════════════════════════════════════════════════════ */
-.timeline-compare { margin-bottom: 32px; }
-.timeline-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+/* ── Workflow Cards ────────────────────────────────────────── */
+
+.workflow-card {
+  border: 1px solid var(--border-blue);
+  padding: 28px;
+  background: rgba(91,155,213,0.03);
+}
+
+.workflow-card h3 {
   margin-bottom: 20px;
 }
-.timeline-label {
-  width: 140px;
-  flex-shrink: 0;
-  font-size: 12px;
-}
-.timeline-label strong { color: var(--copper-light); }
-.timeline-bar {
-  flex: 1;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  font-size: 11px;
-  padding: 0 16px;
-  position: relative;
-}
-.timeline-bar.long {
-  background: rgba(100, 100, 120, 0.15);
-  border: 1px dashed var(--border);
-  color: var(--text-dim);
-}
-.timeline-bar.short {
-  background: var(--copper-dim);
-  border: 1px solid var(--copper);
-  color: var(--copper-light);
-  width: 25%;
-}
-.timeline-badge {
-  position: absolute;
-  right: -100px;
-  border: 1px solid var(--red);
-  padding: 4px 12px;
-  font-size: 10px;
-  color: var(--red);
-}
-.timeline-badge.good {
-  border-color: var(--green);
-  color: var(--green);
-}
 
-.timeline-offer {
-  text-align: center;
-  font-size: 14px;
-  color: var(--text-dim);
-  max-width: 600px;
-  margin: 0 auto;
-  line-height: 1.7;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   SPECS TABLE
-   ═══════════════════════════════════════════════════════════════════════ */
-.specs-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  border: 1px solid var(--border);
-}
-.specs-cell {
-  padding: 28px 24px;
-  border-bottom: 1px solid var(--border);
-}
-.specs-cell:nth-child(odd) { border-right: 1px solid var(--border); }
-.specs-cell:nth-child(n+3) { border-bottom: none; }
-.specs-cell h4 {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 12px;
-}
-.specs-cell p, .specs-cell li {
-  font-size: 13px;
-  color: var(--text-dim);
-  line-height: 1.7;
-}
-.specs-cell ul { list-style: none; }
-.specs-cell ul li::before { content: '• '; color: var(--copper); }
-
-/* ═══════════════════════════════════════════════════════════════════════
-   CTA
-   ═══════════════════════════════════════════════════════════════════════ */
-.cta-section .bp-inner {
-  text-align: center;
-  padding: 80px 56px;
-}
-.cta-title {
-  font-family: var(--display);
-  font-weight: 800;
-  font-size: clamp(28px, 4vw, 42px);
-  color: var(--copper-light);
-  margin-bottom: 12px;
-  letter-spacing: -0.02em;
-}
-.cta-sub {
-  font-size: 15px;
-  color: var(--text-dim);
-  margin-bottom: 40px;
-}
-.cta-aperture {
-  width: 100px;
-  height: 100px;
-  margin: 0 auto 32px;
-  border: 2px solid var(--border);
-  border-radius: 50%;
+.workflow-step {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 48px;
-  color: var(--copper);
-  opacity: 0.6;
-}
-.cta-links {
-  display: flex;
-  justify-content: center;
-  gap: 24px;
-  margin-bottom: 32px;
-}
-.cta-links a {
-  font-size: 13px;
-  color: var(--text-dim);
-  text-decoration: none;
-  transition: color 0.2s;
-  border-bottom: 1px solid var(--border-dim);
-  padding-bottom: 2px;
-}
-.cta-links a:hover { color: var(--copper); border-color: var(--copper); }
-.cta-cmd {
-  display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
-  background: var(--bg-dark);
-  border: 1px solid var(--border-dim);
-  padding: 10px 20px;
-  font-size: 13px;
-  color: var(--text-dim);
-  cursor: pointer;
-  transition: border-color 0.2s;
+  padding: 8px 0;
 }
-.cta-cmd:hover { border-color: var(--copper); }
-.cta-cmd .prompt { color: var(--copper); }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   FOOTER
-   ═══════════════════════════════════════════════════════════════════════ */
-footer {
-  padding: 24px 0;
-  border-top: 1px solid var(--border-dim);
-  position: relative;
-  z-index: 1;
-}
-.footer-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
+.workflow-step-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  background: rgba(212,149,106,0.15);
+  border: 1px solid rgba(212,149,106,0.3);
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  font-size: 11px;
-  color: var(--text-faint);
+  justify-content: center;
+  font-size: 0.7rem;
 }
-.footer-inner a { color: var(--text-dim); text-decoration: none; }
-.footer-inner a:hover { color: var(--copper); }
-.footer-links { display: flex; gap: 20px; list-style: none; }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   ANIMATIONS
-   ═══════════════════════════════════════════════════════════════════════ */
+.workflow-step p {
+  font-size: 0.9rem;
+  color: var(--text-mid);
+  line-height: 1.5;
+}
+
+.workflow-step p strong { color: var(--text); }
+
+.step-arrow {
+  text-align: center;
+  color: var(--border-blue);
+  font-size: 0.9rem;
+  padding: 2px 0;
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .section { padding: 40px 20px; }
+  .frame { padding: 32px 24px; }
+  .grid-2x2 { grid-template-columns: 1fr; }
+  .grid-2x2 .cell:nth-child(1),
+  .grid-2x2 .cell:nth-child(2),
+  .grid-2x2 .cell:nth-child(3) { border-right: none; border-bottom: 1px solid var(--border); }
+  .split { grid-template-columns: 1fr; }
+  .split-left { border-right: none; border-bottom: 1px solid var(--border); }
+  .cols-3, .cta-cards, .tiers { grid-template-columns: 1fr; }
+  .tier + .tier { border-left: 1px solid var(--border); border-top: none; }
+  .tier-arrow { display: none; }
+  .comp-table { font-size: 0.8rem; }
+  .comp-table td, .comp-table th { padding: 12px 8px; }
+  .arch-row { grid-template-columns: 1fr; gap: 12px; }
+  .arch-note { display: none; }
+  .hub { grid-template-columns: 1fr; }
+  .hub-center { grid-row: auto; grid-column: auto; }
+  .flow { gap: 8px; }
+  .hero-illustration { height: auto; flex-direction: column; gap: 20px; }
+}
+
+/* ── Animations ────────────────────────────────────────────── */
+
 .reveal {
   opacity: 0;
   transform: translateY(20px);
   transition: opacity 0.6s ease, transform 0.6s ease;
 }
+
 .reveal.visible {
   opacity: 1;
   transform: translateY(0);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   RESPONSIVE
-   ═══════════════════════════════════════════════════════════════════════ */
-@media (max-width: 900px) {
-  .hero-grid, .problem-compare, .arch-grid, .three-col, .mcp-split,
-  .strat-grid, .market-points, .audio-features, .problem-cards { grid-template-columns: 1fr; }
-  .usecases-grid { grid-template-columns: 1fr; }
-  .usecase:nth-child(odd) { border-right: none; }
-  .usecase { border-bottom: 1px solid var(--border) !important; }
-  .usecase:last-child { border-bottom: none !important; }
-  .specs-grid { grid-template-columns: 1fr; }
-  .specs-cell:nth-child(odd) { border-right: none; }
-  .specs-cell { border-bottom: 1px solid var(--border) !important; }
-  .specs-cell:last-child { border-bottom: none !important; }
-  .bp-inner { padding: 40px 24px; }
-  .bp-inner::before, .bp-inner::after { display: none; }
-  .hero-eye { display: none; }
-  .venn-container { display: none; }
-  .strat-center { display: none; }
-  .nav-links { display: none; }
-  .flow { flex-direction: column; }
-  .flow-arrow { transform: rotate(90deg); }
-  .timeline-badge { display: none; }
-}
+.mono { font-family: var(--mono); }
+.accent { color: var(--accent); }
+.dim { color: var(--text-dim); }
+.bold { font-weight: 700; }
+.text-center { text-align: center; }
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+.mt-40 { margin-top: 40px; }
+.mb-8 { margin-bottom: 8px; }
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════════════════════
-     NAV
-     ═══════════════════════════════════════════════════════════════════ -->
-<nav>
-  <div class="nav-inner">
-    <a href="#" class="nav-logo"><span class="copper">KINO</span></a>
-    <ul class="nav-links">
-      <li><a href="#architecture">Architecture</a></li>
-      <li><a href="#verification">Verification</a></li>
-      <li><a href="#mcp">MCP Tools</a></li>
-      <li><a href="#market">Market</a></li>
-      <li><a href="https://github.com/ExpertVagabond/kino" class="nav-cta">GitHub</a></li>
-    </ul>
-  </div>
-</nav>
+<!-- ════════════════════════════════════════════════════════════
+     1. HERO — THE MISSING LINK
+     ════════════════════════════════════════════════════════════ -->
 
-<!-- ═══════════════════════════════════════════════════════════════════
-     HERO
-     ═══════════════════════════════════════════════════════════════════ -->
-<section class="bp-section hero">
-  <div class="bp-frame">
-    <div class="bp-inner reveal">
-      <div class="bp-corner tl"></div>
-      <div class="bp-corner tr"></div>
-      <div class="bp-corner bl"></div>
-      <div class="bp-corner br"></div>
+<section class="section reveal">
+  <div class="frame">
+    <span class="corner-bl">+</span>
+    <span class="corner-br">+</span>
 
-      <div class="hero-spec">PROJECT: KINO<br>SPECIFICATION DOCUMENT - VER 1.0</div>
+    <p class="section-label text-center">the missing link</p>
 
-      <div class="hero-grid">
-        <div>
-          <h1 class="hero-title"><span class="copper">Kino:</span> Video Intelligence for AI Agents</h1>
-          <p class="hero-desc">The first formally verified, <span class="copper">Rust-native</span> video infrastructure designed for the <span class="blue">Model Context Protocol (MCP)</span>.</p>
-          <div class="hero-badge">
-            <div><span class="icon">&#9635;</span> Purple Squirrel Media LLC</div>
-            <div><span class="icon">&#9881;</span> Rust 2021 Edition</div>
-            <div><span class="icon">&#8614;</span> 14K LOC</div>
-          </div>
-        </div>
-        <div class="hero-eye">
-          <div class="eye-ring"></div>
-          <div class="eye-ring"></div>
-          <div class="eye-ring"></div>
-          <div class="eye-ring"></div>
-          <div class="eye-core"></div>
-          <span class="eye-label">AMPLITUDE (dB)</span>
-          <span class="eye-label">4500kbps FRAME_RATE</span>
-          <span class="eye-label">CODEC_PIPELINE</span>
-          <span class="eye-label">MCP COMPATIBILITY LAYER</span>
-          <span class="eye-label">NEURAL NET INTERFACE</span>
-          <span class="eye-label">0xAFE608EE$</span>
-        </div>
+    <!-- Hero Illustration: Prism -->
+    <div class="hero-illustration">
+      <svg class="input-rays" viewBox="0 0 300 120" fill="none" style="position:relative;width:300px;">
+        <!-- Scattered dots converging -->
+        <g opacity="0.5">
+          <circle cx="20" cy="20" r="2" fill="#888"/>
+          <circle cx="35" cy="45" r="2" fill="#888"/>
+          <circle cx="15" cy="70" r="2" fill="#888"/>
+          <circle cx="50" cy="15" r="1.5" fill="#999"/>
+          <circle cx="45" cy="55" r="2" fill="#888"/>
+          <circle cx="30" cy="90" r="1.5" fill="#999"/>
+          <circle cx="60" cy="30" r="2" fill="#888"/>
+          <circle cx="55" cy="75" r="1.5" fill="#999"/>
+          <circle cx="70" cy="50" r="2" fill="#888"/>
+          <circle cx="80" cy="25" r="1.5" fill="#999"/>
+          <circle cx="75" cy="80" r="2" fill="#888"/>
+          <circle cx="90" cy="60" r="2" fill="#888"/>
+          <circle cx="100" cy="35" r="1.5" fill="#999"/>
+          <circle cx="95" cy="85" r="1.5" fill="#999"/>
+          <circle cx="110" cy="45" r="2" fill="#888"/>
+          <circle cx="120" cy="70" r="2" fill="#888"/>
+          <circle cx="130" cy="40" r="1.5" fill="#999"/>
+          <circle cx="140" cy="55" r="2" fill="#888"/>
+          <circle cx="150" cy="48" r="2" fill="#888"/>
+          <circle cx="160" cy="60" r="1.5" fill="#999"/>
+          <circle cx="170" cy="52" r="2" fill="#888"/>
+          <circle cx="180" cy="56" r="2" fill="#888"/>
+          <circle cx="190" cy="54" r="2" fill="#888"/>
+          <circle cx="200" cy="55" r="2" fill="#888"/>
+          <circle cx="210" cy="57" r="2" fill="#888"/>
+          <circle cx="220" cy="56" r="2" fill="#888"/>
+        </g>
+        <!-- Converging lines -->
+        <line x1="20" y1="20" x2="280" y2="55" stroke="#999" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="15" y1="70" x2="280" y2="58" stroke="#999" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <line x1="30" y1="90" x2="280" y2="62" stroke="#999" stroke-width="0.5" stroke-dasharray="3,3"/>
+      </svg>
+
+      <div class="prism-container">
+        <svg class="prism-svg" viewBox="0 0 200 240" fill="none">
+          <polygon points="100,20 180,200 20,200" stroke="#3355AA" stroke-width="2" fill="rgba(91,155,213,0.05)"/>
+          <line x1="100" y1="20" x2="180" y2="200" stroke="#3355AA" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.3"/>
+        </svg>
+        <span class="prism-label">KINO</span>
       </div>
 
-      <div class="bp-titleblock">
-        <div>PROJECT: AI-VIDEO INTEGRATION ANALYSIS</div>
-        <div>DRAWING NO: AI-VB-000</div>
-        <div>SCALE: NTS</div>
-        <div>DATE: FEB 25, 2026</div>
+      <svg style="width:200px;height:120px;" viewBox="0 0 200 120" fill="none">
+        <!-- Three output rays with colors -->
+        <line x1="0" y1="50" x2="180" y2="30" stroke="#D4956A" stroke-width="2.5"/>
+        <line x1="0" y1="58" x2="180" y2="60" stroke="#3355AA" stroke-width="2"/>
+        <line x1="0" y1="66" x2="180" y2="90" stroke="#888" stroke-width="1.5"/>
+        <!-- AI chip icon -->
+        <rect x="150" y="30" width="48" height="48" rx="4" stroke="#3355AA" stroke-width="1.5" fill="rgba(91,155,213,0.05)"/>
+        <circle cx="174" cy="54" r="12" stroke="#3355AA" stroke-width="1"/>
+        <circle cx="174" cy="54" r="6" stroke="#3355AA" stroke-width="1"/>
+        <line x1="150" y1="42" x2="142" y2="42" stroke="#3355AA" stroke-width="1"/>
+        <line x1="150" y1="54" x2="142" y2="54" stroke="#3355AA" stroke-width="1"/>
+        <line x1="150" y1="66" x2="142" y2="66" stroke="#3355AA" stroke-width="1"/>
+        <line x1="198" y1="42" x2="206" y2="42" stroke="#3355AA" stroke-width="1"/>
+        <line x1="198" y1="54" x2="206" y2="54" stroke="#3355AA" stroke-width="1"/>
+        <line x1="198" y1="66" x2="206" y2="66" stroke="#3355AA" stroke-width="1"/>
+      </svg>
+    </div>
+
+    <h1 class="text-center">Kino: The Video Intelligence Engine</h1>
+    <p class="text-center mt-16" style="font-size:1.3rem; color:var(--text-mid); max-width:600px; margin-left:auto; margin-right:auto;">Rust-Powered. Formally Verified. MCP-Native.</p>
+    <p class="text-center mt-24" style="font-size:0.95rem; color:var(--text-dim);">Built by Purple Squirrel Media</p>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     2. THE FIRST VIDEO SDK
+     ════════════════════════════════════════════════════════════ -->
+
+<section class="section reveal">
+  <h2>The First Video SDK Built for the AI Era</h2>
+  <p class="subtitle">Bridging the gap between video infrastructure and autonomous agents.</p>
+
+  <div class="grid-2x2">
+    <div class="cell">
+      <div class="cell-icon">
+        <svg viewBox="0 0 48 48"><path d="M4 24h12M32 24h12M16 24a8 8 0 1 1 16 0 8 8 0 0 1-16 0z"/><line x1="4" y1="18" x2="4" y2="30"/><line x1="44" y1="18" x2="44" y2="30"/></svg>
+      </div>
+      <div class="cell-text">
+        <h3>Agent-Native</h3>
+        <p>Built-in Model Context Protocol (MCP) server for instant integration with Claude, GPT, and custom agents.</p>
+      </div>
+    </div>
+    <div class="cell">
+      <div class="cell-icon">
+        <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" stroke-width="1.5"/><path d="M24 10v14l10 6" stroke-width="1.5"/><circle cx="38" cy="38" r="8" stroke-width="1.5"/><path d="M38 34v4h4" stroke-width="1.5"/></svg>
+      </div>
+      <div class="cell-text">
+        <h3>Performance</h3>
+        <p>7-crate Rust workspace with zero-copy parsing and &lt;4ms startup latency.</p>
+      </div>
+    </div>
+    <div class="cell">
+      <div class="cell-icon">
+        <svg viewBox="0 0 48 48"><circle cx="24" cy="16" r="12" stroke-width="1.5"/><path d="M16 28l-4 16h24l-4-16" stroke-width="1.5"/><path d="M20 20l4-4 4 4" stroke-width="1.5"/><rect x="18" y="32" width="12" height="8" rx="2" stroke-width="1.5"/></svg>
+      </div>
+      <div class="cell-text">
+        <h3>Correctness</h3>
+        <p>Critical state machines backed by TLA+ formal verification (mathematical proofs of safety).</p>
+      </div>
+    </div>
+    <div class="cell">
+      <div class="cell-icon">
+        <svg viewBox="0 0 48 48"><rect x="8" y="8" width="14" height="14" rx="2" stroke-width="1.5"/><rect x="26" y="8" width="14" height="14" rx="2" stroke-width="1.5"/><rect x="14" y="26" width="20" height="14" rx="2" stroke-width="1.5"/><rect x="10" y="10" width="10" height="10" rx="1" stroke-width="1"/></svg>
+      </div>
+      <div class="cell-text">
+        <h3>Versatility</h3>
+        <p>Deploys anywhere: Edge (WASM), Desktop (Tauri), CLI, or Python pipelines.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════════════
-     PROBLEM
-     ═══════════════════════════════════════════════════════════════════ -->
-<section class="bp-section">
-  <div class="bp-frame">
-    <div class="bp-inner reveal">
-      <div class="bp-corner tl"></div><div class="bp-corner tr"></div><div class="bp-corner bl"></div><div class="bp-corner br"></div>
+<!-- ════════════════════════════════════════════════════════════
+     3. THE BLIND SPOT
+     ════════════════════════════════════════════════════════════ -->
 
-      <div class="section-title">AI Agents are <span class="copper">Video-Blind</span></div>
+<section class="section reveal">
+  <div class="frame">
+    <span class="corner-bl">+</span>
+    <span class="corner-br">+</span>
 
-      <div class="problem-compare">
-        <div class="problem-side good">
-          <h3>Text &amp; Image Processing</h3>
-          <div class="problem-metric"><span>Latency</span><span class="val">&lt; 100ms</span></div>
-          <div class="problem-metric"><span>Data extraction</span><span class="val">Structured</span></div>
-          <div class="problem-metric"><span>Processing</span><span class="val">Instant</span></div>
+    <h2>Video is the Last Unstructured Frontier</h2>
+
+    <div class="split">
+      <div class="split-left">
+        <h3 style="margin-bottom:16px;">Current State: The Blind Spot</h3>
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+            <circle cx="32" cy="32" r="16" stroke="#999" stroke-width="2"/>
+            <circle cx="32" cy="32" r="6" fill="#999"/>
+            <line x1="12" y1="12" x2="52" y2="52" stroke="#999" stroke-width="3"/>
+          </svg>
+          <div style="width:120px;height:80px;background:repeating-conic-gradient(#ccc 0% 25%, #999 0% 50%) 0 0/8px 8px;opacity:0.6;"></div>
         </div>
-        <div class="problem-side bad">
-          <h3>Video Processing (Current State)</h3>
-          <div class="problem-metric bad-val"><span>Latency</span><span class="val">&gt; 30s</span></div>
-          <div class="problem-metric bad-val"><span>Data extraction</span><span class="val">Blocked</span></div>
-          <div class="problem-metric bad-val"><span>Processing</span><span class="val">Bottleneck</span></div>
-        </div>
+        <ul style="list-style:disc;padding-left:20px;color:var(--text-mid);line-height:2;">
+          <li><strong style="color:var(--text);">Blind Agents:</strong> LLMs are text-centric; they cannot natively watch streams.</li>
+          <li><strong style="color:var(--text);">Unsafe Tooling:</strong> FFmpeg is unsafe, hard to wrap, and lacks semantic output.</li>
+          <li><strong style="color:var(--text);">Slow Clouds:</strong> API latency (100ms&ndash;10s) makes real-time reasoning impossible.</li>
+        </ul>
       </div>
-
-      <div class="problem-cards">
-        <div class="problem-card">
-          <div class="label-row"><span>Inter Tight</span><span>Temporal Reasoning Gap</span></div>
-          <h4>The Blind Spot</h4>
-          <p>LLMs <span class="copper">cannot</span> inherently reason about temporal media streams or audio time-series data.</p>
+      <div class="split-right">
+        <h3 style="margin-bottom:16px;">With Kino: Structured Vision</h3>
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+            <circle cx="32" cy="32" r="16" stroke="#555" stroke-width="2"/>
+            <circle cx="32" cy="32" r="6" fill="#555"/>
+          </svg>
+          <svg width="140" height="80" viewBox="0 0 140 80" fill="none">
+            <!-- Grid mesh expanding from eye -->
+            <line x1="0" y1="40" x2="140" y2="10" stroke="#999" stroke-width="0.5"/>
+            <line x1="0" y1="40" x2="140" y2="25" stroke="#999" stroke-width="0.5"/>
+            <line x1="0" y1="40" x2="140" y2="40" stroke="#999" stroke-width="0.5"/>
+            <line x1="0" y1="40" x2="140" y2="55" stroke="#999" stroke-width="0.5"/>
+            <line x1="0" y1="40" x2="140" y2="70" stroke="#999" stroke-width="0.5"/>
+            <line x1="40" y1="20" x2="40" y2="60" stroke="#999" stroke-width="0.5"/>
+            <line x1="70" y1="15" x2="70" y2="65" stroke="#999" stroke-width="0.5"/>
+            <line x1="100" y1="10" x2="100" y2="70" stroke="#999" stroke-width="0.5"/>
+            <line x1="130" y1="8" x2="130" y2="72" stroke="#999" stroke-width="0.5"/>
+            <g fill="#555">
+              <circle cx="40" cy="28" r="2.5"/><circle cx="70" cy="22" r="2.5"/><circle cx="100" cy="18" r="2.5"/>
+              <circle cx="40" cy="40" r="2.5"/><circle cx="70" cy="40" r="2.5"/><circle cx="100" cy="40" r="2.5"/>
+              <circle cx="40" cy="52" r="2.5"/><circle cx="70" cy="58" r="2.5"/><circle cx="100" cy="62" r="2.5"/>
+              <circle cx="130" cy="14" r="2.5"/><circle cx="130" cy="40" r="2.5"/><circle cx="130" cy="66" r="2.5"/>
+            </g>
+          </svg>
         </div>
-        <div class="problem-card">
-          <div class="label-row"><span>Inter Tight</span><span>Wrapper Limitations</span></div>
-          <h4>The Bottleneck</h4>
-          <p>Current wrappers (FFmpeg/Python) are <span class="copper">slow</span>, <span class="copper">memory-unsafe</span>, and lack structured reasoning.</p>
-        </div>
-        <div class="problem-card">
-          <div class="label-row"><span>Inter Tight</span><span>Quality Assurance Failure</span></div>
-          <h4>The Result</h4>
-          <p><span class="copper">Hallucinations</span> on content and inability to perform basic QA tasks.</p>
-        </div>
-      </div>
-
-      <div class="bp-titleblock">
-        <div>PROJECT: AI-VIDEO INTEGRATION ANALYSIS</div>
-        <div>DRAWING NO: AI-VB-001</div>
-        <div>SCALE: NTS</div>
-        <div>DATE: FEB 25, 2026</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════════════
-     SOLUTION
-     ═══════════════════════════════════════════════════════════════════ -->
-<section class="bp-section">
-  <div class="bp-frame">
-    <div class="bp-inner reveal">
-      <div class="bp-corner tl"></div><div class="bp-corner tr"></div><div class="bp-corner bl"></div><div class="bp-corner br"></div>
-
-      <div class="section-title">Giving Agents <span class="copper">Eyes and Ears</span></div>
-
-      <div class="flow">
-        <div class="flow-col">
-          <h4>Raw Streams</h4>
-          <div class="flow-items">
-            <div class="flow-item"><span class="icon">&#9654;</span> HLS</div>
-            <div class="flow-item"><span class="icon">&#9633;</span> DASH</div>
-            <div class="flow-item"><span class="icon">&#9654;</span> MP4</div>
-          </div>
-        </div>
-
-        <div class="flow-arrow">&#10142;</div>
-
-        <div class="flow-box">
-          <h4>Kino MCP Server</h4>
-          <ul>
-            <li>Real-time Analysis</li>
-            <li>Fingerprinting</li>
-            <li>QC Checks</li>
-          </ul>
-          <div class="sublabel">The Engine</div>
-        </div>
-
-        <div class="flow-arrow">&#10142;</div>
-
-        <div class="flow-col">
-          <h4>Structured Intelligence</h4>
-          <div class="flow-json">
-<pre><span class="bracket">{</span>
-  <span class="key">'codec'</span>: <span class="str">'h264'</span>,
-  <span class="key">'fps'</span>: <span class="num">30</span>,
-  <span class="key">'genre'</span>: <span class="str">'Jazz'</span>,
-  <span class="key">'issues'</span>: <span class="bracket">[]</span>
-<span class="bracket">}</span></pre>
-          </div>
-        </div>
-      </div>
-
-      <div class="flow-caption">Kino translates raw video/audio into actionable data that agents (Claude, GPT) understand instantly.</div>
-
-      <div class="bp-titleblock">
-        <div>PROJECT: AI-VIDEO INTEGRATION ANALYSIS</div>
-        <div>DRAWING NO: AI-VB-002</div>
-        <div>SCALE: NTS</div>
-        <div>DATE: FEB 25, 2026</div>
+        <p style="color:var(--text-mid);line-height:1.7;">A drop-in primitive that allows agents to programmatically analyze, fingerprint, and QC video streams in real-time.</p>
+        <div class="code-block mt-24" style="display:inline-block;font-size:1rem;font-weight:600;padding:12px 24px;">Semantic JSON Output</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════════════
-     ARCHITECTURE
-     ═══════════════════════════════════════════════════════════════════ -->
-<section class="bp-section" id="architecture">
-  <div class="bp-frame">
-    <div class="bp-inner reveal">
-      <div class="bp-corner tl"></div><div class="bp-corner tr"></div><div class="bp-corner bl"></div><div class="bp-corner br"></div>
+<!-- ════════════════════════════════════════════════════════════
+     4. MCP FLOW
+     ════════════════════════════════════════════════════════════ -->
 
-      <div class="section-title">Built for Speed, Safety, and <span class="copper">Modularity</span></div>
+<section class="section reveal">
+  <div class="frame">
+    <span class="corner-bl">+</span>
+    <span class="corner-br">+</span>
 
-      <div class="arch-grid">
-        <div class="crate-map">
-          <h4>7-Crate Workspace</h4>
-          <div class="crate-nodes">
-            <div class="crate-node">kino-cli<span class="sub">14 subcommands</span></div>
-            <div class="crate-node">kino-mcp<span class="sub">8 MCP tools</span></div>
-            <div class="crate-node">kino-wasm<span class="sub">browser target</span></div>
-            <div class="crate-node core">kino-core<span class="sub">HLS/DASH/ABR/DRM</span></div>
-            <div class="crate-node">kino-frequency<span class="sub">FFT engine</span></div>
-            <div class="crate-node">kino-desktop<span class="sub">GStreamer</span></div>
-            <div class="crate-node">kino-python<span class="sub">PyO3 bindings</span></div>
-            <div class="crate-node">kino-tauri<span class="sub">cross-platform</span></div>
-          </div>
+    <h2>Giving Agents Video Superpowers via MCP</h2>
+    <p class="subtitle">Kino acts as a native tool provider through the Model Context Protocol.</p>
+
+    <div class="flow">
+      <div class="flow-node">
+        <div class="flow-node-icon">💬</div>
+        <div class="flow-node-label">User Prompt</div>
+      </div>
+      <div class="flow-arrow">Request<br></div>
+      <div class="flow-node">
+        <div class="flow-node-icon" style="font-size:1.4rem;">AI 🤖</div>
+        <div class="flow-node-label">AI Agent</div>
+      </div>
+      <div class="flow-arrow">Tool Call<br></div>
+      <div class="flow-node" style="border-color:var(--accent);">
+        <div class="flow-node-icon">⚙️</div>
+        <div class="flow-node-label" style="color:var(--accent);">Kino MCP Server</div>
+      </div>
+      <div class="flow-arrow">Analyze<br></div>
+      <div class="flow-node">
+        <div class="flow-node-icon">🎬</div>
+        <div class="flow-node-label">HLS Stream</div>
+      </div>
+    </div>
+
+    <div class="flow" style="margin-top:0;">
+      <div class="flow-arrow gray" style="transform:scaleX(-1);">Answer</div>
+      <span style="width:180px;"></span>
+      <div class="flow-arrow gray" style="transform:scaleX(-1);">Structured JSON</div>
+      <span style="width:180px;"></span>
+      <div class="flow-arrow gray" style="transform:scaleX(-1);">Raw Data</div>
+    </div>
+
+    <p class="mono mt-24" style="font-size:0.85rem;color:var(--text-dim);">Security: Uses child_process.execFile to prevent shell injection.</p>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     5. AGENT TOOLSET
+     ════════════════════════════════════════════════════════════ -->
+
+<section class="section reveal">
+  <h2>The Agent Toolset</h2>
+  <p class="subtitle">8 Native MCP Functions available to the LLM</p>
+
+  <table class="tool-table">
+    <tr>
+      <td class="tool-icon"><svg viewBox="0 0 32 32" fill="none"><circle cx="14" cy="14" r="10"/><line x1="22" y1="22" x2="30" y2="30" stroke-width="2"/><line x1="10" y1="14" x2="18" y2="14"/><line x1="14" y1="10" x2="14" y2="18"/></svg></td>
+      <td class="tool-cat">Discovery</td>
+      <td class="tool-desc"><code>analyze_stream</code>: Parse manifests, codecs, renditions.<br><code>validate_stream</code>: Check segment accessibility and DRM.</td>
+    </tr>
+    <tr>
+      <td class="tool-icon"><svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="12"/><path d="M10 16l4 4 8-8"/></svg></td>
+      <td class="tool-cat">Quality Control</td>
+      <td class="tool-desc"><code>quality_check</code>: Full QC report (bitrate ladder, captions).<br><code>monitor_stream</code>: Live latency and freshness checks.</td>
+    </tr>
+    <tr>
+      <td class="tool-icon"><svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="12"/><path d="M16 8c0 4-6 6-6 10a6 6 0 1 0 12 0c0-4-6-6-6-10z"/></svg></td>
+      <td class="tool-cat">Intelligence</td>
+      <td class="tool-desc"><code>fingerprint_audio</code>: Content ID and duplicate detection.<br><code>autotag_content</code>: Detect BPM, genre, and mood.</td>
+    </tr>
+    <tr>
+      <td class="tool-icon"><svg viewBox="0 0 32 32" fill="none"><path d="M6 16h20M16 6v20"/><path d="M10 10l12 12M22 10L10 22"/></svg></td>
+      <td class="tool-cat">Operations</td>
+      <td class="tool-desc"><code>compare_streams</code>: Diff two streams for A/B testing.<br><code>encode_video</code>: Generate presets (Mobile/4K).</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     6. ARCHITECTURE
+     ════════════════════════════════════════════════════════════ -->
+
+<section class="section reveal">
+  <div class="frame">
+    <span class="corner-bl">+</span>
+    <span class="corner-br">+</span>
+
+    <h2>Architecture: Modular 7-Crate Workspace</h2>
+
+    <div class="arch-tree">
+      <div class="arch-top">
+        <strong class="mono" style="font-size:1rem;">kino-cli / kino-mcp</strong>
+        <span style="display:block;color:var(--text-dim);font-size:0.85rem;">Interface & Tooling</span>
+      </div>
+
+      <div style="text-align:center;"><svg width="2" height="30"><line x1="1" y1="0" x2="1" y2="30" stroke="var(--border)" stroke-width="1"/></svg></div>
+      <div style="display:flex;justify-content:center;"><svg width="500" height="2"><line x1="83" y1="1" x2="417" y2="1" stroke="var(--border)" stroke-width="1"/></svg></div>
+
+      <div class="arch-row" style="max-width:600px;margin:0 auto;">
+        <div class="arch-node">
+          <strong>kino-core</strong>
+          <span>(HLS/DASH, ABR, DRM)</span>
         </div>
-
-        <div class="specs-panel">
-          <h4>Engineering Specs</h4>
-          <div class="spec-row"><div class="spec-key">Total Size:</div><div class="spec-val">14K LOC</div></div>
-          <div class="spec-row"><div class="spec-key">Architecture:</div><div class="spec-val">Zero-copy hot paths</div></div>
-          <div class="spec-row"><div class="spec-key">Runtime:</div><div class="spec-val">Async Tokio</div></div>
-          <div class="spec-row"><div class="spec-key">Safety:</div><div class="spec-val">100% Safe Rust<br>(No 'unsafe' blocks in core)</div></div>
-          <div class="spec-row"><div class="spec-key">Parser:</div><div class="spec-val">Nom combinators</div></div>
-          <div class="spec-row"><div class="spec-key">Crypto:</div><div class="spec-val">Ring (DRM)</div></div>
+        <div class="arch-node">
+          <strong>kino-frequency</strong>
+          <span>(FFT Engine, Fingerprinting)</span>
+        </div>
+        <div class="arch-node">
+          <strong>kino-wasm</strong>
+          <span>(Browser/Edge Playback)</span>
         </div>
       </div>
 
-      <div class="bp-titleblock">
-        <div>PROJECT: AI-VIDEO INTEGRATION ANALYSIS</div>
-        <div>DRAWING NO: AI-VB-003</div>
-        <div>SCALE: NTS</div>
-        <div>DATE: FEB 25, 2026</div>
+      <div style="text-align:center;"><svg width="2" height="24"><line x1="1" y1="0" x2="1" y2="24" stroke="var(--border)" stroke-width="1"/></svg></div>
+      <div style="display:flex;justify-content:center;"><svg width="500" height="2"><line x1="83" y1="1" x2="417" y2="1" stroke="var(--border)" stroke-width="1"/></svg></div>
+
+      <div class="arch-row" style="max-width:600px;margin:0 auto;">
+        <div class="arch-node">
+          <strong>kino-desktop</strong>
+          <span>(GStreamer)</span>
+        </div>
+        <div class="arch-node">
+          <strong>kino-tauri</strong>
+          <span>(Native App)</span>
+        </div>
+        <div class="arch-node">
+          <strong>kino-python</strong>
+          <span>(Data Science)</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="mono mt-40" style="font-size:0.8rem;color:var(--text-dim);text-align:right;">Total: 14K Lines of Code. Zero-copy parsing.</p>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     7. TLA+ FORMAL VERIFICATION
+     ════════════════════════════════════════════════════════════ -->
+
+<section class="section reveal">
+  <div class="frame">
+    <span class="corner-bl">+</span>
+    <span class="corner-br">+</span>
+
+    <div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;">
+      <div style="flex:1;min-width:300px;">
+        <h2>Uncompromising Correctness</h2>
+        <p class="subtitle">Mathematical Proof of Reliability using TLA+</p>
+
+        <div class="code-block mt-24" style="font-size:0.9rem;">
+<span class="kw">invariant</span> BufferBounded ==
+    /\ Len(buffer) <= MaxBufferSize
+    /\ \A s \in buffer : s.quality >= MinQuality</div>
+
+        <hr class="divider">
+
+        <h3>The Specs</h3>
+        <ul style="list-style:disc;padding-left:20px;color:var(--text-mid);line-height:2.2;">
+          <li><strong style="color:var(--text);">Safety:</strong> Buffer never exceeds limits; <strong>Fullscreen != PiP.</strong></li>
+          <li><strong style="color:var(--text);">Liveness:</strong> Buffering always resolves; Loading always completes.</li>
+          <li><strong style="color:var(--text);">Consistency:</strong> Error states never de-sync.</li>
+        </ul>
+        <p class="mt-16" style="color:var(--text-mid);">25+ verified invariants ensure the player never enters an invalid state.</p>
+      </div>
+
+      <div style="flex-shrink:0;">
+        <div class="seal">
+          <div class="seal-text">Formally<br>Verified</div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════════════
-     DEFENSIBLE ENGINEERING
-     ═══════════════════════════════════════════════════════════════════ -->
-<section class="bp-section">
-  <div class="bp-frame">
-    <div class="bp-inner reveal">
-      <div class="bp-corner tl"></div><div class="bp-corner tr"></div><div class="bp-corner bl"></div><div class="bp-corner br"></div>
+<!-- ════════════════════════════════════════════════════════════
+     8. AUDIO FINGERPRINTING — SPECTROGRAM
+     ════════════════════════════════════════════════════════════ -->
 
-      <div class="section-title">Defensible Engineering</div>
+<section class="section reveal">
+  <div class="frame">
+    <span class="corner-bl">+</span>
+    <span class="corner-br">+</span>
 
-      <div class="three-col">
-        <div class="three-item">
-          <h4>Performance</h4>
-          <div class="bracket">[LATENCY OPTIMIZATION] &nbsp; [RESOURCE EFFICIENCY]</div>
-          <div class="icon-box">&#9201;</div>
-          <p>Rust-native execution. <span class="copper">4ms</span> startup time vs. Python overhead. Zero memory leaks.</p>
-        </div>
-        <div class="three-item">
-          <h4>Correctness</h4>
-          <div class="bracket">[FORMAL SPECIFICATION] &nbsp; [LOGICAL VALIDATION]</div>
-          <div class="icon-box">&#10003;</div>
-          <p>TLA+ Formal Verification. Critical state machines are <span class="copper">mathematically proven</span>, not just tested.</p>
-        </div>
-        <div class="three-item">
-          <h4>Integration</h4>
-          <div class="bracket">[MODULAR INTERFACE] &nbsp; [ECOSYSTEM COMPATIBILITY]</div>
-          <div class="icon-box">&#10070;</div>
-          <p><span class="copper">MCP-Native.</span> Day 1 compatibility with Claude, OpenAI, and custom agents.</p>
-        </div>
+    <h2>Seeing Through Sound: kino-frequency</h2>
+
+    <div class="spectrogram-wrap">
+      <div class="spec-label spec-label-a">Anchor Point (Hash A)</div>
+      <div class="spec-label spec-label-b">Target Point (Hash B)</div>
+      <div class="spec-dot spec-dot-a"></div>
+      <div class="spec-dot spec-dot-b"></div>
+      <div class="spec-line spec-line-a"></div>
+      <div class="spec-line spec-line-b"></div>
+      <canvas class="spectrogram-canvas" id="spectrogramCanvas"></canvas>
+    </div>
+
+    <div class="cols-3" style="gap:0;">
+      <div style="padding:20px;border-right:1px solid var(--border);">
+        <h3>Fingerprinting</h3>
+        <p style="color:var(--text-mid);font-size:0.9rem;">Shazam-style spectral peak hashing for Content ID.</p>
       </div>
+      <div style="padding:20px;border-right:1px solid var(--border);">
+        <h3>Auto-Tagging</h3>
+        <p style="color:var(--text-mid);font-size:0.9rem;">Detects Genre (Electronic), Mood (Dark), and BPM.</p>
+      </div>
+      <div style="padding:20px;">
+        <h3>Thumbnailing</h3>
+        <p style="color:var(--text-mid);font-size:0.9rem;">Identifies moments of high interest via audio energy.</p>
+      </div>
+    </div>
 
-      <div class="bp-titleblock">
-        <div>PROJECT: AI-VIDEO INTEGRATION ANALYSIS</div>
-        <div>DRAWING NO: AI-VB-004</div>
-        <div>SCALE: NTS</div>
-        <div>DATE: FEB 25, 2026</div>
+    <p class="mono mt-24" style="font-size:0.8rem;color:var(--text-dim);text-align:center;">Tech Note: Rust-based FFT processing at ~100x realtime.</p>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     9. WHY RUST — COMPARISON TABLE
+     ════════════════════════════════════════════════════════════ -->
+
+<section class="section reveal">
+  <h2>Why Rust? Performance Meets Safety.</h2>
+
+  <table class="comp-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Kino (Rust)</th>
+        <th>FFmpeg (C)</th>
+        <th>Cloud APIs</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Memory Safety</td>
+        <td><span class="check">✓</span> <strong>Safe</strong><br><span class="dim" style="font-size:0.85rem;">(Borrow Checker)</span></td>
+        <td>Unsafe<br><span class="dim" style="font-size:0.85rem;">(Manual Mgmt)</span></td>
+        <td>N/A</td>
+      </tr>
+      <tr>
+        <td>Latency</td>
+        <td><strong>&lt;4ms Startup</strong></td>
+        <td>Heavy Overhead</td>
+        <td>100ms - 10s</td>
+      </tr>
+      <tr>
+        <td>Deployment</td>
+        <td><strong>Single Binary / WASM</strong></td>
+        <td>Shared Libraries</td>
+        <td>External Dep.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="mono mt-24" style="font-size:0.85rem;color:var(--text-dim);">Process thousands of streams concurrently without the memory leaks that crash Python pipelines.</p>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     10. REAL-WORLD WORKFLOWS
+     ════════════════════════════════════════════════════════════ -->
+
+<section class="section reveal">
+  <h2>Real-World Agent Workflows</h2>
+
+  <div class="cols-3" style="margin-top:32px;">
+    <div class="workflow-card">
+      <h3>Content Moderation</h3>
+      <div class="workflow-step">
+        <div class="workflow-step-icon">📡</div>
+        <p>Agent scans live stream</p>
+      </div>
+      <div class="step-arrow">↓</div>
+      <div class="workflow-step">
+        <div class="workflow-step-icon">🔊</div>
+        <p>Fingerprints audio</p>
+      </div>
+      <div class="step-arrow">↓</div>
+      <div class="workflow-step">
+        <div class="workflow-step-icon">🛡️</div>
+        <p><strong>Flags policy violations</strong> before viewers see them.</p>
+      </div>
+    </div>
+
+    <div class="workflow-card">
+      <h3>Transcoding Pipeline</h3>
+      <div class="workflow-step">
+        <div class="workflow-step-icon">📄</div>
+        <p>Agent analyzes input</p>
+      </div>
+      <div class="step-arrow">↓</div>
+      <div class="workflow-step">
+        <div class="workflow-step-icon">⚙️</div>
+        <p>Selects optimal preset</p>
+      </div>
+      <div class="step-arrow">↓</div>
+      <div class="workflow-step">
+        <div class="workflow-step-icon">✅</div>
+        <p><strong>Validates</strong> output quality automatically.</p>
+      </div>
+    </div>
+
+    <div class="workflow-card">
+      <h3>Event Monitoring</h3>
+      <div class="workflow-step">
+        <div class="workflow-step-icon">🕐</div>
+        <p>Agent watches 24/7</p>
+      </div>
+      <div class="step-arrow">↓</div>
+      <div class="workflow-step">
+        <div class="workflow-step-icon">📊</div>
+        <p>Monitors health metrics</p>
+      </div>
+      <div class="step-arrow">↓</div>
+      <div class="workflow-step">
+        <div class="workflow-step-icon">🚨</div>
+        <p><strong>Alerts</strong> on latency spikes or DRM failures.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════════════
-     TLA+ VERIFICATION
-     ═══════════════════════════════════════════════════════════════════ -->
-<section class="bp-section tla-section" id="verification">
-  <div class="bp-frame">
-    <div class="bp-inner reveal">
-      <div class="bp-corner tl"></div><div class="bp-corner tr"></div><div class="bp-corner bl"></div><div class="bp-corner br"></div>
+<!-- ════════════════════════════════════════════════════════════
+     11. DEPLOY ANYWHERE
+     ════════════════════════════════════════════════════════════ -->
 
-      <div class="tla-bg">VARIABLE state, bufferLevel
+<section class="section reveal">
+  <div class="frame">
+    <span class="corner-bl">+</span>
+    <span class="corner-br">+</span>
 
-Init == state = "Idl
-  /\ bufferLevel = 0
+    <h2 class="text-center">Deploy Anywhere</h2>
 
-Next ==
-  \/ (state = "Idle"
-      state' = "Buff
-      state' = "Init
-      state' = "Buff
-      bufferLevel = 0
-      bufferLevel = 0
-  )
-
-== \/ (state = "Idle" /\ state' = "Buffering")
-
-  \/ (state = "Idle" /\ state' = "Buffering")        rLevel = 10
-
-                                                t, bufferLevel = 0)
-
-                                                /\ bufferLevel) {
-
-                                    state = bufferLevel
-                                            }</div>
-
-      <div class="section-title">Mathematical Proof of <span class="copper">Correctness</span></div>
-
-      <div class="tla-center">
-        <h3>Verified Invariants (25+)</h3>
-        <div class="tla-item"><strong>PSMPlayerState:</strong> Models 9 lifecycle states (Idle to Error).</div>
-        <div class="tla-item"><strong>PSMAbrAlgorithm:</strong> Proves ABR switching never oscillates below quality thresholds.</div>
-        <div class="tla-item"><strong>PSMDrm:</strong> Verifies handshake correctness.</div>
-        <div class="tla-item"><strong>PSMBufferController:</strong> Buffer never underflows during playback.</div>
-        <div class="tla-item"><strong>PSMConcurrentStreaming:</strong> Multi-stream coordination is deadlock-free.</div>
+    <div class="hub">
+      <div class="hub-node" style="justify-self:end;">
+        <h4>🖥 Browser</h4>
+        <p>kino-wasm: Runs via MSE. No server round-trip.</p>
       </div>
-
-      <div class="tla-quote">&ldquo;We didn&rsquo;t just write code; we proved it works.&rdquo;</div>
-
-      <div class="bp-titleblock">
-        <div>PROJECT: AI-VIDEO INTEGRATION ANALYSIS</div>
-        <div>DRAWING NO: AI-VB-005</div>
-        <div>SCALE: NTS</div>
-        <div>DATE: FEB 25, 2026</div>
+      <div class="hub-center">
+        <div class="hub-center-text">Kino<br>Binary</div>
+      </div>
+      <div class="hub-node" style="justify-self:start;">
+        <h4>🖥 Desktop</h4>
+        <p>kino-tauri: Native apps for macOS, Linux, Windows.</p>
+      </div>
+      <div class="hub-node" style="justify-self:end;">
+        <h4>🐍 Scripts</h4>
+        <p>kino-python: PyO3 bindings for Data Science.</p>
+      </div>
+      <div style="grid-column:2;"></div>
+      <div class="hub-node" style="justify-self:start;">
+        <h4>🖧 Server</h4>
+        <p>CLI / MCP: Linux/macOS binaries. AWS Lambda ready.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════════════
-     AUDIO / SHAZAM FOR AGENTS
-     ═══════════════════════════════════════════════════════════════════ -->
-<section class="bp-section">
-  <div class="bp-frame">
-    <div class="bp-inner reveal">
-      <div class="bp-corner tl"></div><div class="bp-corner tr"></div><div class="bp-corner bl"></div><div class="bp-corner br"></div>
+<!-- ════════════════════════════════════════════════════════════
+     12. DEVELOPER EXPERIENCE
+     ════════════════════════════════════════════════════════════ -->
 
-      <div class="section-title">Shazam for <span class="copper">Agents</span></div>
+<section class="section reveal">
+  <div class="frame">
+    <span class="corner-bl">+</span>
+    <span class="corner-br">+</span>
 
-      <div class="wave-label-top">RustFFT (100x Realtime) &#8595;</div>
-      <div class="wave-visual" id="waveform"></div>
+    <h2>Developer Experience: Integration in Minutes</h2>
 
-      <div class="audio-features">
-        <div class="audio-feat">
-          <h4>Fingerprinting:</h4>
-          <p>SHA-256 hashes of spectral peak constellations.</p>
-        </div>
-        <div class="audio-feat">
-          <h4>Auto-Tagging:</h4>
-          <p>AI detection of Genre, Mood, and BPM via spectral centroids.</p>
-        </div>
-        <div class="audio-feat">
-          <h4>Identification:</h4>
-          <p>Detects duplicate content and rights management.</p>
-        </div>
+    <p class="code-label">Bash (CLI)</p>
+    <div class="code-block">kino-cli analyze https://example.com/master.m3u8 <span class="str">--format</span> json</div>
+
+    <p class="code-label">JavaScript (WASM)</p>
+    <div class="code-block"><span class="kw">import</span> { WasmPlayer } <span class="kw">from</span> <span class="str">'./pkg'</span>;
+player.load(url);</div>
+
+    <p class="code-label">Python (Analysis)</p>
+    <div class="code-block">analyzer = FrequencyAnalyzer(fft_size=<span class="num">2048</span>)
+result = analyzer.analyze_file(<span class="str">"content.wav"</span>)</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     13. COMPETITIVE MOAT
+     ════════════════════════════════════════════════════════════ -->
+
+<section class="section reveal">
+  <div class="frame">
+    <span class="corner-bl">+</span>
+    <span class="corner-br">+</span>
+
+    <h2 class="text-center">The Competitive Moat</h2>
+
+    <div class="cols-3" style="margin-top:32px;">
+      <div class="card">
+        <h3 class="text-center">Vs. FFprobe</h3>
+        <hr class="divider" style="margin:16px 0;">
+        <p style="color:var(--text-mid);font-size:0.9rem;line-height:1.7;">
+          <span class="check">✓</span> Kino provides semantic understanding (JSON) and formal verification.
+        </p>
+        <hr class="divider" style="margin:16px 0;">
+        <p style="color:var(--text-dim);font-size:0.85rem;">✕ FFprobe is unstructured and unsafe.</p>
       </div>
-
-      <div class="bp-titleblock">
-        <div>PROJECT: AI-VIDEO INTEGRATION ANALYSIS</div>
-        <div>DRAWING NO: AI-VB-006</div>
-        <div>SCALE: NTS</div>
-        <div>DATE: FEB 25, 2026</div>
+      <div class="card">
+        <h3 class="text-center">Vs. SaaS (Mux/Bitmovin)</h3>
+        <hr class="divider" style="margin:16px 0;">
+        <p style="color:var(--text-mid);font-size:0.9rem;line-height:1.7;">
+          <span class="check">✓</span> Kino is local-first, private, and agent-native.
+        </p>
+        <hr class="divider" style="margin:16px 0;">
+        <p style="color:var(--text-dim);font-size:0.85rem;">No recurring API costs.</p>
       </div>
+      <div class="card">
+        <h3 class="text-center">Vs. Python Scripts</h3>
+        <hr class="divider" style="margin:16px 0;">
+        <p style="color:var(--text-mid);font-size:0.9rem;line-height:1.7;">
+          <span class="check">✓</span> Kino is ~100x faster (Rust) and memory safe.
+        </p>
+        <hr class="divider" style="margin:16px 0;">
+        <p style="color:var(--text-dim);font-size:0.85rem;">Python processing is slow and brittle.</p>
+      </div>
+    </div>
+
+    <div class="card mt-24" style="text-align:center;padding:20px;">
+      <p style="font-size:1.05rem;">The only SDK combining <strong>Rust performance</strong>, <strong>Formal Verification</strong>, and <span class="mono">AI-Native interfaces</span>.</p>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════════════
-     MCP TOOLS
-     ═══════════════════════════════════════════════════════════════════ -->
-<section class="bp-section" id="mcp">
-  <div class="bp-frame">
-    <div class="bp-inner reveal">
-      <div class="bp-corner tl"></div><div class="bp-corner tr"></div><div class="bp-corner bl"></div><div class="bp-corner br"></div>
+<!-- ════════════════════════════════════════════════════════════
+     14. BUSINESS MODEL
+     ════════════════════════════════════════════════════════════ -->
 
-      <div class="section-title">Native Fluency in <span class="copper">Agent-Speak</span></div>
+<section class="section reveal">
+  <div class="frame">
+    <span class="corner-bl">+</span>
+    <span class="corner-br">+</span>
 
-      <div class="mcp-split">
-        <div class="mcp-col">
-          <h4>Available Tools</h4>
-          <div class="mcp-tool">analyze_stream</div>
-          <div class="mcp-tool">validate_stream</div>
-          <div class="mcp-tool">fingerprint_audio</div>
-          <div class="mcp-tool">quality_check</div>
-          <div class="mcp-tool">monitor_stream</div>
-          <div class="mcp-tool">autotag_content</div>
-          <div class="mcp-tool">compare_streams</div>
-          <div class="mcp-tool">encode_video</div>
+    <h2 class="text-center">Business Model: Open Core</h2>
+
+    <div class="tiers">
+      <div class="tier">
+        <div class="tier-header">
+          <span style="font-size:1.3rem;">🙌</span>
+          <h3>Community</h3>
         </div>
-        <div class="mcp-col">
-          <h4>Agent Response</h4>
-          <div class="mcp-json"><pre><span class="bracket">{</span>
-  <span class="key">"tool_use"</span>: <span class="str">"quality_check"</span>,
-  <span class="key">"result"</span>: <span class="bracket">{</span>
-    <span class="key">"status"</span>: <span class="str">"pass"</span>,
-    <span class="key">"resolution"</span>: <span class="str">"1920x1080"</span>,
-    <span class="key">"bitrate_ladder"</span>: <span class="bracket">[</span>
-      <span class="str">"320p"</span>,
-      <span class="str">"720p"</span>,
-      <span class="str">"1080p"</span>
-    <span class="bracket">]</span>,
-    <span class="key">"drm"</span>: <span class="str">"Widevine"</span>
-  <span class="bracket">}</span>
-<span class="bracket">}</span></pre></div>
-        </div>
+        <div class="tier-price">(Free)</div>
+        <ul>
+          <li>MIT/Apache License.</li>
+          <li>Full SDK, MCP Server, WASM, Audio Fingerprinting.</li>
+        </ul>
+        <span class="tier-arrow">→</span>
       </div>
-
-      <div class="mcp-caption">Agents call tools natively to receive structured data&mdash;no CLI required.</div>
-
-      <div class="bp-titleblock">
-        <div>PROJECT: AI-VIDEO INTEGRATION ANALYSIS</div>
-        <div>DRAWING NO: AI-VB-007</div>
-        <div>SCALE: NTS</div>
-        <div>DATE: FEB 25, 2026</div>
+      <div class="tier">
+        <div class="tier-header">
+          <span style="font-size:1.3rem;">🤝</span>
+          <h3>Professional</h3>
+        </div>
+        <div class="tier-price">($12k-25k/yr)</div>
+        <ul>
+          <li>Widevine DRM support.</li>
+          <li>Priority Support.</li>
+          <li>Custom Presets.</li>
+          <li>Service Level Agreement.</li>
+        </ul>
+        <span class="tier-arrow">→</span>
+      </div>
+      <div class="tier">
+        <div class="tier-header">
+          <span style="font-size:1.3rem;">🏢</span>
+          <h3>Enterprise</h3>
+        </div>
+        <div class="tier-price">(Custom)</div>
+        <ul>
+          <li>FairPlay & PlayReady DRM.</li>
+          <li>White-label MCP.</li>
+          <li>Air-gapped deployment support.</li>
+        </ul>
       </div>
     </div>
+
+    <p class="text-center mt-40" style="color:var(--text-mid);font-size:0.95rem;">
+      <strong>Target Customers:</strong> AI Platforms (Anthropic/OpenAI), Streaming Tech (Cloudflare), Media Tools (Frame.io)
+    </p>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════════════
-     BATTLE TESTED
-     ═══════════════════════════════════════════════════════════════════ -->
-<section class="bp-section">
-  <div class="bp-frame">
-    <div class="bp-inner reveal">
-      <div class="bp-corner tl"></div><div class="bp-corner tr"></div><div class="bp-corner bl"></div><div class="bp-corner br"></div>
+<!-- ════════════════════════════════════════════════════════════
+     15. CTA — THE MISSING LINK
+     ════════════════════════════════════════════════════════════ -->
 
-      <div class="section-title">Battle-Tested <span class="copper">Infrastructure</span></div>
+<section class="section reveal">
+  <div class="frame" style="border-width:2px;border-color:var(--text);">
+    <span class="corner-bl" style="color:var(--text);">+</span>
+    <span class="corner-br" style="color:var(--text);">+</span>
 
-      <div class="test-list">
-        <div class="test-item"><span class="test-pass">[PASS]</span> <strong>Mux HLS Parsing :</strong> Successfully parsed multi-rendition manifests (320p to 1080p).</div>
-        <div class="test-item"><span class="test-pass">[PASS]</span> <strong>Segment Validation :</strong> Verified accessibility of encrypted segments.</div>
-        <div class="test-item"><span class="test-pass">[PASS]</span> <strong>DRM Handshake :</strong> Validated Widevine and FairPlay signals.</div>
-        <div class="test-item"><span class="test-pass">[PASS]</span> <strong>Performance :</strong> 4ms startup time. Zero memory leaks detected.</div>
+    <h2 class="text-center" style="font-size:clamp(2rem, 4vw, 3rem);">The Missing Link for AI Video Intelligence</h2>
+    <p class="text-center mt-16" style="font-size:1.15rem;color:var(--text-mid);">Rust-Powered. Formally Verified. Available Now.</p>
+
+    <div class="cta-cards">
+      <div class="cta-card">
+        <h3>For Agents</h3>
+        <div class="cta-bar"></div>
+        <code>npm install -g kino-mcp</code>
       </div>
-
-      <div class="stable-badge">&#10003; v1.0.0 STABLE</div>
-
-      <div class="bp-titleblock">
-        <div>PROJECT: AI-VIDEO INTEGRATION ANALYSIS</div>
-        <div>DRAWING NO: AI-VB-008</div>
-        <div>SCALE: NTS</div>
-        <div>DATE: FEB 25, 2026</div>
+      <div class="cta-card">
+        <h3>For Devs</h3>
+        <div class="cta-bar"></div>
+        <code>cargo install kino-cli</code>
+      </div>
+      <div class="cta-card">
+        <h3>Source</h3>
+        <div class="cta-bar"></div>
+        <code>github.com/ExpertVagabond/kino</code>
       </div>
     </div>
+
+    <p class="text-center mt-40" style="font-size:0.85rem;color:var(--text-dim);">Copyright 2026 Purple Squirrel Media LLC.</p>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════════════
-     USE CASES
-     ═══════════════════════════════════════════════════════════════════ -->
-<section class="bp-section">
-  <div class="bp-frame">
-    <div class="bp-inner reveal">
-      <div class="bp-corner tl"></div><div class="bp-corner tr"></div><div class="bp-corner bl"></div><div class="bp-corner br"></div>
-
-      <div class="section-title">Unlocking Autonomous <span class="copper">Media Workflows</span></div>
-
-      <div class="usecases-grid">
-        <div class="usecase">
-          <div class="uc-icon">&#128737;</div>
-          <h4>Content Moderation</h4>
-          <p>Real-time policy checking and audio fingerprinting on live streams.</p>
-        </div>
-        <div class="usecase">
-          <div class="uc-icon">&#9881;</div>
-          <h4>QA Bots</h4>
-          <p>24/7 automated validation of bitrate ladders and DRM compliance.</p>
-        </div>
-        <div class="usecase">
-          <div class="uc-icon">&#127991;</div>
-          <h4>Auto-Indexing</h4>
-          <p>Tagging libraries by mood/genre without human intervention.</p>
-        </div>
-        <div class="usecase">
-          <div class="uc-icon">&#9889;</div>
-          <h4>Edge Compute</h4>
-          <p>Running analysis in-browser via WASM (Cloudflare Workers compatible).</p>
-        </div>
-      </div>
-
-      <div class="bp-titleblock">
-        <div>PROJECT: AI-VIDEO INTEGRATION ANALYSIS</div>
-        <div>DRAWING NO: AI-VB-009</div>
-        <div>SCALE: NTS</div>
-        <div>DATE: FEB 25, 2026</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════════════
-     MARKET
-     ═══════════════════════════════════════════════════════════════════ -->
-<section class="bp-section" id="market">
-  <div class="bp-frame">
-    <div class="bp-inner reveal">
-      <div class="bp-corner tl"></div><div class="bp-corner tr"></div><div class="bp-corner bl"></div><div class="bp-corner br"></div>
-
-      <div class="section-title">Every AI Company is a <span class="copper">Media Company</span></div>
-
-      <div class="venn-container">
-        <div class="venn">
-          <div class="venn-circle left"><span>LLMs &amp;<br>Agents</span></div>
-          <div class="venn-circle right"><span>Video<br>Infrastructure</span></div>
-          <div class="venn-overlap">The<br>Void</div>
-        </div>
-      </div>
-
-      <div class="market-points">
-        <div class="market-point">
-          <h4>Multimodal Shift</h4>
-          <p>Models must ingest and reason about video programmatically.</p>
-        </div>
-        <div class="market-point">
-          <h4>The Missing Standard</h4>
-          <p>There is no 'Video Standard Library' for AI agents&mdash;until Kino.</p>
-        </div>
-        <div class="market-point">
-          <h4>Opportunity</h4>
-          <p>Kino is the standard interface between LLMs and Video.</p>
-        </div>
-      </div>
-
-      <div class="bp-titleblock">
-        <div>PROJECT: AI-VIDEO INTEGRATION ANALYSIS</div>
-        <div>DRAWING NO: AI-VB-010</div>
-        <div>SCALE: NTS</div>
-        <div>DATE: FEB 25, 2026</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════════════
-     STRATEGIC FIT
-     ═══════════════════════════════════════════════════════════════════ -->
-<section class="bp-section">
-  <div class="bp-frame">
-    <div class="bp-inner reveal">
-      <div class="bp-corner tl"></div><div class="bp-corner tr"></div><div class="bp-corner bl"></div><div class="bp-corner br"></div>
-
-      <div class="section-title">Strategic Fit &amp; <span class="copper">Integration</span></div>
-
-      <div class="strat-grid">
-        <div class="strat-card">
-          <h4>AI Labs</h4>
-          <div class="strat-sub">(Anthropic / OpenAI)</div>
-          <p>Give models native, verified video capabilities immediately.</p>
-        </div>
-        <div class="strat-center">
-          <div class="gear">&#9881;</div>
-          <div class="label">KINO Core</div>
-        </div>
-        <div class="strat-card">
-          <h4>Video Infra</h4>
-          <div class="strat-sub">(Mux / Cloudflare)</div>
-          <p>Offer &ldquo;Agent-ready&rdquo; APIs to customers.</p>
-        </div>
-      </div>
-      <div style="text-align:center;margin-top:32px;">
-        <div class="strat-card" style="display:inline-block;max-width:400px;">
-          <h4>Media Tools</h4>
-          <div class="strat-sub">(Adobe / Frame.io)</div>
-          <p>Embed reliable, automated analysis into creative workflows.</p>
-        </div>
-      </div>
-
-      <div class="bp-titleblock">
-        <div>PROJECT: AI-VIDEO INTEGRATION ANALYSIS</div>
-        <div>DRAWING NO: AI-VB-011</div>
-        <div>SCALE: NTS</div>
-        <div>DATE: FEB 25, 2026</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════════════
-     TIMELINE
-     ═══════════════════════════════════════════════════════════════════ -->
-<section class="bp-section">
-  <div class="bp-frame">
-    <div class="bp-inner reveal">
-      <div class="bp-corner tl"></div><div class="bp-corner tr"></div><div class="bp-corner bl"></div><div class="bp-corner br"></div>
-
-      <div class="section-title">Accelerate Your Video Roadmap by <span class="copper">Years</span></div>
-
-      <div class="timeline-compare">
-        <div class="timeline-row">
-          <div class="timeline-label"><strong>Timeline A:</strong><br>Build In-House</div>
-          <div class="timeline-bar long">
-            Hire Rust Team &rarr; Build Core &rarr; Write TLA+ &rarr; Debug &rarr; Release
-            <div class="timeline-badge">24 Months (High Risk)</div>
-          </div>
-        </div>
-        <div class="timeline-row">
-          <div class="timeline-label"><strong>Timeline B:</strong><br>Integrate Kino</div>
-          <div class="timeline-bar short">
-            Acquire &amp; Plug-in
-            <div class="timeline-badge good">Immediate (Verified)</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="timeline-offer">Offer: Acquire the IP, the formally verified TLA+ specs, and the &ldquo;first-mover&rdquo; advantage in MCP video tooling.</div>
-
-      <div class="bp-titleblock">
-        <div>PROJECT: AI-VIDEO INTEGRATION ANALYSIS</div>
-        <div>DRAWING NO: AI-VB-012</div>
-        <div>SCALE: NTS</div>
-        <div>DATE: FEB 25, 2026</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════════════
-     TECH SPECS
-     ═══════════════════════════════════════════════════════════════════ -->
-<section class="bp-section">
-  <div class="bp-frame">
-    <div class="bp-inner reveal">
-      <div class="bp-corner tl"></div><div class="bp-corner tr"></div><div class="bp-corner bl"></div><div class="bp-corner br"></div>
-
-      <div class="section-title">Technical <span class="copper">Specifications</span></div>
-
-      <div class="specs-grid">
-        <div class="specs-cell">
-          <h4>License</h4>
-          <p>Dual Licensed: MIT / Apache-2.0</p>
-        </div>
-        <div class="specs-cell">
-          <h4>Core Dependencies</h4>
-          <ul>
-            <li>Tokio (Async Runtime)</li>
-            <li>Symphonia (Audio Decoding)</li>
-            <li>Ring (Crypto/DRM)</li>
-            <li>Nom (Parser Combinators)</li>
-          </ul>
-        </div>
-        <div class="specs-cell">
-          <h4>Deployment Targets</h4>
-          <ul>
-            <li>Native Binary (Linux/macOS/Windows)</li>
-            <li>WASM (WebAssembly)</li>
-            <li>Python (PyO3 bindings)</li>
-            <li>Docker Container</li>
-          </ul>
-        </div>
-        <div class="specs-cell">
-          <h4>Hardware Acceleration</h4>
-          <p>VA-API, VideoToolbox, NVDEC auto-detection.</p>
-        </div>
-      </div>
-
-      <div class="bp-titleblock">
-        <div>PROJECT: AI-VIDEO INTEGRATION ANALYSIS</div>
-        <div>DRAWING NO: AI-VB-013</div>
-        <div>SCALE: NTS</div>
-        <div>DATE: FEB 25, 2026</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════════════
-     CTA
-     ═══════════════════════════════════════════════════════════════════ -->
-<section class="bp-section cta-section">
-  <div class="bp-frame">
-    <div class="bp-inner reveal">
-      <div class="bp-corner tl"></div><div class="bp-corner tr"></div><div class="bp-corner bl"></div><div class="bp-corner br"></div>
-
-      <div class="cta-aperture">&#10687;</div>
-      <div class="cta-title">Let's Build the Eyes of AGI.</div>
-      <div class="cta-sub">Ready for integration today.</div>
-
-      <div class="cta-links">
-        <a href="https://purplesquirrelmedia.io">Purple Squirrel Media</a>
-        <a href="https://github.com/ExpertVagabond/kino">GitHub Repository</a>
-        <a href="https://docs.rs/kino-core">Documentation</a>
-        <a href="https://kino-demo.pages.dev">Demo</a>
-      </div>
-
-      <div class="cta-cmd" onclick="navigator.clipboard.writeText('npm install -g kino-mcp')">
-        <span class="prompt">$</span> npm install -g kino-mcp
-      </div>
-
-      <div class="bp-titleblock">
-        <div>PROJECT: AI-VIDEO INTEGRATION ANALYSIS</div>
-        <div>DRAWING NO: AI-VB-014</div>
-        <div>SCALE: NTS</div>
-        <div>DATE: FEB 25, 2026</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════════════
-     FOOTER
-     ═══════════════════════════════════════════════════════════════════ -->
-<footer>
-  <div class="footer-inner">
-    <div><img src="logo.png" alt="PSM" style="height:20px;border-radius:4px;vertical-align:middle;margin-right:6px;opacity:0.7">Kino &mdash; <a href="https://purplesquirrelmedia.io">Purple Squirrel Media LLC</a> &mdash; 2026</div>
-    <ul class="footer-links">
-      <li><a href="https://github.com/ExpertVagabond/kino">GitHub</a></li>
-      <li><a href="mailto:matthew@purplesquirrelmedia.io">Contact</a></li>
-    </ul>
-  </div>
-</footer>
+<!-- ════════════════════════════════════════════════════════════
+     SCRIPTS
+     ════════════════════════════════════════════════════════════ -->
 
 <script>
-// Nav scroll
-const nav = document.querySelector('nav');
-window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 20));
-
-// Waveform generator
-const waveEl = document.getElementById('waveform');
-const barCount = 120;
-for (let i = 0; i < barCount; i++) {
-  const bar = document.createElement('div');
-  bar.className = 'wave-bar';
-  // Create a realistic waveform shape
-  const x = i / barCount;
-  const env = Math.sin(x * Math.PI) * 0.8 + 0.2;
-  const noise = Math.sin(i * 0.5) * 0.3 + Math.sin(i * 1.7) * 0.2 + Math.sin(i * 3.1) * 0.15;
-  const h = Math.max(4, (env * (40 + noise * 60)));
-  bar.style.height = h + 'px';
-  if (i === Math.floor(barCount * 0.45)) {
-    // Add the divider
-    const div = document.createElement('div');
-    div.className = 'wave-divider';
-    waveEl.appendChild(div);
-  }
-  waveEl.appendChild(bar);
-}
-
 // Scroll reveal
-const obs = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-}, { threshold: 0.06, rootMargin: '0px 0px -40px 0px' });
-document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Spectrogram canvas
+const canvas = document.getElementById('spectrogramCanvas');
+if (canvas) {
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+
+  function drawSpectrogram() {
+    const w = canvas.parentElement.clientWidth - 40;
+    const h = canvas.parentElement.clientHeight - 40;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.scale(dpr, dpr);
+
+    // Draw frequency grid lines
+    ctx.strokeStyle = 'rgba(91, 155, 213, 0.12)';
+    ctx.lineWidth = 0.5;
+    for (let y = 0; y < h; y += 12) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+    }
+    for (let x = 0; x < w; x += 20) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, h);
+      ctx.stroke();
+    }
+
+    // Draw spectrogram bars
+    for (let x = 0; x < w; x += 3) {
+      const numBands = 8 + Math.floor(Math.random() * 8);
+      for (let b = 0; b < numBands; b++) {
+        const y = h - (b / numBands) * h;
+        const energy = Math.random();
+        const alpha = energy * 0.4 + 0.05;
+        const barH = 4 + energy * 8;
+        ctx.fillStyle = `rgba(51, 85, 170, ${alpha})`;
+        ctx.fillRect(x, y - barH / 2, 2, barH);
+      }
+    }
+
+    // Peak areas
+    const peaks = [w * 0.24, w * 0.45, w * 0.65, w * 0.8];
+    peaks.forEach(px => {
+      for (let y = h * 0.2; y < h * 0.9; y += 2) {
+        const dist = Math.abs(y - h * 0.5);
+        const energy = Math.max(0, 1 - dist / (h * 0.3));
+        const alpha = energy * 0.6;
+        ctx.fillStyle = `rgba(51, 85, 170, ${alpha})`;
+        ctx.fillRect(px - 6, y, 12, 2);
+      }
+    });
+  }
+
+  drawSpectrogram();
+  window.addEventListener('resize', drawSpectrogram);
+}
 </script>
+
 </body>
 </html>
