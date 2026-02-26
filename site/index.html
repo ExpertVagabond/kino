@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kino — The Video Intelligence Engine</title>
-<meta name="description" content="The first formally verified, Rust-native video SDK built for the AI era. MCP-native integration for Claude, GPT, and custom agents. Built by Purple Squirrel Media.">
+<meta name="description" content="The first formally verified, Rust-native video SDK built for the AI era. MCP-native integration for Claude, GPT, and custom agents.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800;9..40,900&display=swap" rel="stylesheet">
@@ -12,487 +12,579 @@
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --bg: #E8E5DF;
-  --slide-bg: #F3F1EC;
-  --border: #C4C0B8;
-  --border-lt: #D4D0C8;
-  --border-blue: #A8BDD4;
+  --bg: #F3F1EC;
+  --bg-alt: #EBE8E2;
+  --border: #C8C4BB;
+  --border-lt: #D8D4CB;
   --accent: #C87941;
+  --accent-hover: #B56A35;
+  --accent-bg: rgba(200,121,65,0.08);
+  --accent-border: rgba(200,121,65,0.25);
+  --blue: #3366AA;
+  --blue-bg: rgba(51,102,170,0.04);
+  --blue-border: rgba(51,102,170,0.15);
+  --green: #4CAF50;
   --text: #1A1A1A;
   --text-mid: #4A4A4A;
   --text-dim: #7A7A7A;
-  --text-lt: #999;
-  --green: #4CAF50;
-  --blue: #3366AA;
+  --text-lt: #A0A0A0;
   --sans: 'DM Sans', system-ui, sans-serif;
   --mono: 'JetBrains Mono', monospace;
 }
 
 html { scroll-behavior: smooth; background: var(--bg); color: var(--text); }
-body { font-family: var(--sans); font-weight: 400; line-height: 1.6; -webkit-font-smoothing: antialiased; padding: 24px; }
+body { font-family: var(--sans); font-weight: 400; line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 
 ::selection { background: var(--accent); color: #fff; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-hover); }
 
 /* ═══════════════════════════════════════════════════════════
-   SLIDE — each section is a presentation slide
+   NAV
    ═══════════════════════════════════════════════════════════ */
 
-.slide {
-  max-width: 1280px;
-  margin: 0 auto 24px;
-  background: var(--slide-bg);
-  border: 1px dashed var(--border);
-  position: relative;
-  padding: 60px 72px;
-  min-height: 540px;
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(243,241,236,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-lt);
+  padding: 0 48px;
+  height: 56px;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-
-  /* crosshair marks */
+  align-items: center;
+  justify-content: space-between;
 }
 
-.slide::before,
-.slide::after {
+.nav-logo {
+  font-family: var(--sans);
+  font-weight: 900;
+  font-size: 1.2rem;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-logo .mark {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  padding: 2px 6px;
+  letter-spacing: 0.05em;
+}
+
+.nav-links {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+}
+
+.nav-links a {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-mid);
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--text); }
+
+.nav-cta {
+  background: var(--text);
+  color: var(--bg) !important;
+  padding: 7px 18px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.nav-cta:hover { background: var(--accent) !important; color: #fff !important; }
+
+/* ═══════════════════════════════════════════════════════════
+   LAYOUT
+   ═══════════════════════════════════════════════════════════ */
+
+.container {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+
+section {
+  padding: 100px 0;
+}
+
+section.alt {
+  background: var(--bg-alt);
+}
+
+/* Decorative crosshair marks */
+.crosshair {
+  position: relative;
+}
+
+.crosshair::before {
   content: '+';
   position: absolute;
   font-family: var(--mono);
-  font-size: 16px;
+  font-size: 14px;
   color: var(--border);
-  line-height: 1;
   font-weight: 300;
 }
-.slide::before { top: 8px; left: 12px; }
-.slide::after { top: 8px; right: 12px; }
 
-.slide .corner-bl,
-.slide .corner-br {
-  position: absolute;
+/* Technical annotation labels */
+.annotation {
   font-family: var(--mono);
-  font-size: 16px;
-  color: var(--border);
-  line-height: 1;
-  font-weight: 300;
-}
-.slide .corner-bl { bottom: 8px; left: 12px; }
-.slide .corner-br { bottom: 8px; right: 12px; }
-
-/* Inner frame — some slides have a second thin border */
-.slide-inner {
-  border: 1px solid var(--border-lt);
-  padding: 48px 56px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-/* NotebookLM-style footer mark */
-.slide-footer {
-  position: absolute;
-  bottom: 14px;
-  right: 20px;
-  font-size: 11px;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   color: var(--text-lt);
-  font-family: var(--sans);
-  display: flex;
-  align-items: center;
-  gap: 4px;
 }
 
 /* ═══════════════════════════════════════════════════════════
-   TYPOGRAPHY — exactly matching the deck
+   TYPOGRAPHY
    ═══════════════════════════════════════════════════════════ */
 
 h1 {
-  font-family: var(--sans);
   font-weight: 900;
-  font-size: 3.2rem;
-  line-height: 1.08;
-  letter-spacing: -0.025em;
+  font-size: clamp(2.8rem, 5.5vw, 4.2rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
 }
 
 h2 {
-  font-family: var(--sans);
   font-weight: 800;
-  font-size: 2.4rem;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
   line-height: 1.12;
   letter-spacing: -0.02em;
-  margin-bottom: 6px;
+  margin-bottom: 12px;
 }
 
 h3 {
-  font-family: var(--sans);
   font-weight: 700;
   font-size: 1.15rem;
   line-height: 1.3;
+  margin-bottom: 6px;
 }
 
-.subtitle {
-  font-size: 1.05rem;
-  color: var(--text-mid);
-  line-height: 1.5;
-  font-weight: 400;
-}
-
-.label-mono {
+.eyebrow {
   font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: var(--text-dim);
+  color: var(--accent);
+  margin-bottom: 12px;
+  display: block;
+}
+
+.lead {
+  font-size: 1.15rem;
+  color: var(--text-mid);
+  line-height: 1.6;
+  max-width: 580px;
 }
 
 /* ═══════════════════════════════════════════════════════════
-   GRID & LAYOUT PRIMITIVES
+   HERO
    ═══════════════════════════════════════════════════════════ */
 
-.grid-2x2 {
+.hero {
+  padding-top: 160px;
+  padding-bottom: 100px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  position: relative;
+  gap: 60px;
+  align-items: center;
 }
 
-.grid-2x2::before {
-  content: '';
-  position: absolute;
-  top: 0; bottom: 0; left: 50%;
-  width: 1px;
-  background: var(--border);
+.hero-text .tagline {
+  font-size: 1.1rem;
+  color: var(--text-mid);
+  margin: 20px 0 36px;
+  line-height: 1.6;
+  max-width: 480px;
 }
 
-.grid-2x2::after {
-  content: '';
-  position: absolute;
-  left: 0; right: 0; top: 50%;
-  height: 1px;
-  background: var(--border);
-}
-
-.grid-2x2 .cell {
-  padding: 36px 40px;
+.hero-actions {
   display: flex;
-  gap: 20px;
-  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.cell-icon svg {
-  width: 52px;
-  height: 52px;
-  stroke: var(--text-dim);
-  fill: none;
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  flex-shrink: 0;
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.cell-text h3 { margin-bottom: 8px; }
-.cell-text p { color: var(--text-mid); font-size: 0.92rem; line-height: 1.55; }
-
-.split {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  position: relative;
+.btn-primary {
+  background: var(--text);
+  color: var(--bg);
 }
 
-.split::before {
-  content: '';
-  position: absolute;
-  top: 0; bottom: 0; left: 50%;
-  width: 1px;
-  background: var(--border);
+.btn-primary:hover { background: var(--accent); color: #fff; }
+
+.btn-outline {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
 }
 
-.split-col { padding: 32px 40px; }
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
 
-.cols-3 {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  position: relative;
-}
-
-.cols-3.divided .col:not(:last-child) {
-  border-right: 1px solid var(--border);
-}
-
-.cols-3 .col { padding: 24px 28px; }
-
-/* ═══════════════════════════════════════════════════════════
-   ICON STYLE — warm brown/orange line art
-   ═══════════════════════════════════════════════════════════ */
-
-.icon-accent svg {
-  stroke: var(--accent);
-  fill: none;
-  stroke-width: 1.5;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* ═══════════════════════════════════════════════════════════
-   TABLE — clean lines matching slides
-   ═══════════════════════════════════════════════════════════ */
-
-.slide-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.slide-table th {
-  text-align: left;
-  padding: 14px 20px;
-  font-weight: 700;
-  border-bottom: 2px solid var(--text);
-  font-size: 1rem;
-}
-
-.slide-table td {
-  padding: 18px 20px;
-  border-bottom: 1px solid var(--border);
-  vertical-align: top;
-  font-size: 0.92rem;
-  line-height: 1.55;
-}
-
-.slide-table td:first-child { font-weight: 600; }
-
-/* Tool table */
-.tool-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 20px 0;
-  border-bottom: 1px solid var(--border);
-}
-
-.tool-row:last-child { border-bottom: none; }
-
-.tool-row .tool-icon {
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
+.hero-visual {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
-.tool-row .tool-icon svg {
-  width: 32px;
-  height: 32px;
+/* Dashed frame accent on hero visual */
+.hero-frame {
+  position: relative;
+  padding: 32px;
+  border: 1px dashed var(--border);
+}
+
+.hero-frame::before,
+.hero-frame::after {
+  content: '+';
+  position: absolute;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--border);
+  font-weight: 300;
+}
+
+.hero-frame::before { top: -8px; left: -4px; }
+.hero-frame::after { top: -8px; right: -4px; }
+
+.hero-frame .hf-bl,
+.hero-frame .hf-br {
+  position: absolute;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--border);
+  font-weight: 300;
+}
+
+.hero-frame .hf-bl { bottom: -8px; left: -4px; }
+.hero-frame .hf-br { bottom: -8px; right: -4px; }
+
+/* ═══════════════════════════════════════════════════════════
+   PILLARS — 4-column feature grid
+   ═══════════════════════════════════════════════════════════ */
+
+.pillars {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.pillar {
+  padding: 36px 28px;
+  border-right: 1px solid var(--border);
+}
+
+.pillar:last-child { border-right: none; }
+
+.pillar-icon {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 16px;
+}
+
+.pillar-icon svg {
+  width: 36px;
+  height: 36px;
+  stroke: var(--accent);
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pillar h3 { margin-bottom: 8px; }
+.pillar p { font-size: 0.88rem; color: var(--text-mid); line-height: 1.55; }
+
+/* ═══════════════════════════════════════════════════════════
+   PROBLEM / SOLUTION — side by side
+   ═══════════════════════════════════════════════════════════ */
+
+.problem-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin-top: 48px;
+}
+
+.problem-col {
+  padding: 40px;
+}
+
+.problem-col:first-child {
+  border-right: 1px solid var(--border);
+}
+
+.problem-col h3 { font-size: 1.25rem; margin-bottom: 20px; }
+
+.problem-col ul {
+  list-style: none;
+  padding: 0;
+}
+
+.problem-col ul li {
+  padding: 8px 0;
+  font-size: 0.92rem;
+  color: var(--text-mid);
+  line-height: 1.55;
+  border-bottom: 1px solid var(--border-lt);
+}
+
+.problem-col ul li:last-child { border-bottom: none; }
+.problem-col ul li strong { color: var(--text); }
+
+/* ═══════════════════════════════════════════════════════════
+   TOOLS — table-like rows
+   ═══════════════════════════════════════════════════════════ */
+
+.tools-list { margin-top: 40px; }
+
+.tool-row {
+  display: grid;
+  grid-template-columns: 48px 120px 1fr;
+  gap: 16px;
+  align-items: start;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border-lt);
+}
+
+.tool-row:first-child { border-top: 1px solid var(--border); }
+
+.tool-row .t-icon svg {
+  width: 28px;
+  height: 28px;
   stroke: var(--accent);
   fill: none;
   stroke-width: 1.5;
 }
 
-.tool-row .tool-cat {
-  width: 130px;
-  flex-shrink: 0;
-  font-weight: 700;
-  font-size: 1.05rem;
-  padding-top: 2px;
-}
-
-.tool-row .tool-desc {
-  color: var(--text-mid);
-  line-height: 1.65;
-  font-size: 0.92rem;
-}
-
-.tool-row .tool-desc code {
-  font-family: var(--mono);
-  font-weight: 600;
-  color: var(--text);
-  font-size: 0.88rem;
-}
+.tool-row .t-cat { font-weight: 700; font-size: 0.95rem; padding-top: 2px; }
+.tool-row .t-desc { color: var(--text-mid); font-size: 0.9rem; line-height: 1.6; }
+.tool-row .t-desc code { font-family: var(--mono); font-weight: 600; color: var(--text); font-size: 0.85rem; }
 
 /* ═══════════════════════════════════════════════════════════
-   CODE BLOCKS
+   ARCHITECTURE — tree with dashed frame
    ═══════════════════════════════════════════════════════════ */
 
-.code-box {
-  background: var(--border-lt);
-  border: 1px solid var(--border);
-  padding: 16px 20px;
+.arch-frame {
+  border: 1px dashed var(--border);
+  padding: 48px;
+  position: relative;
+  margin-top: 40px;
+}
+
+.arch-frame::before {
+  content: '+';
+  position: absolute;
+  top: -8px;
+  left: -4px;
   font-family: var(--mono);
-  font-size: 0.85rem;
-  line-height: 1.65;
-  margin-top: 8px;
+  font-size: 13px;
+  color: var(--border);
+  font-weight: 300;
 }
 
-.code-box .kw { color: #7B3FA0; font-weight: 500; }
-.code-box .str { color: #2E7D32; }
-.code-box .num { color: #1565C0; }
-
-.code-label {
-  font-weight: 600;
-  font-size: 0.95rem;
-  margin-top: 24px;
+.arch-frame::after {
+  content: '+';
+  position: absolute;
+  top: -8px;
+  right: -4px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--border);
+  font-weight: 300;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   ARCH TREE — matching slide 6 exactly
-   ═══════════════════════════════════════════════════════════ */
+.arch-tree { text-align: center; }
 
-.arch-tree { text-align: center; margin-top: 32px; }
-
-.arch-box {
+.arch-node {
   display: inline-block;
   border: 1px solid var(--border);
-  padding: 14px 40px;
-  background: rgba(255,255,255,0.3);
+  padding: 12px 28px;
+  background: rgba(255,255,255,0.4);
 }
 
-.arch-box strong { font-family: var(--mono); font-size: 0.95rem; display: block; }
-.arch-box span { font-size: 0.8rem; color: var(--text-dim); }
+.arch-node strong { font-family: var(--mono); font-size: 0.88rem; display: block; }
+.arch-node span { font-size: 0.78rem; color: var(--text-dim); }
 
 .arch-row {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 14px;
-  max-width: 620px;
+  gap: 12px;
+  max-width: 560px;
   margin: 0 auto;
 }
 
-/* connector lines */
-.arch-vline { display: flex; justify-content: center; }
-.arch-vline svg { display: block; }
-
-/* ═══════════════════════════════════════════════════════════
-   SEAL / BADGE — formal verification stamp
-   ═══════════════════════════════════════════════════════════ */
-
-.seal {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #C87941 0%, #A0613A 100%);
+.arch-connector {
   display: flex;
-  align-items: center;
   justify-content: center;
-  position: relative;
-  box-shadow: inset 0 0 0 6px rgba(255,255,255,0.25), inset 0 0 0 10px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.12);
-  flex-shrink: 0;
-}
-
-.seal::before {
-  content: '';
-  position: absolute;
-  inset: 14px;
-  border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.25);
-}
-
-.seal-text {
-  font-family: var(--sans);
-  font-weight: 900;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  text-align: center;
-  line-height: 1.35;
-  color: #fff;
+  padding: 4px 0;
 }
 
 /* ═══════════════════════════════════════════════════════════
-   SPECTROGRAM
+   CODE — blocks with labels
    ═══════════════════════════════════════════════════════════ */
 
-.spec-wrap {
-  position: relative;
-  border: 1px solid var(--border-blue);
-  background: rgba(51,102,170,0.02);
-  height: 200px;
-  margin: 16px 0 28px;
-  overflow: hidden;
+.code-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+  margin-top: 36px;
 }
 
-.spec-wrap canvas { width: 100%; height: 100%; display: block; }
+.code-card {
+  border: 1px solid var(--border-lt);
+  background: rgba(255,255,255,0.4);
+}
 
-.spec-label {
+.code-card-label {
+  padding: 10px 16px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  border-bottom: 1px solid var(--border-lt);
+}
+
+.code-card pre {
+  padding: 16px;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  line-height: 1.65;
+  overflow-x: auto;
+  background: var(--bg-alt);
+}
+
+.code-card pre .kw { color: #7B3FA0; }
+.code-card pre .str { color: #2E7D32; }
+.code-card pre .num { color: #1565C0; }
+
+/* ═══════════════════════════════════════════════════════════
+   COMPARISON — 3 columns
+   ═══════════════════════════════════════════════════════════ */
+
+.comp-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 36px;
+}
+
+.comp-table th {
+  text-align: left;
+  padding: 14px 20px;
+  font-weight: 700;
+  border-bottom: 2px solid var(--text);
+  font-size: 0.95rem;
+}
+
+.comp-table td {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-lt);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  vertical-align: top;
+}
+
+.comp-table td:first-child { font-weight: 600; width: 130px; }
+
+/* ═══════════════════════════════════════════════════════════
+   SPECTROGRAM ACCENT
+   ═══════════════════════════════════════════════════════════ */
+
+.spec-accent {
+  border: 1px solid var(--blue-border);
+  background: var(--blue-bg);
+  height: 160px;
+  position: relative;
+  overflow: hidden;
+  margin: 24px 0;
+}
+
+.spec-accent canvas { width: 100%; height: 100%; display: block; }
+
+.spec-tag {
   position: absolute;
   font-family: var(--mono);
-  font-size: 0.65rem;
-  background: rgba(255,255,255,0.92);
+  font-size: 0.6rem;
+  background: rgba(255,255,255,0.9);
   border: 1px solid var(--accent);
-  padding: 2px 8px;
-  color: var(--text);
-  white-space: nowrap;
+  padding: 1px 6px;
 }
 
 .spec-dot {
   position: absolute;
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   background: var(--accent);
   border-radius: 50%;
 }
 
-.spec-line {
-  position: absolute;
-  width: 1px;
-  background: var(--accent);
-}
-
 /* ═══════════════════════════════════════════════════════════
-   FLOW DIAGRAM — MCP pipeline
+   SEAL
    ═══════════════════════════════════════════════════════════ */
 
-.flow-pipe {
-  display: flex;
+.seal-inline {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 0;
-  margin: 36px 0 12px;
-  flex-wrap: nowrap;
-}
-
-.flow-box {
-  border: 1px solid var(--border);
-  padding: 16px 20px;
-  text-align: center;
-  background: rgba(255,255,255,0.4);
-  min-width: 120px;
-}
-
-.flow-box-icon { font-size: 2rem; margin-bottom: 4px; }
-.flow-box-name { font-weight: 700; font-size: 0.8rem; }
-.flow-box.accent-border { border-color: var(--accent); }
-
-.flow-arrow-block {
-  padding: 0 6px;
-  text-align: center;
+  gap: 6px;
+  background: var(--accent);
+  color: #fff;
+  padding: 4px 12px;
   font-family: var(--mono);
-  font-size: 0.68rem;
-  color: var(--text-dim);
-  line-height: 1.4;
-}
-
-.flow-arrow-block .arr {
-  font-size: 1.2rem;
-  color: var(--text-dim);
-  display: block;
-}
-
-/* Return flow labels */
-.flow-return {
-  display: flex;
-  justify-content: space-around;
-  font-family: var(--mono);
-  font-size: 0.68rem;
-  color: var(--text-dim);
-  margin-top: 4px;
-  padding: 0 60px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 /* ═══════════════════════════════════════════════════════════
-   WORKFLOW CARDS — slide 10
+   WORKFLOW — icon cards
    ═══════════════════════════════════════════════════════════ */
+
+.workflow-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+  margin-top: 36px;
+}
 
 .wf-card {
-  border: 1px solid var(--border-blue);
+  border: 1px solid var(--blue-border);
+  background: var(--blue-bg);
   padding: 28px;
-  background: rgba(51,102,170,0.02);
 }
 
 .wf-card h3 { margin-bottom: 16px; }
@@ -501,890 +593,576 @@ h3 {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 6px 0;
-  font-size: 0.9rem;
+  padding: 5px 0;
+  font-size: 0.88rem;
+  color: var(--text-mid);
 }
 
+.wf-step strong { color: var(--text); }
+
 .wf-step-icon {
-  width: 32px;
-  height: 28px;
-  background: rgba(200,121,65,0.12);
-  border: 1px solid rgba(200,121,65,0.25);
+  width: 28px;
+  height: 24px;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   flex-shrink: 0;
 }
 
-.wf-step p { color: var(--text-mid); }
-.wf-step p strong { color: var(--text); }
-
-.wf-arrow { text-align: center; color: var(--border-blue); font-size: 0.75rem; padding: 2px 0 2px 42px; }
+.wf-arrow {
+  padding: 1px 0 1px 38px;
+  color: var(--blue-border);
+  font-size: 0.7rem;
+}
 
 /* ═══════════════════════════════════════════════════════════
-   HUB DIAGRAM — deploy anywhere
+   PRICING — tier strip
    ═══════════════════════════════════════════════════════════ */
 
-.hub-grid {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  grid-template-rows: auto auto;
-  gap: 20px;
-  align-items: center;
-  justify-items: center;
-  margin-top: 36px;
-}
-
-.hub-center {
-  grid-row: 1 / 3;
-  grid-column: 2;
-  width: 110px;
-  height: 110px;
-  border: 1.5px solid var(--border);
-  transform: rotate(45deg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255,255,255,0.4);
-}
-
-.hub-center span {
-  transform: rotate(-45deg);
-  font-weight: 700;
-  font-size: 0.85rem;
-  text-align: center;
-  line-height: 1.3;
-}
-
-.hub-card {
-  border: 1px solid var(--border);
-  padding: 16px 20px;
-  background: rgba(255,255,255,0.3);
-  width: 100%;
-  max-width: 260px;
-}
-
-.hub-card h4 { font-size: 1rem; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
-.hub-card p { font-family: var(--mono); font-size: 0.78rem; color: var(--text-mid); line-height: 1.5; }
-
-/* ═══════════════════════════════════════════════════════════
-   MOAT CARDS — slide 13
-   ═══════════════════════════════════════════════════════════ */
-
-.moat-card {
-  border: 1px solid var(--border);
-  padding: 24px;
-  background: rgba(255,255,255,0.3);
-}
-
-.moat-card h3 { text-align: center; margin-bottom: 12px; }
-.moat-card .moat-divider { border-top: 1px solid var(--border); margin: 12px 0; }
-.moat-card .moat-pro { color: var(--text-mid); font-size: 0.9rem; line-height: 1.55; }
-.moat-card .moat-con { color: var(--text-lt); font-size: 0.82rem; }
-
-/* ═══════════════════════════════════════════════════════════
-   TIER CARDS — slide 14
-   ═══════════════════════════════════════════════════════════ */
-
-.tier-grid {
+.tier-strip {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 0;
-  margin-top: 32px;
-}
-
-.tier-box {
+  margin-top: 40px;
   border: 1px solid var(--border);
-  padding: 28px;
-  background: rgba(255,255,255,0.3);
-  position: relative;
 }
 
-.tier-box + .tier-box { border-left: none; }
+.tier {
+  padding: 32px;
+  border-right: 1px solid var(--border);
+}
 
-.tier-box h3 { display: flex; align-items: center; gap: 8px; }
-.tier-price { font-family: var(--mono); font-size: 0.78rem; color: var(--text-dim); margin: 2px 0 14px; }
+.tier:last-child { border-right: none; }
 
-.tier-box ul { list-style: none; padding: 0; }
-.tier-box ul li { font-size: 0.88rem; color: var(--text-mid); padding: 2px 0; line-height: 1.55; }
-
-.tier-arrow {
-  position: absolute;
-  right: -13px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-dim);
+.tier-name {
+  font-weight: 800;
   font-size: 1.1rem;
-  z-index: 2;
-  background: var(--slide-bg);
-  padding: 0 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
+
+.tier-price {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin: 2px 0 14px;
+}
+
+.tier ul { list-style: none; }
+.tier li { font-size: 0.88rem; color: var(--text-mid); padding: 3px 0; }
 
 /* ═══════════════════════════════════════════════════════════
-   CTA CARDS — slide 15
+   CTA FOOTER
    ═══════════════════════════════════════════════════════════ */
 
-.cta-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 20px;
-  margin-top: 36px;
+.cta-section {
+  text-align: center;
+  padding: 80px 0 60px;
 }
 
-.cta-box {
-  border: 2px solid var(--text);
-  padding: 24px;
+.cta-row {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+
+.cta-block {
+  border: 1.5px solid var(--text);
+  padding: 20px 32px;
   text-align: center;
   position: relative;
-  background: rgba(255,255,255,0.3);
+  min-width: 200px;
 }
 
-/* corner brackets */
-.cta-box::before { content: ''; position: absolute; top: -2px; left: -2px; width: 12px; height: 12px; border-top: 2px solid var(--text); border-left: 2px solid var(--text); }
-.cta-box::after { content: ''; position: absolute; top: -2px; right: -2px; width: 12px; height: 12px; border-top: 2px solid var(--text); border-right: 2px solid var(--text); }
-.cta-box .cb-bl { position: absolute; bottom: -2px; left: -2px; width: 12px; height: 12px; border-bottom: 2px solid var(--text); border-left: 2px solid var(--text); }
-.cta-box .cb-br { position: absolute; bottom: -2px; right: -2px; width: 12px; height: 12px; border-bottom: 2px solid var(--text); border-right: 2px solid var(--text); }
+/* Corner bracket accents */
+.cta-block::before { content: ''; position: absolute; top: -2px; left: -2px; width: 10px; height: 10px; border-top: 2px solid var(--text); border-left: 2px solid var(--text); }
+.cta-block::after { content: ''; position: absolute; bottom: -2px; right: -2px; width: 10px; height: 10px; border-bottom: 2px solid var(--text); border-right: 2px solid var(--text); }
 
-.cta-box h3 { font-size: 1.2rem; margin-bottom: 12px; }
-.cta-bar { height: 3px; background: var(--accent); width: 80%; margin: 0 auto 12px; }
-.cta-box code { font-family: var(--mono); font-size: 0.78rem; color: var(--text-mid); }
+.cta-block h4 { font-size: 1rem; margin-bottom: 8px; }
+.cta-block .cta-bar { height: 2px; background: var(--accent); width: 60%; margin: 0 auto 8px; }
+.cta-block code { font-family: var(--mono); font-size: 0.75rem; color: var(--text-mid); }
+
+footer {
+  text-align: center;
+  padding: 24px;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  border-top: 1px solid var(--border-lt);
+}
 
 /* ═══════════════════════════════════════════════════════════
    RESPONSIVE
    ═══════════════════════════════════════════════════════════ */
 
 @media (max-width: 900px) {
-  body { padding: 12px; }
-  .slide { padding: 32px 28px; min-height: auto; }
-  .slide-inner { padding: 28px 24px; }
-  .grid-2x2, .split, .cols-3, .tier-grid, .cta-grid, .hub-grid { grid-template-columns: 1fr; }
-  .grid-2x2::before, .split::before { display: none; }
-  .grid-2x2::after { display: none; }
-  .grid-2x2 .cell { border-bottom: 1px solid var(--border); }
-  .tier-box + .tier-box { border-left: 1px solid var(--border); border-top: none; }
-  .tier-arrow { display: none; }
+  .container { padding: 0 24px; }
+  nav { padding: 0 24px; }
+  .nav-links a:not(.nav-cta) { display: none; }
+  .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+  .hero-visual { order: -1; }
+  .pillars { grid-template-columns: 1fr 1fr; }
+  .pillar:nth-child(2) { border-right: none; }
+  .pillar:nth-child(1), .pillar:nth-child(2) { border-bottom: 1px solid var(--border); }
+  .problem-grid { grid-template-columns: 1fr; }
+  .problem-col:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+  .tool-row { grid-template-columns: 48px 1fr; }
+  .tool-row .t-cat { display: none; }
   .arch-row { grid-template-columns: 1fr; gap: 8px; }
-  .flow-pipe { flex-wrap: wrap; gap: 8px; }
-  .hub-center { grid-row: auto; grid-column: auto; }
-  h1 { font-size: 2rem; }
-  h2 { font-size: 1.6rem; }
+  .code-grid, .workflow-grid { grid-template-columns: 1fr; }
+  .tier-strip { grid-template-columns: 1fr; }
+  .tier { border-right: none; border-bottom: 1px solid var(--border); }
+  .tier:last-child { border-bottom: none; }
+  section { padding: 60px 0; }
 }
 
 /* ═══════════════════════════════════════════════════════════
-   REVEAL ANIMATION
+   ANIMATIONS
    ═══════════════════════════════════════════════════════════ */
 
-.slide {
+.reveal {
   opacity: 0;
-  transform: translateY(16px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
-.slide.visible {
+.reveal.visible {
   opacity: 1;
   transform: translateY(0);
 }
+
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
 </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════════════
-     SLIDE 1 — HERO: THE MISSING LINK
-     ══════════════════════════════════════════════════════ -->
+<!-- ── NAV ──────────────────────────────────────────────────── -->
 
-<div class="slide" style="min-height: 640px; text-align:center;">
-  <span class="corner-bl">+</span><span class="corner-br">+</span>
-
-  <p class="label-mono" style="margin-bottom:32px;">the missing link</p>
-
-  <!-- Prism illustration -->
-  <div style="display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:48px;">
-    <!-- Scattered input data -->
-    <svg width="260" height="160" viewBox="0 0 260 160" fill="none" style="flex-shrink:0;">
-      <g opacity="0.5">
-        <circle cx="15" cy="30" r="2" fill="#888"/><circle cx="28" cy="55" r="2" fill="#999"/>
-        <circle cx="10" cy="80" r="2" fill="#888"/><circle cx="40" cy="20" r="1.5" fill="#aaa"/>
-        <circle cx="35" cy="95" r="2" fill="#888"/><circle cx="50" cy="45" r="2" fill="#999"/>
-        <circle cx="55" cy="110" r="1.5" fill="#aaa"/><circle cx="65" cy="35" r="2" fill="#888"/>
-        <circle cx="70" cy="75" r="2" fill="#999"/><circle cx="80" cy="50" r="2" fill="#888"/>
-        <circle cx="85" cy="100" r="1.5" fill="#aaa"/><circle cx="95" cy="65" r="2" fill="#888"/>
-        <circle cx="105" cy="42" r="2" fill="#999"/><circle cx="110" cy="85" r="2" fill="#888"/>
-        <circle cx="120" cy="58" r="2" fill="#888"/><circle cx="130" cy="72" r="1.5" fill="#999"/>
-        <circle cx="140" cy="62" r="2" fill="#888"/><circle cx="155" cy="68" r="2" fill="#888"/>
-        <circle cx="170" cy="72" r="2" fill="#999"/><circle cx="185" cy="74" r="2" fill="#888"/>
-        <circle cx="200" cy="76" r="2" fill="#888"/><circle cx="215" cy="77" r="2" fill="#999"/>
-        <circle cx="230" cy="78" r="2" fill="#888"/><circle cx="245" cy="79" r="2" fill="#888"/>
-      </g>
-      <line x1="15" y1="30" x2="255" y2="76" stroke="#aaa" stroke-width="0.5" stroke-dasharray="4,3"/>
-      <line x1="10" y1="80" x2="255" y2="78" stroke="#aaa" stroke-width="0.5" stroke-dasharray="4,3"/>
-      <line x1="35" y1="95" x2="255" y2="82" stroke="#aaa" stroke-width="0.5" stroke-dasharray="4,3"/>
-      <line x1="10" y1="130" x2="255" y2="84" stroke="#aaa" stroke-width="0.5" stroke-dasharray="4,3"/>
-    </svg>
-
-    <!-- Prism -->
-    <svg width="180" height="200" viewBox="0 0 180 200" fill="none" style="flex-shrink:0;margin: 0 -20px;">
-      <polygon points="90,10 170,180 10,180" stroke="#3366AA" stroke-width="2" fill="rgba(51,102,170,0.04)"/>
-      <line x1="90" y1="10" x2="170" y2="180" stroke="#3366AA" stroke-width="1" stroke-dasharray="5,4" opacity="0.25"/>
-      <line x1="50" y1="95" x2="130" y2="95" stroke="#3366AA" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.2"/>
-      <text x="90" y="125" text-anchor="middle" font-family="DM Sans, sans-serif" font-weight="900" font-size="32" fill="#1A1A1A">KINO</text>
-    </svg>
-
-    <!-- Output rays to AI chip -->
-    <svg width="240" height="140" viewBox="0 0 240 140" fill="none" style="flex-shrink:0;">
-      <line x1="0" y1="65" x2="170" y2="35" stroke="#C87941" stroke-width="2.5"/>
-      <line x1="0" y1="72" x2="170" y2="70" stroke="#3366AA" stroke-width="2"/>
-      <line x1="0" y1="79" x2="170" y2="105" stroke="#888" stroke-width="1.5"/>
-      <!-- AI chip -->
-      <rect x="172" y="40" width="52" height="52" rx="4" stroke="#3366AA" stroke-width="1.5" fill="rgba(51,102,170,0.04)"/>
-      <circle cx="198" cy="66" r="14" stroke="#3366AA" stroke-width="1.2"/>
-      <circle cx="198" cy="66" r="7" stroke="#3366AA" stroke-width="1"/>
-      <circle cx="198" cy="66" r="2" fill="#3366AA"/>
-      <!-- pins -->
-      <line x1="172" y1="52" x2="164" y2="52" stroke="#3366AA" stroke-width="1"/>
-      <line x1="172" y1="66" x2="164" y2="66" stroke="#3366AA" stroke-width="1"/>
-      <line x1="172" y1="80" x2="164" y2="80" stroke="#3366AA" stroke-width="1"/>
-      <line x1="224" y1="52" x2="232" y2="52" stroke="#3366AA" stroke-width="1"/>
-      <line x1="224" y1="66" x2="232" y2="66" stroke="#3366AA" stroke-width="1"/>
-      <line x1="224" y1="80" x2="232" y2="80" stroke="#3366AA" stroke-width="1"/>
-      <line x1="198" y1="40" x2="198" y2="32" stroke="#3366AA" stroke-width="1"/>
-      <line x1="186" y1="40" x2="186" y2="32" stroke="#3366AA" stroke-width="1"/>
-      <line x1="210" y1="40" x2="210" y2="32" stroke="#3366AA" stroke-width="1"/>
-    </svg>
+<nav>
+  <div class="nav-logo">
+    KINO <span class="mark">v0.1</span>
   </div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#tools">MCP Tools</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#pricing">Pricing</a>
+    <a href="https://github.com/ExpertVagabond/kino" class="nav-cta">GitHub →</a>
+  </div>
+</nav>
 
-  <h1>Kino: The Video Intelligence Engine</h1>
-  <p style="font-size:1.25rem;color:var(--text-mid);margin-top:16px;">Rust-Powered. Formally Verified. MCP-Native.</p>
-  <p style="font-size:0.9rem;color:var(--text-dim);margin-top:24px;">Built by Purple Squirrel Media</p>
+<!-- ── HERO ─────────────────────────────────────────────────── -->
 
-  <span class="slide-footer">NotebookLM</span>
-</div>
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-text">
+        <span class="eyebrow">the missing link</span>
+        <h1>Video Intelligence<br>for AI Agents</h1>
+        <p class="tagline">The first formally verified, Rust-native video SDK with a built-in MCP server. Give your agents eyes and ears.</p>
+        <div class="hero-actions">
+          <a href="https://github.com/ExpertVagabond/kino" class="btn btn-primary">View Source →</a>
+          <a href="#tools" class="btn btn-outline">Explore Tools</a>
+        </div>
+        <div style="margin-top:28px;display:flex;gap:16px;flex-wrap:wrap;">
+          <span class="annotation">rust-powered</span>
+          <span class="annotation">formally verified</span>
+          <span class="annotation">mcp-native</span>
+        </div>
+      </div>
 
-<!-- ══════════════════════════════════════════════════════
-     SLIDE 2 — THE FIRST VIDEO SDK
-     ══════════════════════════════════════════════════════ -->
+      <div class="hero-visual">
+        <div class="hero-frame">
+          <span class="hf-bl">+</span>
+          <span class="hf-br">+</span>
+          <!-- Prism illustration -->
+          <svg width="340" height="260" viewBox="0 0 340 260" fill="none">
+            <!-- Input scatter -->
+            <g opacity="0.45">
+              <circle cx="12" cy="60" r="2" fill="#888"/><circle cx="25" cy="85" r="2" fill="#999"/>
+              <circle cx="8" cy="110" r="2" fill="#888"/><circle cx="38" cy="50" r="1.5" fill="#aaa"/>
+              <circle cx="30" cy="130" r="2" fill="#888"/><circle cx="48" cy="75" r="2" fill="#999"/>
+              <circle cx="55" cy="145" r="1.5" fill="#aaa"/><circle cx="60" cy="65" r="2" fill="#888"/>
+              <circle cx="68" cy="100" r="2" fill="#999"/><circle cx="78" cy="80" r="2" fill="#888"/>
+              <circle cx="82" cy="120" r="1.5" fill="#aaa"/><circle cx="92" cy="95" r="2" fill="#888"/>
+              <circle cx="105" cy="88" r="2" fill="#999"/><circle cx="115" cy="105" r="2" fill="#888"/>
+            </g>
+            <line x1="12" y1="60" x2="135" y2="120" stroke="#aaa" stroke-width="0.5" stroke-dasharray="3,3"/>
+            <line x1="8" y1="110" x2="135" y2="125" stroke="#aaa" stroke-width="0.5" stroke-dasharray="3,3"/>
+            <line x1="30" y1="130" x2="135" y2="130" stroke="#aaa" stroke-width="0.5" stroke-dasharray="3,3"/>
 
-<div class="slide">
-  <span class="corner-bl">+</span><span class="corner-br">+</span>
+            <!-- Prism -->
+            <polygon points="170,30 240,220 100,220" stroke="#3366AA" stroke-width="2" fill="rgba(51,102,170,0.03)"/>
+            <line x1="170" y1="30" x2="240" y2="220" stroke="#3366AA" stroke-width="1" stroke-dasharray="5,4" opacity="0.2"/>
+            <text x="170" y="155" text-anchor="middle" font-family="DM Sans, sans-serif" font-weight="900" font-size="28" fill="#1A1A1A">KINO</text>
 
-  <h2>The First Video SDK Built for the AI Era</h2>
-  <p class="subtitle">Bridging the gap between video infrastructure and autonomous agents.</p>
+            <!-- Output rays -->
+            <line x1="210" y1="120" x2="320" y2="80" stroke="#C87941" stroke-width="2.5"/>
+            <line x1="210" y1="128" x2="320" y2="128" stroke="#3366AA" stroke-width="2"/>
+            <line x1="210" y1="136" x2="320" y2="176" stroke="#888" stroke-width="1.5"/>
 
-  <div class="grid-2x2" style="margin-top:36px;">
-    <div class="cell">
-      <div class="cell-icon">
-        <svg viewBox="0 0 52 52"><rect x="4" y="20" width="16" height="12" rx="2"/><line x1="20" y1="26" x2="32" y2="26"/><rect x="32" y="20" width="16" height="12" rx="2"/><line x1="4" y1="23" x2="0" y2="23"/><line x1="4" y1="29" x2="0" y2="29"/></svg>
-      </div>
-      <div class="cell-text">
-        <h3>Agent-Native</h3>
-        <p>Built-in Model Context Protocol (MCP) server for instant integration with Claude, GPT, and custom agents.</p>
-      </div>
-    </div>
-    <div class="cell">
-      <div class="cell-icon">
-        <svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="20" stroke-width="1.5"/><path d="M26 10v16l10 6" stroke-width="1.5"/><circle cx="42" cy="42" r="8" stroke-width="1.5"/><path d="M42 38v4h4" stroke-width="1.5"/></svg>
-      </div>
-      <div class="cell-text">
-        <h3>Performance</h3>
-        <p>7-crate Rust workspace with zero-copy parsing and &lt;4ms startup latency.</p>
-      </div>
-    </div>
-    <div class="cell">
-      <div class="cell-icon">
-        <svg viewBox="0 0 52 52"><circle cx="22" cy="18" r="12" stroke-width="1.5"/><path d="M14 30l-4 18h24l-4-18" stroke-width="1.5"/><path d="M18 22l4-4 4 4" stroke-width="1.5" fill="none"/></svg>
-      </div>
-      <div class="cell-text">
-        <h3>Correctness</h3>
-        <p>Critical state machines backed by TLA+ formal verification (mathematical proofs of safety).</p>
-      </div>
-    </div>
-    <div class="cell">
-      <div class="cell-icon">
-        <svg viewBox="0 0 52 52"><rect x="6" y="6" width="16" height="14" rx="2"/><rect x="30" y="6" width="16" height="14" rx="2"/><rect x="14" y="28" width="24" height="16" rx="2"/><rect x="8" y="8" width="12" height="10" rx="1" opacity="0.3"/></svg>
-      </div>
-      <div class="cell-text">
-        <h3>Versatility</h3>
-        <p>Deploys anywhere: Edge (WASM), Desktop (Tauri), CLI, or Python pipelines.</p>
+            <!-- AI chip -->
+            <rect x="294" y="100" width="40" height="40" rx="3" stroke="#3366AA" stroke-width="1.5" fill="rgba(51,102,170,0.03)"/>
+            <circle cx="314" cy="120" r="10" stroke="#3366AA" stroke-width="1"/>
+            <circle cx="314" cy="120" r="4" stroke="#3366AA" stroke-width="1"/>
+            <line x1="294" y1="110" x2="288" y2="110" stroke="#3366AA" stroke-width="1"/>
+            <line x1="294" y1="120" x2="288" y2="120" stroke="#3366AA" stroke-width="1"/>
+            <line x1="294" y1="130" x2="288" y2="130" stroke="#3366AA" stroke-width="1"/>
+          </svg>
+          <div class="annotation" style="position:absolute;bottom:12px;right:16px;">fig. 01 — data prism</div>
+        </div>
       </div>
     </div>
   </div>
+</section>
 
-  <span class="slide-footer">NotebookLM</span>
-</div>
+<!-- ── PILLARS ──────────────────────────────────────────────── -->
 
-<!-- ══════════════════════════════════════════════════════
-     SLIDE 3 — BLIND SPOT
-     ══════════════════════════════════════════════════════ -->
-
-<div class="slide">
-  <span class="corner-bl">+</span><span class="corner-br">+</span>
-
-  <h2>Video is the Last Unstructured Frontier</h2>
-
-  <div class="split" style="margin-top:32px;">
-    <div class="split-col">
-      <h3 style="margin-bottom:16px;">Current State: The Blind Spot</h3>
-      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
-        <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="#888" stroke-width="2">
-          <circle cx="32" cy="32" r="18"/><circle cx="32" cy="32" r="7" fill="#999" stroke="none"/>
-          <line x1="14" y1="14" x2="50" y2="50" stroke-width="3"/>
-        </svg>
-        <div style="width:120px;height:80px;background:repeating-conic-gradient(#c8c4bc 0% 25%, #a8a4a0 0% 50%) 0 0/6px 6px;opacity:0.6;"></div>
-      </div>
-      <ul style="list-style:disc;padding-left:20px;color:var(--text-mid);line-height:2.2;font-size:0.92rem;">
-        <li><strong style="color:var(--text)">Blind Agents:</strong> LLMs are text-centric; they cannot natively watch streams.</li>
-        <li><strong style="color:var(--text)">Unsafe Tooling:</strong> FFmpeg is unsafe, hard to wrap, and lacks semantic output.</li>
-        <li><strong style="color:var(--text)">Slow Clouds:</strong> API latency (100ms&ndash;10s) makes real-time reasoning impossible.</li>
-      </ul>
+<div class="container reveal">
+  <div class="pillars">
+    <div class="pillar">
+      <div class="pillar-icon"><svg viewBox="0 0 36 36"><rect x="2" y="14" width="12" height="8" rx="1.5"/><line x1="14" y1="18" x2="22" y2="18"/><rect x="22" y="14" width="12" height="8" rx="1.5"/></svg></div>
+      <h3>Agent-Native</h3>
+      <p>Built-in MCP server for instant integration with Claude, GPT, and custom agents.</p>
     </div>
-    <div class="split-col">
-      <h3 style="margin-bottom:16px;">With Kino: Structured Vision</h3>
-      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
-        <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="#555" stroke-width="2">
-          <circle cx="32" cy="32" r="18"/><circle cx="32" cy="32" r="7" fill="#666" stroke="none"/>
-        </svg>
-        <svg width="140" height="80" viewBox="0 0 140 80" fill="none" stroke="#999" stroke-width="0.5">
-          <line x1="0" y1="40" x2="140" y2="8"/><line x1="0" y1="40" x2="140" y2="24"/>
-          <line x1="0" y1="40" x2="140" y2="40"/><line x1="0" y1="40" x2="140" y2="56"/>
-          <line x1="0" y1="40" x2="140" y2="72"/>
-          <line x1="40" y1="18" x2="40" y2="62"/><line x1="70" y1="12" x2="70" y2="68"/>
-          <line x1="100" y1="8" x2="100" y2="72"/><line x1="130" y1="5" x2="130" y2="75"/>
-          <g fill="#555" stroke="none">
-            <circle cx="40" cy="26" r="3"/><circle cx="70" cy="20" r="3"/><circle cx="100" cy="16" r="3"/><circle cx="130" cy="12" r="3"/>
-            <circle cx="40" cy="40" r="3"/><circle cx="70" cy="40" r="3"/><circle cx="100" cy="40" r="3"/><circle cx="130" cy="40" r="3"/>
-            <circle cx="40" cy="54" r="3"/><circle cx="70" cy="60" r="3"/><circle cx="100" cy="64" r="3"/><circle cx="130" cy="68" r="3"/>
-          </g>
-        </svg>
-      </div>
-      <p style="color:var(--text-mid);line-height:1.65;font-size:0.92rem;">A drop-in primitive that allows agents to programmatically analyze, fingerprint, and QC video streams in real-time.</p>
-      <div class="code-box" style="display:inline-block;font-size:1rem;font-weight:600;padding:10px 24px;margin-top:20px;">Semantic JSON Output</div>
+    <div class="pillar">
+      <div class="pillar-icon"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="14"/><path d="M18 6v12l8 5"/></svg></div>
+      <h3>Performance</h3>
+      <p>7-crate Rust workspace with zero-copy parsing and &lt;4ms startup latency.</p>
+    </div>
+    <div class="pillar">
+      <div class="pillar-icon"><svg viewBox="0 0 36 36"><circle cx="16" cy="12" r="8"/><path d="M10 20l-3 12h18l-3-12"/><path d="M13 15l3-3 3 3"/></svg></div>
+      <h3>Correctness</h3>
+      <p>State machines backed by TLA+ formal verification. <span class="seal-inline" style="font-size:0.6rem;padding:2px 6px;">verified</span></p>
+    </div>
+    <div class="pillar">
+      <div class="pillar-icon"><svg viewBox="0 0 36 36"><rect x="4" y="4" width="12" height="10" rx="1.5"/><rect x="20" y="4" width="12" height="10" rx="1.5"/><rect x="10" y="20" width="16" height="12" rx="1.5"/></svg></div>
+      <h3>Versatility</h3>
+      <p>Edge (WASM), Desktop (Tauri), CLI, Python pipelines. Deploy anywhere.</p>
     </div>
   </div>
-
-  <span class="slide-footer">NotebookLM</span>
 </div>
 
-<!-- ══════════════════════════════════════════════════════
-     SLIDE 4 — MCP PIPELINE
-     ══════════════════════════════════════════════════════ -->
-
-<div class="slide">
-  <span class="corner-bl">+</span><span class="corner-br">+</span>
-  <div class="slide-inner">
-
-    <h2>Giving Agents Video Superpowers via MCP</h2>
-    <p class="subtitle">Kino acts as a native tool provider through the Model Context Protocol.</p>
-
-    <div class="flow-pipe">
-      <div class="flow-box">
-        <div class="flow-box-icon">💬</div>
-        <div class="flow-box-name">User Prompt</div>
-      </div>
-      <div class="flow-arrow-block">Request<span class="arr">→</span></div>
-      <div class="flow-box">
-        <div class="flow-box-icon" style="font-size:1.4rem;line-height:2rem;">AI 🧠</div>
-        <div class="flow-box-name">AI Agent</div>
-      </div>
-      <div class="flow-arrow-block">Tool Call<span class="arr">→</span></div>
-      <div class="flow-box accent-border">
-        <div class="flow-box-icon">⚙️</div>
-        <div class="flow-box-name" style="color:var(--accent);">Kino MCP Server</div>
-      </div>
-      <div class="flow-arrow-block">Analyze<span class="arr">→</span></div>
-      <div class="flow-box">
-        <div class="flow-box-icon">🎬</div>
-        <div class="flow-box-name">HLS Stream</div>
-      </div>
-    </div>
-
-    <div class="flow-return">
-      <span>← Answer</span>
-      <span>← Structured JSON</span>
-      <span>← Raw Data</span>
-    </div>
-
-    <p class="label-mono" style="margin-top:32px;">Security: Uses child_process.execFile to prevent shell injection.</p>
-
-  </div>
-  <span class="slide-footer">NotebookLM</span>
-</div>
-
-<!-- ══════════════════════════════════════════════════════
-     SLIDE 5 — AGENT TOOLSET
-     ══════════════════════════════════════════════════════ -->
-
-<div class="slide">
-  <span class="corner-bl">+</span><span class="corner-br">+</span>
-
-  <h2>The Agent Toolset</h2>
-  <p class="subtitle">8 Native MCP Functions available to the LLM</p>
-
-  <div style="margin-top:28px;">
-    <div class="tool-row">
-      <div class="tool-icon icon-accent"><svg viewBox="0 0 32 32"><circle cx="13" cy="13" r="9"/><line x1="20" y1="20" x2="28" y2="28" stroke-width="2.5"/><line x1="9" y1="13" x2="17" y2="13"/><line x1="13" y1="9" x2="13" y2="17"/></svg></div>
-      <div class="tool-cat">Discovery</div>
-      <div class="tool-desc"><code>analyze_stream</code>: Parse manifests, codecs, renditions.<br><code>validate_stream</code>: Check segment accessibility and DRM.</div>
-    </div>
-    <div class="tool-row">
-      <div class="tool-icon icon-accent"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="12"/><path d="M10 16l4 4 8-8"/></svg></div>
-      <div class="tool-cat">Quality Control</div>
-      <div class="tool-desc"><code>quality_check</code>: Full QC report (bitrate ladder, captions).<br><code>monitor_stream</code>: Live latency and freshness checks.</div>
-    </div>
-    <div class="tool-row">
-      <div class="tool-icon icon-accent"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="12"/><path d="M16 8a5 5 0 0 0-3 2c-1 1.5-2 3-2 5a5 5 0 0 0 10 0c0-2-1-3.5-2-5a5 5 0 0 0-3-2z" fill="none"/><circle cx="16" cy="20" r="2"/></svg></div>
-      <div class="tool-cat">Intelligence</div>
-      <div class="tool-desc"><code>fingerprint_audio</code>: Content ID and duplicate detection.<br><code>autotag_content</code>: Detect BPM, genre, and mood.</div>
-    </div>
-    <div class="tool-row">
-      <div class="tool-icon icon-accent"><svg viewBox="0 0 32 32"><path d="M6 16h20"/><path d="M10 10l6 6-6 6"/><path d="M22 10l-6 6 6 6"/></svg></div>
-      <div class="tool-cat">Operations</div>
-      <div class="tool-desc"><code>compare_streams</code>: Diff two streams for A/B testing.<br><code>encode_video</code>: Generate presets (Mobile/4K).</div>
-    </div>
-  </div>
-
-  <span class="slide-footer">NotebookLM</span>
-</div>
-
-<!-- ══════════════════════════════════════════════════════
-     SLIDE 6 — ARCHITECTURE TREE
-     ══════════════════════════════════════════════════════ -->
-
-<div class="slide">
-  <span class="corner-bl">+</span><span class="corner-br">+</span>
-  <div class="slide-inner">
-
-    <h2>Architecture: Modular 7-Crate Workspace</h2>
-
-    <div class="arch-tree">
-      <div class="arch-box">
-        <strong>kino-cli / kino-mcp</strong>
-        <span>Interface & Tooling</span>
-      </div>
-
-      <div class="arch-vline"><svg width="2" height="28"><line x1="1" y1="0" x2="1" y2="28" stroke="var(--border)" stroke-width="1"/></svg></div>
-      <div style="display:flex;justify-content:center;"><svg width="420" height="2"><line x1="70" y1="1" x2="350" y2="1" stroke="var(--border)" stroke-width="1"/></svg></div>
-
-      <div class="arch-row">
-        <div class="arch-box"><strong>kino-core</strong><span>(HLS/DASH, ABR, DRM)</span></div>
-        <div class="arch-box"><strong>kino-frequency</strong><span>(FFT Engine, Fingerprinting)</span></div>
-        <div class="arch-box"><strong>kino-wasm</strong><span>(Browser/Edge Playback)</span></div>
-      </div>
-
-      <div class="arch-vline"><svg width="2" height="20"><line x1="1" y1="0" x2="1" y2="20" stroke="var(--border)" stroke-width="1"/></svg></div>
-      <div style="display:flex;justify-content:center;"><svg width="420" height="2"><line x1="70" y1="1" x2="350" y2="1" stroke="var(--border)" stroke-width="1"/></svg></div>
-
-      <div class="arch-row">
-        <div class="arch-box"><strong>kino-desktop</strong><span>(GStreamer)</span></div>
-        <div class="arch-box"><strong>kino-tauri</strong><span>(Native App)</span></div>
-        <div class="arch-box"><strong>kino-python</strong><span>(Data Science)</span></div>
-      </div>
-    </div>
-
-    <p class="label-mono" style="text-align:right;margin-top:32px;">Total: 14K Lines of Code. Zero-copy parsing.</p>
-
-  </div>
-  <span class="slide-footer">NotebookLM</span>
-</div>
-
-<!-- ══════════════════════════════════════════════════════
-     SLIDE 7 — TLA+ FORMAL VERIFICATION
-     ══════════════════════════════════════════════════════ -->
-
-<div class="slide">
-  <span class="corner-bl">+</span><span class="corner-br">+</span>
-  <div class="slide-inner">
-
-    <div style="display:flex;gap:48px;align-items:flex-start;">
-      <div style="flex:1;min-width:300px;">
-        <h2>Uncompromising Correctness</h2>
-        <p class="subtitle">Mathematical Proof of Reliability using TLA+</p>
-
-        <div class="code-box" style="margin-top:24px;font-size:0.9rem;">
-<span class="kw">invariant</span> BufferBounded ==
-    /\ Len(buffer) &lt;= MaxBufferSize
-    /\ \A s \in buffer : s.quality >= MinQuality</div>
-
-        <hr style="border:none;border-top:1px solid var(--border);margin:28px 0;">
-
-        <h3>The Specs</h3>
-        <ul style="list-style:disc;padding-left:20px;color:var(--text-mid);line-height:2.2;font-size:0.92rem;margin-top:8px;">
-          <li><strong style="color:var(--text)">Safety:</strong> Buffer never exceeds limits; <strong>Fullscreen != PiP.</strong></li>
-          <li><strong style="color:var(--text)">Liveness:</strong> Buffering always resolves; Loading always completes.</li>
-          <li><strong style="color:var(--text)">Consistency:</strong> Error states never de-sync.</li>
-        </ul>
-        <p style="color:var(--text-mid);margin-top:12px;font-size:0.92rem;">25+ verified invariants ensure the player never enters an invalid state.</p>
-      </div>
-
-      <div class="seal">
-        <div class="seal-text">Formally<br>Verified</div>
-      </div>
-    </div>
-
-  </div>
-  <span class="slide-footer">NotebookLM</span>
-</div>
-
-<!-- ══════════════════════════════════════════════════════
-     SLIDE 8 — SPECTROGRAM
-     ══════════════════════════════════════════════════════ -->
-
-<div class="slide">
-  <span class="corner-bl">+</span><span class="corner-br">+</span>
-  <div class="slide-inner">
-
-    <h2>Seeing Through Sound: kino-frequency</h2>
-
-    <div class="spec-wrap">
-      <div class="spec-label" style="top:8px;left:22%;">Anchor Point (Hash A)</div>
-      <div class="spec-label" style="top:8px;right:16%;">Target Point (Hash B)</div>
-      <div class="spec-dot" style="bottom:52%;left:24%;"></div>
-      <div class="spec-dot" style="bottom:38%;right:18%;"></div>
-      <div class="spec-line" style="top:28px;left:calc(24% + 4px);height:calc(52% - 28px);"></div>
-      <div class="spec-line" style="top:28px;right:calc(18% + 4px);height:calc(62% - 28px);"></div>
-      <canvas id="specCanvas"></canvas>
-    </div>
-
-    <div class="cols-3 divided" style="border-top:1px solid var(--border);">
-      <div class="col">
-        <h3>Fingerprinting</h3>
-        <p style="color:var(--text-mid);font-size:0.88rem;margin-top:4px;">Shazam-style spectral peak hashing for Content ID.</p>
-      </div>
-      <div class="col">
-        <h3>Auto-Tagging</h3>
-        <p style="color:var(--text-mid);font-size:0.88rem;margin-top:4px;">Detects Genre (Electronic), Mood (Dark), and BPM.</p>
-      </div>
-      <div class="col">
-        <h3>Thumbnailing</h3>
-        <p style="color:var(--text-mid);font-size:0.88rem;margin-top:4px;">Identifies moments of high interest via audio energy.</p>
-      </div>
-    </div>
-
-    <p class="label-mono" style="text-align:center;margin-top:20px;">Tech Note: Rust-based FFT processing at ~100x realtime.</p>
-
-  </div>
-  <span class="slide-footer">NotebookLM</span>
-</div>
-
-<!-- ══════════════════════════════════════════════════════
-     SLIDE 9 — WHY RUST
-     ══════════════════════════════════════════════════════ -->
-
-<div class="slide">
-  <span class="corner-bl">+</span><span class="corner-br">+</span>
-
-  <h2>Why Rust? Performance Meets Safety.</h2>
-
-  <table class="slide-table" style="margin-top:32px;">
-    <thead>
-      <tr><th></th><th>Kino (Rust)</th><th>FFmpeg (C)</th><th>Cloud APIs</th></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Memory<br>Safety</td>
-        <td><span style="color:var(--green);font-size:1.3rem;">✓</span> <strong>Safe</strong><br><span style="color:var(--text-dim);font-size:0.82rem;">(Borrow Checker)</span></td>
-        <td>Unsafe<br><span style="color:var(--text-dim);font-size:0.82rem;">(Manual Mgmt)</span></td>
-        <td>N/A</td>
-      </tr>
-      <tr>
-        <td>Latency</td>
-        <td><strong>&lt;4ms Startup</strong> ⏱</td>
-        <td>Heavy Overhead</td>
-        <td>100ms - 10s</td>
-      </tr>
-      <tr>
-        <td>Deployment</td>
-        <td><strong>Single Binary / WASM</strong> 📦</td>
-        <td>Shared Libraries</td>
-        <td>External Dep.</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <p class="label-mono" style="margin-top:32px;">Process thousands of streams concurrently without the memory leaks that crash Python pipelines.</p>
-
-  <span class="slide-footer">NotebookLM</span>
-</div>
-
-<!-- ══════════════════════════════════════════════════════
-     SLIDE 10 — REAL-WORLD WORKFLOWS
-     ══════════════════════════════════════════════════════ -->
-
-<div class="slide">
-  <span class="corner-bl">+</span><span class="corner-br">+</span>
-
-  <h2>Real-World Agent Workflows</h2>
-
-  <div class="cols-3" style="gap:20px;margin-top:28px;">
-    <div class="wf-card">
-      <h3>Content Moderation</h3>
-      <div class="wf-step"><div class="wf-step-icon">📡</div><p>Agent scans live stream</p></div>
-      <div class="wf-arrow">↓</div>
-      <div class="wf-step"><div class="wf-step-icon">🔊</div><p>Fingerprints audio</p></div>
-      <div class="wf-arrow">↓</div>
-      <div class="wf-step"><div class="wf-step-icon">🛡</div><p><strong>Flags policy violations</strong> before viewers see them.</p></div>
-    </div>
-    <div class="wf-card">
-      <h3>Transcoding Pipeline</h3>
-      <div class="wf-step"><div class="wf-step-icon">📄</div><p>Agent analyzes input</p></div>
-      <div class="wf-arrow">↓</div>
-      <div class="wf-step"><div class="wf-step-icon">⚙️</div><p>Selects optimal preset</p></div>
-      <div class="wf-arrow">↓</div>
-      <div class="wf-step"><div class="wf-step-icon">✅</div><p><strong>Validates</strong> output quality automatically.</p></div>
-    </div>
-    <div class="wf-card">
-      <h3>Event Monitoring</h3>
-      <div class="wf-step"><div class="wf-step-icon">🕐</div><p>Agent watches 24/7</p></div>
-      <div class="wf-arrow">↓</div>
-      <div class="wf-step"><div class="wf-step-icon">📊</div><p>Monitors health metrics</p></div>
-      <div class="wf-arrow">↓</div>
-      <div class="wf-step"><div class="wf-step-icon">🚨</div><p><strong>Alerts</strong> on latency spikes or DRM failures.</p></div>
-    </div>
-  </div>
-
-  <span class="slide-footer">NotebookLM</span>
-</div>
-
-<!-- ══════════════════════════════════════════════════════
-     SLIDE 11 — DEPLOY ANYWHERE
-     ══════════════════════════════════════════════════════ -->
-
-<div class="slide" style="text-align:center;">
-  <span class="corner-bl">+</span><span class="corner-br">+</span>
-
-  <h2>Deploy Anywhere</h2>
-
-  <div class="hub-grid">
-    <div class="hub-card" style="justify-self:end;">
-      <h4>🖥 Browser</h4>
-      <p>kino-wasm: Runs via MSE. No server round-trip.</p>
-    </div>
-    <div class="hub-center"><span>Kino<br>Binary</span></div>
-    <div class="hub-card" style="justify-self:start;">
-      <h4>🖥 Desktop</h4>
-      <p>kino-tauri: Native apps for macOS, Linux, Windows.</p>
-    </div>
-    <div class="hub-card" style="justify-self:end;">
-      <h4>🐍 Scripts</h4>
-      <p>kino-python: PyO3 bindings for Data Science.</p>
-    </div>
-    <div></div>
-    <div class="hub-card" style="justify-self:start;">
-      <h4>🖧 Server</h4>
-      <p>CLI / MCP: Linux/macOS binaries. AWS Lambda ready.</p>
-    </div>
-  </div>
-
-  <span class="slide-footer">NotebookLM</span>
-</div>
-
-<!-- ══════════════════════════════════════════════════════
-     SLIDE 12 — DEVELOPER EXPERIENCE
-     ══════════════════════════════════════════════════════ -->
-
-<div class="slide">
-  <span class="corner-bl">+</span><span class="corner-br">+</span>
-  <div class="slide-inner">
-
-    <h2>Developer Experience: Integration in Minutes</h2>
-
-    <p class="code-label" style="margin-top:28px;">Bash (CLI)</p>
-    <div class="code-box">kino-cli analyze https://example.com/master.m3u8 <span class="str">--format</span> json</div>
-
-    <p class="code-label">JavaScript (WASM)</p>
-    <div class="code-box"><span class="kw">import</span> { WasmPlayer } <span class="kw">from</span> <span class="str">'./pkg'</span>;
-player.load(url);</div>
-
-    <p class="code-label">Python (Analysis)</p>
-    <div class="code-box">analyzer = FrequencyAnalyzer(fft_size=<span class="num">2048</span>)
-result = analyzer.analyze_file(<span class="str">"content.wav"</span>)</div>
-
-  </div>
-  <span class="slide-footer">NotebookLM</span>
-</div>
-
-<!-- ══════════════════════════════════════════════════════
-     SLIDE 13 — COMPETITIVE MOAT
-     ══════════════════════════════════════════════════════ -->
-
-<div class="slide">
-  <span class="corner-bl">+</span><span class="corner-br">+</span>
-  <div class="slide-inner">
-
-    <h2 style="text-align:center;">The Competitive Moat</h2>
-
-    <div class="cols-3" style="gap:20px;margin-top:28px;">
-      <div class="moat-card">
-        <h3>Vs. FFprobe</h3>
-        <div class="moat-divider"></div>
-        <p class="moat-pro"><span style="color:var(--green)">✓</span> Kino provides semantic understanding (JSON) and formal verification.</p>
-        <div class="moat-divider"></div>
-        <p class="moat-con">✕ FFprobe is unstructured and unsafe.</p>
-      </div>
-      <div class="moat-card">
-        <h3>Vs. SaaS (Mux/Bitmovin)</h3>
-        <div class="moat-divider"></div>
-        <p class="moat-pro"><span style="color:var(--green)">✓</span> Kino is local-first, private, and agent-native.</p>
-        <div class="moat-divider"></div>
-        <p class="moat-con">No recurring API costs.</p>
-      </div>
-      <div class="moat-card">
-        <h3>Vs. Python Scripts</h3>
-        <div class="moat-divider"></div>
-        <p class="moat-pro"><span style="color:var(--green)">✓</span> Kino is ~100x faster (Rust) and memory safe.</p>
-        <div class="moat-divider"></div>
-        <p class="moat-con">Python processing is slow and brittle.</p>
-      </div>
-    </div>
-
-    <div class="moat-card" style="text-align:center;padding:16px 24px;margin-top:20px;">
-      <p style="font-size:1rem;">The only SDK combining <strong>Rust performance</strong>, <strong>Formal Verification</strong>, and <span style="font-family:var(--mono)">AI-Native interfaces</span>.</p>
-    </div>
-
-  </div>
-  <span class="slide-footer">NotebookLM</span>
-</div>
-
-<!-- ══════════════════════════════════════════════════════
-     SLIDE 14 — BUSINESS MODEL
-     ══════════════════════════════════════════════════════ -->
-
-<div class="slide">
-  <span class="corner-bl">+</span><span class="corner-br">+</span>
-  <div class="slide-inner">
-
-    <h2 style="text-align:center;">Business Model: Open Core</h2>
-
-    <div class="tier-grid">
-      <div class="tier-box">
-        <h3><span style="font-size:1.2rem;">🙌</span> Community</h3>
-        <div class="tier-price">(Free)</div>
+<!-- ── PROBLEM / SOLUTION ──────────────────────────────────── -->
+
+<section id="features">
+  <div class="container reveal">
+    <span class="eyebrow">the problem</span>
+    <h2>Video is the Last Unstructured Frontier</h2>
+    <p class="lead">AI agents can read text, browse the web, and write code. But they can't watch a video stream.</p>
+
+    <div class="problem-grid">
+      <div class="problem-col">
+        <h3>Current State: The Blind Spot</h3>
         <ul>
-          <li>MIT/Apache License.</li>
-          <li>Full SDK, MCP Server, WASM, Audio Fingerprinting.</li>
-        </ul>
-        <span class="tier-arrow">→</span>
-      </div>
-      <div class="tier-box">
-        <h3><span style="font-size:1.2rem;">🤝</span> Professional</h3>
-        <div class="tier-price">($12k-25k/yr)</div>
-        <ul>
-          <li>Widevine DRM support.</li>
-          <li>Priority Support.</li>
-          <li>Custom Presets.</li>
-          <li>Service Level Agreement.</li>
-        </ul>
-        <span class="tier-arrow">→</span>
-      </div>
-      <div class="tier-box">
-        <h3><span style="font-size:1.2rem;">🏢</span> Enterprise</h3>
-        <div class="tier-price">(Custom)</div>
-        <ul>
-          <li>FairPlay & PlayReady DRM.</li>
-          <li>White-label MCP.</li>
-          <li>Air-gapped deployment support.</li>
+          <li><strong>Blind Agents</strong> — LLMs are text-centric; they cannot natively watch streams.</li>
+          <li><strong>Unsafe Tooling</strong> — FFmpeg is unsafe, hard to wrap, and lacks semantic output.</li>
+          <li><strong>Slow Clouds</strong> — API latency (100ms–10s) makes real-time reasoning impossible.</li>
         </ul>
       </div>
-    </div>
-
-    <p style="text-align:center;margin-top:36px;color:var(--text-mid);font-size:0.92rem;">
-      <strong>Target Customers:</strong> AI Platforms (Anthropic/OpenAI), Streaming Tech (Cloudflare), Media Tools (Frame.io)
-    </p>
-
-  </div>
-  <span class="slide-footer">NotebookLM</span>
-</div>
-
-<!-- ══════════════════════════════════════════════════════
-     SLIDE 15 — CTA
-     ══════════════════════════════════════════════════════ -->
-
-<div class="slide" style="text-align:center;">
-  <span class="corner-bl">+</span><span class="corner-br">+</span>
-
-  <h2 style="font-size:2.6rem;margin-bottom:8px;">The Missing Link for AI Video Intelligence</h2>
-  <p style="font-size:1.15rem;color:var(--text-mid);">Rust-Powered. Formally Verified. Available Now.</p>
-
-  <div class="cta-grid">
-    <div class="cta-box">
-      <span class="cb-bl"></span><span class="cb-br"></span>
-      <h3>For Agents</h3>
-      <div class="cta-bar"></div>
-      <code>npm install -g kino-mcp</code>
-    </div>
-    <div class="cta-box">
-      <span class="cb-bl"></span><span class="cb-br"></span>
-      <h3>For Devs</h3>
-      <div class="cta-bar"></div>
-      <code>cargo install kino-cli</code>
-    </div>
-    <div class="cta-box">
-      <span class="cb-bl"></span><span class="cb-br"></span>
-      <h3>Source</h3>
-      <div class="cta-bar"></div>
-      <code>github.com/ExpertVagabond/kino</code>
+      <div class="problem-col">
+        <h3>With Kino: Structured Vision</h3>
+        <p style="color:var(--text-mid);font-size:0.92rem;line-height:1.65;margin-bottom:16px;">A drop-in primitive that allows agents to programmatically analyze, fingerprint, and QC video streams in real-time.</p>
+        <div style="font-family:var(--mono);font-size:0.95rem;font-weight:600;background:var(--bg-alt);border:1px solid var(--border-lt);padding:10px 20px;display:inline-block;">Semantic JSON Output</div>
+        <div class="spec-accent" style="margin-top:20px;">
+          <div class="spec-tag" style="top:6px;left:18%;">Anchor (Hash A)</div>
+          <div class="spec-tag" style="top:6px;right:14%;">Target (Hash B)</div>
+          <div class="spec-dot" style="top:45%;left:20%;"></div>
+          <div class="spec-dot" style="top:55%;right:16%;"></div>
+          <canvas id="specCanvas"></canvas>
+        </div>
+        <div class="annotation">fig. 02 — spectral peak fingerprinting</div>
+      </div>
     </div>
   </div>
+</section>
 
-  <p style="margin-top:48px;font-size:0.85rem;color:var(--text-dim);">Copyright 2026 Purple Squirrel Media LLC.</p>
+<!-- ── MCP TOOLS ────────────────────────────────────────────── -->
 
-  <span class="slide-footer">NotebookLM</span>
-</div>
+<section id="tools" class="alt">
+  <div class="container reveal">
+    <span class="eyebrow">agent toolset</span>
+    <h2>8 MCP Functions for the LLM</h2>
+    <p class="lead">Every tool returns structured JSON that agents can reason about directly.</p>
 
-<!-- ══════════════════════════════════════════════════════
-     SCRIPTS
-     ══════════════════════════════════════════════════════ -->
+    <div class="tools-list">
+      <div class="tool-row">
+        <div class="t-icon icon-accent"><svg viewBox="0 0 28 28"><circle cx="11" cy="11" r="8"/><line x1="17" y1="17" x2="25" y2="25" stroke-width="2.5"/></svg></div>
+        <div class="t-cat">Discovery</div>
+        <div class="t-desc"><code>analyze_stream</code> — Parse manifests, codecs, renditions. <code>validate_stream</code> — Check segment accessibility and DRM.</div>
+      </div>
+      <div class="tool-row">
+        <div class="t-icon icon-accent"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="10"/><path d="M9 14l3 3 7-7"/></svg></div>
+        <div class="t-cat">Quality</div>
+        <div class="t-desc"><code>quality_check</code> — Full QC report (bitrate ladder, captions). <code>monitor_stream</code> — Live latency and freshness checks.</div>
+      </div>
+      <div class="tool-row">
+        <div class="t-icon icon-accent"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="10"/><circle cx="14" cy="14" r="4"/><circle cx="14" cy="14" r="1.5" fill="currentColor"/></svg></div>
+        <div class="t-cat">Intelligence</div>
+        <div class="t-desc"><code>fingerprint_audio</code> — Content ID and duplicate detection. <code>autotag_content</code> — Detect BPM, genre, and mood.</div>
+      </div>
+      <div class="tool-row">
+        <div class="t-icon icon-accent"><svg viewBox="0 0 28 28"><path d="M4 14h20"/><path d="M8 8l6 6-6 6"/><path d="M20 8l-6 6 6 6"/></svg></div>
+        <div class="t-cat">Operations</div>
+        <div class="t-desc"><code>compare_streams</code> — Diff two streams for A/B testing. <code>encode_video</code> — Generate presets (Mobile/4K).</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ARCHITECTURE ─────────────────────────────────────────── -->
+
+<section id="architecture">
+  <div class="container reveal">
+    <span class="eyebrow">architecture</span>
+    <h2>Modular 7-Crate Workspace</h2>
+    <p class="lead">Each crate is independently versioned. Total: 14K lines of Rust. Zero-copy parsing.</p>
+
+    <div class="arch-frame">
+      <div class="arch-tree">
+        <div class="arch-node" style="padding:14px 48px;">
+          <strong>kino-cli / kino-mcp</strong>
+          <span>Interface & Tooling</span>
+        </div>
+
+        <div class="arch-connector"><svg width="2" height="24"><line x1="1" y1="0" x2="1" y2="24" stroke="var(--border)" stroke-width="1"/></svg></div>
+        <div style="display:flex;justify-content:center;"><svg width="380" height="2"><line x1="60" y1="1" x2="320" y2="1" stroke="var(--border)" stroke-width="1"/></svg></div>
+
+        <div class="arch-row">
+          <div class="arch-node"><strong>kino-core</strong><span>(HLS/DASH, ABR, DRM)</span></div>
+          <div class="arch-node"><strong>kino-frequency</strong><span>(FFT, Fingerprinting)</span></div>
+          <div class="arch-node"><strong>kino-wasm</strong><span>(Browser/Edge)</span></div>
+        </div>
+
+        <div class="arch-connector"><svg width="2" height="18"><line x1="1" y1="0" x2="1" y2="18" stroke="var(--border)" stroke-width="1"/></svg></div>
+        <div style="display:flex;justify-content:center;"><svg width="380" height="2"><line x1="60" y1="1" x2="320" y2="1" stroke="var(--border)" stroke-width="1"/></svg></div>
+
+        <div class="arch-row">
+          <div class="arch-node"><strong>kino-desktop</strong><span>(GStreamer)</span></div>
+          <div class="arch-node"><strong>kino-tauri</strong><span>(Native App)</span></div>
+          <div class="arch-node"><strong>kino-python</strong><span>(Data Science)</span></div>
+        </div>
+      </div>
+      <div class="annotation" style="text-align:right;margin-top:16px;">fig. 03 — crate dependency tree</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── WHY RUST ─────────────────────────────────────────────── -->
+
+<section class="alt">
+  <div class="container reveal">
+    <span class="eyebrow">performance</span>
+    <h2>Why Rust? Performance Meets Safety.</h2>
+
+    <table class="comp-table">
+      <thead><tr><th></th><th>Kino (Rust)</th><th>FFmpeg (C)</th><th>Cloud APIs</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Memory Safety</td>
+          <td><span style="color:var(--green);font-size:1.2rem;">✓</span> <strong>Safe</strong> <span style="color:var(--text-dim);font-size:0.8rem;">(Borrow Checker)</span></td>
+          <td>Unsafe <span style="color:var(--text-dim);font-size:0.8rem;">(Manual Mgmt)</span></td>
+          <td>N/A</td>
+        </tr>
+        <tr><td>Latency</td><td><strong>&lt;4ms Startup</strong></td><td>Heavy Overhead</td><td>100ms - 10s</td></tr>
+        <tr><td>Deployment</td><td><strong>Single Binary / WASM</strong></td><td>Shared Libraries</td><td>External Dep.</td></tr>
+      </tbody>
+    </table>
+
+    <p class="annotation" style="margin-top:24px;">Process thousands of streams concurrently without memory leaks that crash Python pipelines.</p>
+  </div>
+</section>
+
+<!-- ── DEVELOPER EXPERIENCE ─────────────────────────────────── -->
+
+<section>
+  <div class="container reveal">
+    <span class="eyebrow">developer experience</span>
+    <h2>Integration in Minutes</h2>
+
+    <div class="code-grid">
+      <div class="code-card">
+        <div class="code-card-label">Bash (CLI)</div>
+        <pre>kino-cli analyze \
+  https://example.com/master.m3u8 \
+  <span class="str">--format</span> json</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-label">JavaScript (WASM)</div>
+        <pre><span class="kw">import</span> { WasmPlayer } <span class="kw">from</span> <span class="str">'./pkg'</span>;
+player.load(url);</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-label">Python (Analysis)</div>
+        <pre>analyzer = FrequencyAnalyzer(
+  fft_size=<span class="num">2048</span>
+)
+result = analyzer.analyze_file(
+  <span class="str">"content.wav"</span>
+)</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── USE CASES ────────────────────────────────────────────── -->
+
+<section class="alt">
+  <div class="container reveal">
+    <span class="eyebrow">use cases</span>
+    <h2>Real-World Agent Workflows</h2>
+
+    <div class="workflow-grid">
+      <div class="wf-card">
+        <h3>Content Moderation</h3>
+        <div class="wf-step"><div class="wf-step-icon">📡</div><p>Agent scans live stream</p></div>
+        <div class="wf-arrow">↓</div>
+        <div class="wf-step"><div class="wf-step-icon">🔊</div><p>Fingerprints audio</p></div>
+        <div class="wf-arrow">↓</div>
+        <div class="wf-step"><div class="wf-step-icon">🛡</div><p><strong>Flags violations</strong> before viewers see them</p></div>
+      </div>
+      <div class="wf-card">
+        <h3>Transcoding Pipeline</h3>
+        <div class="wf-step"><div class="wf-step-icon">📄</div><p>Agent analyzes input</p></div>
+        <div class="wf-arrow">↓</div>
+        <div class="wf-step"><div class="wf-step-icon">⚙️</div><p>Selects optimal preset</p></div>
+        <div class="wf-arrow">↓</div>
+        <div class="wf-step"><div class="wf-step-icon">✅</div><p><strong>Validates</strong> output quality automatically</p></div>
+      </div>
+      <div class="wf-card">
+        <h3>Event Monitoring</h3>
+        <div class="wf-step"><div class="wf-step-icon">🕐</div><p>Agent watches 24/7</p></div>
+        <div class="wf-arrow">↓</div>
+        <div class="wf-step"><div class="wf-step-icon">📊</div><p>Monitors health metrics</p></div>
+        <div class="wf-arrow">↓</div>
+        <div class="wf-step"><div class="wf-step-icon">🚨</div><p><strong>Alerts</strong> on latency spikes or DRM failures</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRICING ──────────────────────────────────────────────── -->
+
+<section id="pricing">
+  <div class="container reveal">
+    <span class="eyebrow">business model</span>
+    <h2>Open Core</h2>
+    <p class="lead">Free for agents. Professional support for production. Enterprise for regulated media.</p>
+
+    <div class="tier-strip">
+      <div class="tier">
+        <div class="tier-name">🙌 Community</div>
+        <div class="tier-price">Free — MIT/Apache</div>
+        <ul>
+          <li>Full SDK & MCP Server</li>
+          <li>WASM Player</li>
+          <li>Audio Fingerprinting</li>
+          <li>All 8 Agent Tools</li>
+        </ul>
+      </div>
+      <div class="tier">
+        <div class="tier-name">🤝 Professional</div>
+        <div class="tier-price">$12k–25k / year</div>
+        <ul>
+          <li>Widevine DRM support</li>
+          <li>Priority support & SLA</li>
+          <li>Custom encoding presets</li>
+        </ul>
+      </div>
+      <div class="tier">
+        <div class="tier-name">🏢 Enterprise</div>
+        <div class="tier-price">Custom</div>
+        <ul>
+          <li>FairPlay & PlayReady DRM</li>
+          <li>White-label MCP server</li>
+          <li>Air-gapped deployment</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="annotation" style="text-align:center;margin-top:24px;">Target: AI Platforms (Anthropic/OpenAI) · Streaming Tech (Cloudflare) · Media Tools (Frame.io)</p>
+  </div>
+</section>
+
+<!-- ── CTA ──────────────────────────────────────────────────── -->
+
+<section class="cta-section">
+  <div class="container reveal">
+    <h2 style="font-size:clamp(1.8rem, 3.5vw, 2.8rem);">The Missing Link for AI Video Intelligence</h2>
+    <p style="color:var(--text-mid);font-size:1.1rem;margin-top:8px;">Rust-Powered. Formally Verified. Available Now.</p>
+
+    <div class="cta-row">
+      <div class="cta-block">
+        <h4>For Agents</h4>
+        <div class="cta-bar"></div>
+        <code>npm install -g kino-mcp</code>
+      </div>
+      <div class="cta-block">
+        <h4>For Devs</h4>
+        <div class="cta-bar"></div>
+        <code>cargo install kino-cli</code>
+      </div>
+      <div class="cta-block">
+        <h4>Source</h4>
+        <div class="cta-bar"></div>
+        <code>github.com/ExpertVagabond/kino</code>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>Copyright 2026 Purple Squirrel Media LLC.</p>
+  </div>
+</footer>
+
+<!-- ── SCRIPTS ──────────────────────────────────────────────── -->
 
 <script>
-// Reveal on scroll
-const obs = new IntersectionObserver((entries) => {
+// Reveal
+const obs = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
 }, { threshold: 0.08 });
-document.querySelectorAll('.slide').forEach(el => obs.observe(el));
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 
-// Spectrogram canvas
+// Spectrogram
 const c = document.getElementById('specCanvas');
 if (c) {
   const ctx = c.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
-
   function draw() {
-    const p = c.parentElement;
-    const w = p.clientWidth;
-    const h = p.clientHeight;
-    c.width = w * dpr;
-    c.height = h * dpr;
-    c.style.width = w + 'px';
-    c.style.height = h + 'px';
+    const p = c.parentElement, w = p.clientWidth, h = p.clientHeight;
+    c.width = w * dpr; c.height = h * dpr;
+    c.style.width = w + 'px'; c.style.height = h + 'px';
     ctx.scale(dpr, dpr);
-
-    // Grid
-    ctx.strokeStyle = 'rgba(51,102,170,0.1)';
+    ctx.strokeStyle = 'rgba(51,102,170,0.08)';
     ctx.lineWidth = 0.5;
-    for (let y = 0; y < h; y += 10) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
-    for (let x = 0; x < w; x += 16) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
-
-    // Frequency bars
-    for (let x = 0; x < w; x += 2.5) {
-      const n = 6 + Math.floor(Math.random() * 10);
+    for (let y = 0; y < h; y += 8) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+    for (let x = 0; x < w; x += 14) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+    for (let x = 0; x < w; x += 2) {
+      const n = 5 + Math.floor(Math.random() * 8);
       for (let b = 0; b < n; b++) {
-        const y = h - (b / n) * h;
-        const e = Math.random();
-        ctx.fillStyle = `rgba(51,85,170,${e * 0.35 + 0.03})`;
-        ctx.fillRect(x, y - 2, 1.5, 3 + e * 6);
+        const y = h - (b / n) * h, e = Math.random();
+        ctx.fillStyle = `rgba(51,85,170,${e * 0.3 + 0.02})`;
+        ctx.fillRect(x, y - 1.5, 1.5, 2 + e * 5);
       }
     }
-
-    // Peaks
-    [w * 0.24, w * 0.48, w * 0.68, w * 0.82].forEach(px => {
-      for (let y = h * 0.15; y < h * 0.9; y += 1.5) {
-        const d = Math.abs(y - h * 0.45);
-        const e = Math.max(0, 1 - d / (h * 0.35));
-        ctx.fillStyle = `rgba(51,85,170,${e * 0.55})`;
-        ctx.fillRect(px - 5, y, 10, 1.5);
+    [w * 0.2, w * 0.45, w * 0.65, w * 0.84].forEach(px => {
+      for (let y = h * 0.1; y < h * 0.9; y += 1.5) {
+        const d = Math.abs(y - h * 0.4), e = Math.max(0, 1 - d / (h * 0.35));
+        ctx.fillStyle = `rgba(51,85,170,${e * 0.5})`;
+        ctx.fillRect(px - 4, y, 8, 1.5);
       }
     });
   }
-
   draw();
   window.addEventListener('resize', draw);
 }
