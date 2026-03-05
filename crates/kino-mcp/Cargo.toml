@@ -1,0 +1,15 @@
+[package]
+name = "kino-mcp"
+version.workspace = true
+edition = "2021"
+authors.workspace = true
+license.workspace = true
+description = "MCP server for kino-cli — stream analysis, QC, monitoring"
+
+[[bin]]
+name = "kino-mcp"
+path = "src/main.rs"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
