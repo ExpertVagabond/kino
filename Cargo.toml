@@ -8,6 +8,7 @@ members = [
     "crates/kino-cli",
     "crates/kino-frequency",
     "crates/kino-python",
+    "crates/kino-mcp",
 ]
 default-members = [
     "crates/kino-core",
