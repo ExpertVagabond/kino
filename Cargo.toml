@@ -26,6 +26,8 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/ExpertVagabond/kino"
 homepage = "https://kino-player.pages.dev"
 documentation = "https://docs.rs/kino-core"
+keywords = ["video", "player", "streaming", "hls", "media"]
+categories = ["multimedia::video", "multimedia::audio"]
 
 [workspace.dependencies]
 # Core dependencies
