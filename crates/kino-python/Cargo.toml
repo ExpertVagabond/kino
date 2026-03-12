@@ -13,6 +13,6 @@ name = "kino_frequency"
 crate-type = ["cdylib"]
 
 [dependencies]
-kino-frequency = { path = "../kino-frequency" }
+kino-frequency = { workspace = true }
 pyo3 = { version = "0.22", features = ["extension-module"] }
 numpy = "0.22"

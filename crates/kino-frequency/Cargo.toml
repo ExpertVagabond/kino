@@ -60,7 +60,7 @@ solana-sdk = { version = "1.18", optional = true }
 anchor-lang = { version = "0.29", optional = true }
 
 # Internal crates
-kino-core = { path = "../kino-core" }
+kino-core = { workspace = true }
 
 [dev-dependencies]
 tokio-test = "0.4"
