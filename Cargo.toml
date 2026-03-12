@@ -62,8 +62,8 @@ ring = "0.17"
 base64 = "0.22"
 
 # Internal crates
-kino-core = { path = "crates/kino-core" }
-kino-frequency = { path = "crates/kino-frequency" }
+kino-core = { path = "crates/kino-core", version = "0.1.0" }
+kino-frequency = { path = "crates/kino-frequency", version = "0.1.0" }
 
 # FFT and signal processing
 rustfft = "6.2"
