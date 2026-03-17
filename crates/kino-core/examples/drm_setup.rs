@@ -21,7 +21,10 @@ fn main() {
 
     println!("  License URL: {}", widevine_url);
     println!("  Configured: {}", widevine_config.is_configured());
-    println!("  Supported systems: {:?}\n", widevine_config.supported_systems());
+    println!(
+        "  Supported systems: {:?}\n",
+        widevine_config.supported_systems()
+    );
 
     // Example 2: FairPlay DRM setup
     println!("2. FairPlay DRM Configuration");
@@ -34,7 +37,10 @@ fn main() {
     println!("  License URL: {}", fairplay_url);
     println!("  Certificate URL: {}", cert_url);
     println!("  Configured: {}", fairplay_config.is_configured());
-    println!("  Supported systems: {:?}\n", fairplay_config.supported_systems());
+    println!(
+        "  Supported systems: {:?}\n",
+        fairplay_config.supported_systems()
+    );
 
     // Example 3: ClearKey DRM (for testing)
     println!("3. ClearKey DRM Configuration (for testing)");
@@ -92,15 +98,22 @@ fn main() {
     println!("\n6. Custom License Request Headers");
     println!("----------------------------------");
 
-    let config_with_headers = DrmConfig::widevine(
-        Url::parse("https://license.example.com/widevine").unwrap()
-    )
-    .with_header("X-Custom-Token", "abc123")
-    .with_header("Authorization", "Bearer token-here");
+    let config_with_headers =
+        DrmConfig::widevine(Url::parse("https://license.example.com/widevine").unwrap())
+            .with_header("X-Custom-Token", "abc123")
+            .with_header("Authorization", "Bearer token-here");
 
     println!("  Custom headers added:");
     for (key, value) in &config_with_headers.license_headers {
-        println!("    {}: {}", key, if key == "Authorization" { "[redacted]" } else { value });
+        println!(
+            "    {}: {}",
+            key,
+            if key == "Authorization" {
+                "[redacted]"
+            } else {
+                value
+            }
+        );
     }
 
     println!("\nDRM setup examples complete!");

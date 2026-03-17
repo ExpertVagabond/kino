@@ -6,11 +6,11 @@
 //! - **Motion detection** to avoid blurry transitional frames
 //! - **Contrast analysis** for visually appealing frames
 
+use anyhow::{bail, Context, Result};
+use image::GrayImage;
+use rustfft::{num_complex::Complex, FftPlanner};
 use std::path::Path;
 use std::process::Command;
-use anyhow::{Result, bail, Context};
-use image::GrayImage;
-use rustfft::{FftPlanner, num_complex::Complex};
 use tracing::{debug, info, warn};
 
 use crate::types::*;
@@ -77,7 +77,10 @@ impl ThumbnailSelector {
         audio: &AudioData,
     ) -> Result<f64> {
         let video_path = video_path.as_ref();
-        info!("Finding best thumbnail timestamp for: {}", video_path.display());
+        info!(
+            "Finding best thumbnail timestamp for: {}",
+            video_path.display()
+        );
 
         // Get video duration
         let duration = self.get_video_duration(video_path)?;
@@ -129,12 +132,18 @@ impl ThumbnailSelector {
         candidates.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
 
         if let Some((best_timestamp, best_score)) = candidates.first() {
-            info!("Best thumbnail at {:.2}s with score {:.3}", best_timestamp, best_score);
+            info!(
+                "Best thumbnail at {:.2}s with score {:.3}",
+                best_timestamp, best_score
+            );
             Ok(*best_timestamp)
         } else {
             // Fallback to middle of video
             let fallback = (start_time + end_time) / 2.0;
-            warn!("No suitable frames found, using fallback at {:.2}s", fallback);
+            warn!(
+                "No suitable frames found, using fallback at {:.2}s",
+                fallback
+            );
             Ok(fallback)
         }
     }
@@ -188,16 +197,20 @@ impl ThumbnailSelector {
         }
 
         // Sort by total score
-        candidates.sort_by(|a, b| b.total_score.partial_cmp(&a.total_score).unwrap_or(std::cmp::Ordering::Equal));
+        candidates.sort_by(|a, b| {
+            b.total_score
+                .partial_cmp(&a.total_score)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
 
         // Diversify results (avoid clustering)
         let mut diversified = Vec::new();
         let min_gap = (end_time - start_time) / (num_results as f64 * 2.0);
 
         for candidate in candidates {
-            let too_close = diversified.iter().any(|c: &ThumbnailCandidate| {
-                (c.timestamp - candidate.timestamp).abs() < min_gap
-            });
+            let too_close = diversified
+                .iter()
+                .any(|c: &ThumbnailCandidate| (c.timestamp - candidate.timestamp).abs() < min_gap);
 
             if !too_close {
                 diversified.push(candidate);
@@ -222,10 +235,17 @@ impl ThumbnailSelector {
 
         let output = Command::new("ffmpeg")
             .args([
-                "-ss", &format!("{:.3}", timestamp),
-                "-i", &video_path.to_string_lossy(),
-                "-vframes", "1",
-                "-vf", &format!("scale={}:{}", self.config.output_width, self.config.output_height),
+                "-ss",
+                &format!("{:.3}", timestamp),
+                "-i",
+                &video_path.to_string_lossy(),
+                "-vframes",
+                "1",
+                "-vf",
+                &format!(
+                    "scale={}:{}",
+                    self.config.output_width, self.config.output_height
+                ),
                 "-y",
                 &output_path.to_string_lossy(),
             ])
@@ -245,16 +265,18 @@ impl ThumbnailSelector {
     fn get_video_duration(&self, video_path: &Path) -> Result<f64> {
         let output = Command::new("ffprobe")
             .args([
-                "-v", "quiet",
-                "-print_format", "json",
+                "-v",
+                "quiet",
+                "-print_format",
+                "json",
                 "-show_format",
                 &video_path.to_string_lossy(),
             ])
             .output()
             .context("FFprobe not found")?;
 
-        let json: serde_json::Value = serde_json::from_slice(&output.stdout)
-            .context("Failed to parse ffprobe output")?;
+        let json: serde_json::Value =
+            serde_json::from_slice(&output.stdout).context("Failed to parse ffprobe output")?;
 
         let duration = json["format"]["duration"]
             .as_str()
@@ -269,12 +291,18 @@ impl ThumbnailSelector {
         // Extract frame to raw grayscale
         let output = Command::new("ffmpeg")
             .args([
-                "-ss", &format!("{:.3}", timestamp),
-                "-i", &video_path.to_string_lossy(),
-                "-vframes", "1",
-                "-vf", "scale=320:180,format=gray",  // Small for analysis
-                "-f", "rawvideo",
-                "-pix_fmt", "gray",
+                "-ss",
+                &format!("{:.3}", timestamp),
+                "-i",
+                &video_path.to_string_lossy(),
+                "-vframes",
+                "1",
+                "-vf",
+                "scale=320:180,format=gray", // Small for analysis
+                "-f",
+                "rawvideo",
+                "-pix_fmt",
+                "gray",
                 "pipe:1",
             ])
             .output()
@@ -291,8 +319,12 @@ impl ThumbnailSelector {
             bail!("Incomplete frame data");
         }
 
-        let img = GrayImage::from_raw(width as u32, height as u32, output.stdout[..width * height].to_vec())
-            .ok_or_else(|| anyhow::anyhow!("Failed to create image from raw data"))?;
+        let img = GrayImage::from_raw(
+            width as u32,
+            height as u32,
+            output.stdout[..width * height].to_vec(),
+        )
+        .ok_or_else(|| anyhow::anyhow!("Failed to create image from raw data"))?;
 
         Ok(img)
     }
@@ -300,18 +332,15 @@ impl ThumbnailSelector {
     /// Analyze frame quality using 2D FFT.
     fn analyze_frame_quality(&self, frame: &GrayImage) -> ImageQuality {
         let (width, height) = frame.dimensions();
-        let pixels: Vec<f32> = frame.pixels()
-            .map(|p| p.0[0] as f32 / 255.0)
-            .collect();
+        let pixels: Vec<f32> = frame.pixels().map(|p| p.0[0] as f32 / 255.0).collect();
 
         // Compute 2D FFT for sharpness analysis
         let sharpness = self.compute_2d_fft_sharpness(&pixels, width as usize, height as usize);
 
         // Compute contrast (standard deviation of pixel values)
         let mean: f32 = pixels.iter().sum::<f32>() / pixels.len() as f32;
-        let variance: f32 = pixels.iter()
-            .map(|&p| (p - mean) * (p - mean))
-            .sum::<f32>() / pixels.len() as f32;
+        let variance: f32 =
+            pixels.iter().map(|&p| (p - mean) * (p - mean)).sum::<f32>() / pixels.len() as f32;
         let contrast = variance.sqrt();
 
         // Normalize contrast to 0-1 range
@@ -405,7 +434,8 @@ impl ThumbnailSelector {
         let window_secs = 0.5; // Look at 0.5 second window around each timestamp
         let window_samples = (audio.sample_rate as f64 * window_secs) as usize;
 
-        let mut energies: Vec<f32> = timestamps.iter()
+        let mut energies: Vec<f32> = timestamps
+            .iter()
             .map(|&t| {
                 let center_sample = (t * audio.sample_rate as f64) as usize;
                 let start = center_sample.saturating_sub(window_samples / 2);
@@ -418,7 +448,8 @@ impl ThumbnailSelector {
                 let energy: f32 = audio.samples[start..end]
                     .iter()
                     .map(|&s| s * s)
-                    .sum::<f32>() / (end - start) as f32;
+                    .sum::<f32>()
+                    / (end - start) as f32;
 
                 energy.sqrt()
             })
@@ -524,7 +555,8 @@ mod tests {
         let energies = selector.compute_audio_energies(&audio, &timestamps);
 
         // Energy should peak around 5 seconds (index 4 or 5)
-        let max_idx = energies.iter()
+        let max_idx = energies
+            .iter()
             .enumerate()
             .max_by(|a, b| a.1.partial_cmp(b.1).unwrap())
             .map(|(i, _)| i)

@@ -20,7 +20,8 @@ pub async fn analyze(manifest_url: &str, _format: &str) -> anyhow::Result<()> {
 
     println!("\nRenditions:");
     for (i, r) in manifest.renditions.iter().enumerate() {
-        println!("  {}. {} - {}bps {:?}",
+        println!(
+            "  {}. {} - {}bps {:?}",
             i + 1,
             r.id,
             r.bandwidth,
@@ -141,9 +142,10 @@ pub async fn qc(
     }
 
     // Check: Should have HD rendition
-    let has_hd = manifest.renditions.iter().any(|r| {
-        r.resolution.map(|res| res.height >= 720).unwrap_or(false)
-    });
+    let has_hd = manifest
+        .renditions
+        .iter()
+        .any(|r| r.resolution.map(|res| res.height >= 720).unwrap_or(false));
     if !has_hd {
         warnings.push("No HD rendition (720p+)");
     }
@@ -247,13 +249,28 @@ pub async fn compare(manifest1: &str, manifest2: &str, _format: &str) -> anyhow:
 
     println!("\nComparison:");
     println!("  {:20} {:>15} {:>15}", "Property", "Stream 1", "Stream 2");
-    println!("  {:20} {:>15} {:>15}", "Type", format!("{:?}", m1.manifest_type), format!("{:?}", m2.manifest_type));
+    println!(
+        "  {:20} {:>15} {:>15}",
+        "Type",
+        format!("{:?}", m1.manifest_type),
+        format!("{:?}", m2.manifest_type)
+    );
     println!("  {:20} {:>15} {:>15}", "Live", m1.is_live, m2.is_live);
-    println!("  {:20} {:>15} {:>15}", "Renditions", m1.renditions.len(), m2.renditions.len());
+    println!(
+        "  {:20} {:>15} {:>15}",
+        "Renditions",
+        m1.renditions.len(),
+        m2.renditions.len()
+    );
 
     let max_br1 = m1.renditions.iter().map(|r| r.bandwidth).max().unwrap_or(0);
     let max_br2 = m2.renditions.iter().map(|r| r.bandwidth).max().unwrap_or(0);
-    println!("  {:20} {:>15} {:>15}", "Max Bitrate", format!("{}Mbps", max_br1 / 1_000_000), format!("{}Mbps", max_br2 / 1_000_000));
+    println!(
+        "  {:20} {:>15} {:>15}",
+        "Max Bitrate",
+        format!("{}Mbps", max_br1 / 1_000_000),
+        format!("{}Mbps", max_br2 / 1_000_000)
+    );
 
     Ok(())
 }
@@ -267,7 +284,14 @@ pub async fn monitor(
 ) -> anyhow::Result<()> {
     println!("Monitoring: {}", manifest_url);
     println!("  Interval: {}s", interval);
-    println!("  Duration: {}", if duration == 0 { "indefinite".to_string() } else { format!("{}s", duration) });
+    println!(
+        "  Duration: {}",
+        if duration == 0 {
+            "indefinite".to_string()
+        } else {
+            format!("{}s", duration)
+        }
+    );
 
     let url = Url::parse(manifest_url)?;
     let parser = create_parser(&url);
@@ -291,7 +315,8 @@ pub async fn monitor(
                         if let Ok(segments) = parser.parse_variant(&r.uri).await {
                             let max_seq = segments.iter().map(|s| s.number).max().unwrap_or(0);
                             if max_seq > last_sequence {
-                                println!("[{}] New segments: {} -> {}",
+                                println!(
+                                    "[{}] New segments: {} -> {}",
                                     chrono::Utc::now().format("%H:%M:%S"),
                                     last_sequence,
                                     max_seq
@@ -301,16 +326,14 @@ pub async fn monitor(
                         }
                     }
                 }
-                println!("[{}] OK - {} renditions",
+                println!(
+                    "[{}] OK - {} renditions",
                     chrono::Utc::now().format("%H:%M:%S"),
                     manifest.renditions.len()
                 );
             }
             Err(e) => {
-                println!("[{}] ERROR: {}",
-                    chrono::Utc::now().format("%H:%M:%S"),
-                    e
-                );
+                println!("[{}] ERROR: {}", chrono::Utc::now().format("%H:%M:%S"), e);
             }
         }
 

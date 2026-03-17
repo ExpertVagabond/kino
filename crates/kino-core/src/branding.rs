@@ -192,7 +192,8 @@ impl CssVariables {
   pointer-events: none;
   z-index: 1;
 }
-"#.to_string()
+"#
+        .to_string()
     }
 }
 
@@ -244,7 +245,11 @@ impl KinoTheme {
 
     /// Generate a complete CSS stylesheet
     pub fn to_css(&self) -> String {
-        format!("{}\n{}", CssVariables::generate(), CssVariables::player_css())
+        format!(
+            "{}\n{}",
+            CssVariables::generate(),
+            CssVariables::player_css()
+        )
     }
 }
 

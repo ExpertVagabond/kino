@@ -11,8 +11,8 @@
 //! - **Content Type**: vocal, instrumental, ambient, dialogue
 //! - **Quality**: high-fidelity, compressed, noisy
 
-use std::collections::HashMap;
 use anyhow::Result;
+use std::collections::HashMap;
 use tracing::{debug, info};
 
 use crate::fft::FrequencyAnalyzer;
@@ -76,124 +76,148 @@ impl ContentTagger {
         let mut profiles = HashMap::new();
 
         // Music: balanced spectrum, low flatness (tonal), moderate ZCR
-        profiles.insert("music".to_string(), GenreProfile {
-            spectral_centroid_range: (500.0, 4000.0),
-            spectral_flatness_range: (0.0, 0.3),
-            zcr_range: (0.02, 0.15),
-            band_weights: BandWeights {
-                sub_bass: 0.15,
-                bass: 0.20,
-                low_mid: 0.20,
-                mid: 0.20,
-                high_mid: 0.15,
-                high: 0.10,
+        profiles.insert(
+            "music".to_string(),
+            GenreProfile {
+                spectral_centroid_range: (500.0, 4000.0),
+                spectral_flatness_range: (0.0, 0.3),
+                zcr_range: (0.02, 0.15),
+                band_weights: BandWeights {
+                    sub_bass: 0.15,
+                    bass: 0.20,
+                    low_mid: 0.20,
+                    mid: 0.20,
+                    high_mid: 0.15,
+                    high: 0.10,
+                },
             },
-        });
+        );
 
         // Speech: mid-range centroid, low ZCR, concentrated in mid frequencies
-        profiles.insert("speech".to_string(), GenreProfile {
-            spectral_centroid_range: (300.0, 2000.0),
-            spectral_flatness_range: (0.1, 0.5),
-            zcr_range: (0.01, 0.08),
-            band_weights: BandWeights {
-                sub_bass: 0.05,
-                bass: 0.10,
-                low_mid: 0.25,
-                mid: 0.35,
-                high_mid: 0.15,
-                high: 0.10,
+        profiles.insert(
+            "speech".to_string(),
+            GenreProfile {
+                spectral_centroid_range: (300.0, 2000.0),
+                spectral_flatness_range: (0.1, 0.5),
+                zcr_range: (0.01, 0.08),
+                band_weights: BandWeights {
+                    sub_bass: 0.05,
+                    bass: 0.10,
+                    low_mid: 0.25,
+                    mid: 0.35,
+                    high_mid: 0.15,
+                    high: 0.10,
+                },
             },
-        });
+        );
 
         // Gaming: wide spectrum, high energy variation, high ZCR
-        profiles.insert("gaming".to_string(), GenreProfile {
-            spectral_centroid_range: (1000.0, 6000.0),
-            spectral_flatness_range: (0.2, 0.7),
-            zcr_range: (0.05, 0.20),
-            band_weights: BandWeights {
-                sub_bass: 0.15,
-                bass: 0.15,
-                low_mid: 0.15,
-                mid: 0.20,
-                high_mid: 0.20,
-                high: 0.15,
+        profiles.insert(
+            "gaming".to_string(),
+            GenreProfile {
+                spectral_centroid_range: (1000.0, 6000.0),
+                spectral_flatness_range: (0.2, 0.7),
+                zcr_range: (0.05, 0.20),
+                band_weights: BandWeights {
+                    sub_bass: 0.15,
+                    bass: 0.15,
+                    low_mid: 0.15,
+                    mid: 0.20,
+                    high_mid: 0.20,
+                    high: 0.15,
+                },
             },
-        });
+        );
 
         // Nature: low centroid, high flatness (noise-like), low ZCR
-        profiles.insert("nature".to_string(), GenreProfile {
-            spectral_centroid_range: (200.0, 2000.0),
-            spectral_flatness_range: (0.4, 0.9),
-            zcr_range: (0.01, 0.06),
-            band_weights: BandWeights {
-                sub_bass: 0.10,
-                bass: 0.15,
-                low_mid: 0.20,
-                mid: 0.25,
-                high_mid: 0.15,
-                high: 0.15,
+        profiles.insert(
+            "nature".to_string(),
+            GenreProfile {
+                spectral_centroid_range: (200.0, 2000.0),
+                spectral_flatness_range: (0.4, 0.9),
+                zcr_range: (0.01, 0.06),
+                band_weights: BandWeights {
+                    sub_bass: 0.10,
+                    bass: 0.15,
+                    low_mid: 0.20,
+                    mid: 0.25,
+                    high_mid: 0.15,
+                    high: 0.15,
+                },
             },
-        });
+        );
 
         // Podcast: similar to speech but with music intros
-        profiles.insert("podcast".to_string(), GenreProfile {
-            spectral_centroid_range: (300.0, 2500.0),
-            spectral_flatness_range: (0.1, 0.4),
-            zcr_range: (0.01, 0.10),
-            band_weights: BandWeights {
-                sub_bass: 0.05,
-                bass: 0.10,
-                low_mid: 0.25,
-                mid: 0.35,
-                high_mid: 0.15,
-                high: 0.10,
+        profiles.insert(
+            "podcast".to_string(),
+            GenreProfile {
+                spectral_centroid_range: (300.0, 2500.0),
+                spectral_flatness_range: (0.1, 0.4),
+                zcr_range: (0.01, 0.10),
+                band_weights: BandWeights {
+                    sub_bass: 0.05,
+                    bass: 0.10,
+                    low_mid: 0.25,
+                    mid: 0.35,
+                    high_mid: 0.15,
+                    high: 0.10,
+                },
             },
-        });
+        );
 
         // Tutorial: clear speech with occasional UI sounds
-        profiles.insert("tutorial".to_string(), GenreProfile {
-            spectral_centroid_range: (400.0, 3000.0),
-            spectral_flatness_range: (0.1, 0.5),
-            zcr_range: (0.02, 0.12),
-            band_weights: BandWeights {
-                sub_bass: 0.05,
-                bass: 0.08,
-                low_mid: 0.20,
-                mid: 0.35,
-                high_mid: 0.20,
-                high: 0.12,
+        profiles.insert(
+            "tutorial".to_string(),
+            GenreProfile {
+                spectral_centroid_range: (400.0, 3000.0),
+                spectral_flatness_range: (0.1, 0.5),
+                zcr_range: (0.02, 0.12),
+                band_weights: BandWeights {
+                    sub_bass: 0.05,
+                    bass: 0.08,
+                    low_mid: 0.20,
+                    mid: 0.35,
+                    high_mid: 0.20,
+                    high: 0.12,
+                },
             },
-        });
+        );
 
         // News: professional speech, compressed dynamics
-        profiles.insert("news".to_string(), GenreProfile {
-            spectral_centroid_range: (350.0, 1800.0),
-            spectral_flatness_range: (0.1, 0.35),
-            zcr_range: (0.01, 0.06),
-            band_weights: BandWeights {
-                sub_bass: 0.03,
-                bass: 0.08,
-                low_mid: 0.25,
-                mid: 0.40,
-                high_mid: 0.15,
-                high: 0.09,
+        profiles.insert(
+            "news".to_string(),
+            GenreProfile {
+                spectral_centroid_range: (350.0, 1800.0),
+                spectral_flatness_range: (0.1, 0.35),
+                zcr_range: (0.01, 0.06),
+                band_weights: BandWeights {
+                    sub_bass: 0.03,
+                    bass: 0.08,
+                    low_mid: 0.25,
+                    mid: 0.40,
+                    high_mid: 0.15,
+                    high: 0.09,
+                },
             },
-        });
+        );
 
         // Sports: crowd noise, commentary, high energy
-        profiles.insert("sports".to_string(), GenreProfile {
-            spectral_centroid_range: (500.0, 4000.0),
-            spectral_flatness_range: (0.3, 0.7),
-            zcr_range: (0.04, 0.15),
-            band_weights: BandWeights {
-                sub_bass: 0.10,
-                bass: 0.15,
-                low_mid: 0.20,
-                mid: 0.25,
-                high_mid: 0.18,
-                high: 0.12,
+        profiles.insert(
+            "sports".to_string(),
+            GenreProfile {
+                spectral_centroid_range: (500.0, 4000.0),
+                spectral_flatness_range: (0.3, 0.7),
+                zcr_range: (0.04, 0.15),
+                band_weights: BandWeights {
+                    sub_bass: 0.10,
+                    bass: 0.15,
+                    low_mid: 0.20,
+                    mid: 0.25,
+                    high_mid: 0.18,
+                    high: 0.12,
+                },
             },
-        });
+        );
 
         profiles
     }
@@ -207,7 +231,9 @@ impl ContentTagger {
         debug!("Extracted features: {:?}", features);
 
         // Score against each genre profile
-        let mut scores: Vec<(String, f32)> = self.genre_profiles.iter()
+        let mut scores: Vec<(String, f32)> = self
+            .genre_profiles
+            .iter()
             .map(|(genre, profile)| {
                 let score = self.compute_profile_score(&features, profile);
                 (genre.clone(), score)
@@ -225,7 +251,8 @@ impl ContentTagger {
 
         // Combine all tags
         let min_conf = self.config.min_confidence;
-        let mut all_tags: Vec<ContentTag> = scores.into_iter()
+        let mut all_tags: Vec<ContentTag> = scores
+            .into_iter()
             .filter(|(_, score)| *score >= min_conf)
             .take(self.config.max_tags)
             .map(|(label, confidence)| ContentTag { label, confidence })
@@ -233,10 +260,18 @@ impl ContentTagger {
 
         // Filter mood and content type tags by min_confidence too
         all_tags.extend(mood_tags.into_iter().filter(|t| t.confidence >= min_conf));
-        all_tags.extend(content_type_tags.into_iter().filter(|t| t.confidence >= min_conf));
+        all_tags.extend(
+            content_type_tags
+                .into_iter()
+                .filter(|t| t.confidence >= min_conf),
+        );
 
         // Sort by confidence and limit
-        all_tags.sort_by(|a, b| b.confidence.partial_cmp(&a.confidence).unwrap_or(std::cmp::Ordering::Equal));
+        all_tags.sort_by(|a, b| {
+            b.confidence
+                .partial_cmp(&a.confidence)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
         all_tags.truncate(self.config.max_tags);
 
         Ok(all_tags)
@@ -277,9 +312,11 @@ impl ContentTagger {
 
         // Compute variance
         let mean: f32 = energies.iter().sum::<f32>() / energies.len() as f32;
-        let variance: f32 = energies.iter()
+        let variance: f32 = energies
+            .iter()
             .map(|&e| (e - mean) * (e - mean))
-            .sum::<f32>() / energies.len() as f32;
+            .sum::<f32>()
+            / energies.len() as f32;
 
         Ok(variance.sqrt())
     }
@@ -299,15 +336,13 @@ impl ContentTagger {
         for i in 0..num_frames {
             let start = i * hop_size;
             let end = start + frame_size;
-            let energy: f32 = audio.samples[start..end]
-                .iter()
-                .map(|&s| s * s)
-                .sum();
+            let energy: f32 = audio.samples[start..end].iter().map(|&s| s * s).sum();
             energies.push(energy);
         }
 
         // Compute onset strength (energy derivative)
-        let onset_strength: Vec<f32> = energies.windows(2)
+        let onset_strength: Vec<f32> = energies
+            .windows(2)
             .map(|w| (w[1] - w[0]).max(0.0))
             .collect();
 
@@ -319,7 +354,8 @@ impl ContentTagger {
         let mut best_corr = 0.0f32;
 
         for lag in min_lag..max_lag.min(onset_strength.len()) {
-            let corr: f32 = onset_strength.iter()
+            let corr: f32 = onset_strength
+                .iter()
                 .zip(onset_strength.iter().skip(lag))
                 .map(|(&a, &b)| a * b)
                 .sum();
@@ -347,7 +383,8 @@ impl ContentTagger {
 
         // Spectral centroid match
         let centroid_score = if features.spectral_centroid >= profile.spectral_centroid_range.0
-            && features.spectral_centroid <= profile.spectral_centroid_range.1 {
+            && features.spectral_centroid <= profile.spectral_centroid_range.1
+        {
             1.0
         } else {
             let dist = (features.spectral_centroid - profile.spectral_centroid_range.0)
@@ -359,7 +396,8 @@ impl ContentTagger {
 
         // Spectral flatness match
         let flatness_score = if features.spectral_flatness >= profile.spectral_flatness_range.0
-            && features.spectral_flatness <= profile.spectral_flatness_range.1 {
+            && features.spectral_flatness <= profile.spectral_flatness_range.1
+        {
             1.0
         } else {
             let dist = (features.spectral_flatness - profile.spectral_flatness_range.0)
@@ -371,7 +409,8 @@ impl ContentTagger {
 
         // ZCR match
         let zcr_score = if features.zero_crossing_rate >= profile.zcr_range.0
-            && features.zero_crossing_rate <= profile.zcr_range.1 {
+            && features.zero_crossing_rate <= profile.zcr_range.1
+        {
             1.0
         } else {
             let dist = (features.zero_crossing_rate - profile.zcr_range.0)
@@ -391,16 +430,28 @@ impl ContentTagger {
     /// Compute band energy distribution match.
     fn compute_band_match(&self, energies: &BandEnergies, weights: &BandWeights) -> f32 {
         let features = [
-            energies.sub_bass, energies.bass, energies.low_mid,
-            energies.mid, energies.high_mid, energies.high,
+            energies.sub_bass,
+            energies.bass,
+            energies.low_mid,
+            energies.mid,
+            energies.high_mid,
+            energies.high,
         ];
         let targets = [
-            weights.sub_bass, weights.bass, weights.low_mid,
-            weights.mid, weights.high_mid, weights.high,
+            weights.sub_bass,
+            weights.bass,
+            weights.low_mid,
+            weights.mid,
+            weights.high_mid,
+            weights.high,
         ];
 
         // Cosine similarity
-        let dot: f32 = features.iter().zip(targets.iter()).map(|(a, b)| a * b).sum();
+        let dot: f32 = features
+            .iter()
+            .zip(targets.iter())
+            .map(|(a, b)| a * b)
+            .sum();
         let norm_a: f32 = features.iter().map(|x| x * x).sum::<f32>().sqrt();
         let norm_b: f32 = targets.iter().map(|x| x * x).sum::<f32>().sqrt();
 
@@ -447,8 +498,10 @@ impl ContentTagger {
         let mut tags = Vec::new();
 
         // Vocal: mid-range centroid, low flatness
-        if features.spectral_centroid > 300.0 && features.spectral_centroid < 2000.0
-            && features.spectral_flatness < 0.3 {
+        if features.spectral_centroid > 300.0
+            && features.spectral_centroid < 2000.0
+            && features.spectral_flatness < 0.3
+        {
             tags.push(ContentTag {
                 label: "vocal".to_string(),
                 confidence: 0.6,
@@ -457,7 +510,8 @@ impl ContentTagger {
 
         // Instrumental: low flatness, not in vocal range
         if features.spectral_flatness < 0.25
-            && (features.spectral_centroid < 300.0 || features.spectral_centroid > 2500.0) {
+            && (features.spectral_centroid < 300.0 || features.spectral_centroid > 2500.0)
+        {
             tags.push(ContentTag {
                 label: "instrumental".to_string(),
                 confidence: 0.5,
@@ -570,7 +624,8 @@ mod tests {
         let tags = tagger.predict(&audio).unwrap();
 
         // Noise should have high flatness - might be tagged as nature or ambient
-        let has_ambient_like = tags.iter()
+        let has_ambient_like = tags
+            .iter()
             .any(|t| t.label == "nature" || t.label == "ambient");
 
         // Just verify we get some tags

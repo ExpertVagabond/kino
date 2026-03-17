@@ -6,14 +6,11 @@
 //! - Seek buffer management
 //! - Memory-efficient storage
 
-use crate::{
-    types::*,
-    Result,
-};
+use crate::{types::*, Result};
 use bytes::Bytes;
 use std::collections::{BTreeMap, VecDeque};
 use tokio::sync::{Mutex, RwLock};
-use tracing::{debug, warn, instrument};
+use tracing::{debug, instrument, warn};
 
 /// Buffered segment data
 #[derive(Debug, Clone)]

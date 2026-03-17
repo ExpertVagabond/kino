@@ -73,7 +73,7 @@ impl PsshBox {
 }
 
 /// DRM configuration for a content item
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct DrmConfig {
     /// License server URL for Widevine
     pub widevine_license_url: Option<Url>,
@@ -93,22 +93,6 @@ pub struct DrmConfig {
     pub persist_license: bool,
     /// License duration in seconds (0 = forever)
     pub license_duration: u64,
-}
-
-impl Default for DrmConfig {
-    fn default() -> Self {
-        Self {
-            widevine_license_url: None,
-            playready_license_url: None,
-            fairplay_certificate_url: None,
-            fairplay_license_url: None,
-            license_headers: HashMap::new(),
-            fairplay_content_id: None,
-            clearkey_keys: HashMap::new(),
-            persist_license: false,
-            license_duration: 0,
-        }
-    }
 }
 
 impl DrmConfig {
@@ -139,7 +123,8 @@ impl DrmConfig {
 
     /// Add a custom header for license requests
     pub fn with_header(mut self, key: &str, value: &str) -> Self {
-        self.license_headers.insert(key.to_string(), value.to_string());
+        self.license_headers
+            .insert(key.to_string(), value.to_string());
         self
     }
 
@@ -286,12 +271,17 @@ impl DrmManager {
     /// Get PSSH box for a specific DRM system
     pub fn get_pssh(&self, system: DrmSystem) -> Option<&PsshBox> {
         let target_id = system.system_id().to_lowercase();
-        self.pssh_boxes.iter().find(|p| p.system_id.to_lowercase() == target_id)
+        self.pssh_boxes
+            .iter()
+            .find(|p| p.system_id.to_lowercase() == target_id)
     }
 
     /// Create a license request for Widevine
     pub fn create_widevine_request(&self, challenge: Vec<u8>) -> Result<LicenseRequest> {
-        let license_url = self.config.widevine_license_url.clone()
+        let license_url = self
+            .config
+            .widevine_license_url
+            .clone()
             .ok_or_else(|| Error::drm("Widevine license URL not configured"))?;
 
         Ok(LicenseRequest {
@@ -304,7 +294,10 @@ impl DrmManager {
 
     /// Create a license request for FairPlay
     pub fn create_fairplay_request(&self, spc: Vec<u8>) -> Result<LicenseRequest> {
-        let license_url = self.config.fairplay_license_url.clone()
+        let license_url = self
+            .config
+            .fairplay_license_url
+            .clone()
             .ok_or_else(|| Error::drm("FairPlay license URL not configured"))?;
 
         Ok(LicenseRequest {
@@ -322,7 +315,10 @@ impl DrmManager {
         }
 
         // Build ClearKey license JSON
-        let keys: Vec<serde_json::Value> = self.config.clearkey_keys.iter()
+        let keys: Vec<serde_json::Value> = self
+            .config
+            .clearkey_keys
+            .iter()
             .map(|(kid, key)| {
                 serde_json::json!({
                     "kty": "oct",
@@ -354,7 +350,9 @@ impl DrmManager {
 
     /// Update session with license response
     pub fn process_license(&mut self, session_id: &str, response: LicenseResponse) -> Result<()> {
-        let session = self.sessions.get_mut(session_id)
+        let session = self
+            .sessions
+            .get_mut(session_id)
             .ok_or_else(|| Error::drm("Session not found"))?;
 
         session.state = DrmSessionState::Ready;
@@ -393,7 +391,12 @@ impl DrmManager {
         let supported = self.config.supported_systems();
 
         // Check what PSSH boxes we have
-        for system in &[DrmSystem::Widevine, DrmSystem::FairPlay, DrmSystem::PlayReady, DrmSystem::ClearKey] {
+        for system in &[
+            DrmSystem::Widevine,
+            DrmSystem::FairPlay,
+            DrmSystem::PlayReady,
+            DrmSystem::ClearKey,
+        ] {
             if supported.contains(system) && self.get_pssh(*system).is_some() {
                 return Some(*system);
             }
@@ -425,25 +428,32 @@ fn base64_encode(data: &[u8]) -> String {
 
         result.push(ALPHABET[((n >> 18) & 0x3F) as usize] as char);
         result.push(ALPHABET[((n >> 12) & 0x3F) as usize] as char);
-        result.push(if chunk.len() > 1 { ALPHABET[((n >> 6) & 0x3F) as usize] as char } else { '=' });
-        result.push(if chunk.len() > 2 { ALPHABET[(n & 0x3F) as usize] as char } else { '=' });
+        result.push(if chunk.len() > 1 {
+            ALPHABET[((n >> 6) & 0x3F) as usize] as char
+        } else {
+            '='
+        });
+        result.push(if chunk.len() > 2 {
+            ALPHABET[(n & 0x3F) as usize] as char
+        } else {
+            '='
+        });
     }
     result
 }
 
 fn base64_decode(data: &str) -> Result<Vec<u8>> {
     const DECODE_TABLE: &[i8; 128] = &[
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63,
-        52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1,
-        -1,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14,
-        15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1,
-        -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-        41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1,
+        -1, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4,
+        5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1,
+        -1, -1, -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45,
+        46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1,
     ];
 
-    let input: Vec<u8> = data.bytes()
+    let input: Vec<u8> = data
+        .bytes()
         .filter(|b| *b != b'=' && *b != b'\n' && *b != b'\r')
         .collect();
 

@@ -2,8 +2,8 @@
 //!
 //! Provides buffer strategy recommendations to complement MSE/hls.js.
 
+use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
-use serde::{Serialize, Deserialize};
 
 /// Buffer state information
 #[wasm_bindgen]

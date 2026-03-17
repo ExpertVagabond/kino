@@ -2,9 +2,9 @@
 //!
 //! Collects and aggregates playback metrics for quality analysis.
 
-use wasm_bindgen::prelude::*;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use std::collections::VecDeque;
+use wasm_bindgen::prelude::*;
 
 /// Quality of Experience breakdown
 #[wasm_bindgen]
@@ -115,9 +115,12 @@ impl KinoAnalytics {
     pub fn report_first_frame(&mut self) {
         if self.startup_time_ms.is_none() {
             self.startup_time_ms = Some(js_sys::Date::now() - self.session_start);
-            self.log_event("first_frame", serde_json::json!({
-                "startup_ms": self.startup_time_ms
-            }));
+            self.log_event(
+                "first_frame",
+                serde_json::json!({
+                    "startup_ms": self.startup_time_ms
+                }),
+            );
         }
     }
 
@@ -142,7 +145,10 @@ impl KinoAnalytics {
         if self.rebuffer_start.is_none() {
             self.rebuffer_start = Some(js_sys::Date::now());
             self.rebuffer_count += 1;
-            self.log_event("rebuffer_start", serde_json::json!({ "position": position }));
+            self.log_event(
+                "rebuffer_start",
+                serde_json::json!({ "position": position }),
+            );
         }
     }
 
@@ -152,10 +158,13 @@ impl KinoAnalytics {
         if let Some(start) = self.rebuffer_start.take() {
             let duration = (js_sys::Date::now() - start) / 1000.0;
             self.rebuffer_duration += duration;
-            self.log_event("rebuffer_end", serde_json::json!({
-                "position": position,
-                "duration_s": duration
-            }));
+            self.log_event(
+                "rebuffer_end",
+                serde_json::json!({
+                    "position": position,
+                    "duration_s": duration
+                }),
+            );
         }
     }
 
@@ -165,11 +174,14 @@ impl KinoAnalytics {
         if let Some(old) = self.last_bitrate {
             if old != new_bitrate {
                 self.quality_switches += 1;
-                self.log_event("quality_change", serde_json::json!({
-                    "from": old,
-                    "to": new_bitrate,
-                    "position": position
-                }));
+                self.log_event(
+                    "quality_change",
+                    serde_json::json!({
+                        "from": old,
+                        "to": new_bitrate,
+                        "position": position
+                    }),
+                );
             }
         }
         self.last_bitrate = Some(new_bitrate);
@@ -178,7 +190,8 @@ impl KinoAnalytics {
     /// Report current bitrate (for averaging)
     #[wasm_bindgen]
     pub fn report_bitrate_sample(&mut self, bitrate: u32, duration: f64) {
-        self.bitrate_samples.push_back(BitrateSample { bitrate, duration });
+        self.bitrate_samples
+            .push_back(BitrateSample { bitrate, duration });
 
         // Update max quality time
         if bitrate >= self.max_available_bitrate && self.max_available_bitrate > 0 {
@@ -196,20 +209,26 @@ impl KinoAnalytics {
     /// Report seek event
     #[wasm_bindgen]
     pub fn report_seek(&mut self, from: f64, to: f64) {
-        self.log_event("seek", serde_json::json!({
-            "from": from,
-            "to": to
-        }));
+        self.log_event(
+            "seek",
+            serde_json::json!({
+                "from": from,
+                "to": to
+            }),
+        );
     }
 
     /// Report error
     #[wasm_bindgen]
     pub fn report_error(&mut self, code: &str, message: &str, fatal: bool) {
-        self.log_event("error", serde_json::json!({
-            "code": code,
-            "message": message,
-            "fatal": fatal
-        }));
+        self.log_event(
+            "error",
+            serde_json::json!({
+                "code": code,
+                "message": message,
+                "fatal": fatal
+            }),
+        );
     }
 
     /// Calculate and return QoE metrics
@@ -267,7 +286,8 @@ impl KinoAnalytics {
             return 0;
         }
 
-        let weighted_sum: f64 = self.bitrate_samples
+        let weighted_sum: f64 = self
+            .bitrate_samples
             .iter()
             .map(|s| s.bitrate as f64 * s.duration)
             .sum();

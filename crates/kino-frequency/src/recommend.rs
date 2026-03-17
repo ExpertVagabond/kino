@@ -7,8 +7,8 @@
 //! - **User preferences**: Learn user taste from watch history
 //! - **Hybrid scoring**: Combine multiple similarity metrics
 
-use std::collections::HashMap;
 use anyhow::Result;
+use std::collections::HashMap;
 use tracing::info;
 
 use crate::fft::FrequencyAnalyzer;
@@ -72,15 +72,24 @@ impl RecommendationEngine {
         audio: &AudioData,
         metadata: Option<ContentMetadata>,
     ) -> Result<()> {
-        let signature = self.analyzer.compute_signature(&audio.samples, audio.sample_rate)?;
+        let signature = self
+            .analyzer
+            .compute_signature(&audio.samples, audio.sample_rate)?;
 
-        info!("Indexed content: {} (signature size: {})", content_id, signature.features.len());
+        info!(
+            "Indexed content: {} (signature size: {})",
+            content_id,
+            signature.features.len()
+        );
 
-        self.content_index.insert(content_id.to_string(), ContentEntry {
-            content_id: content_id.to_string(),
-            signature,
-            _metadata: metadata,
-        });
+        self.content_index.insert(
+            content_id.to_string(),
+            ContentEntry {
+                content_id: content_id.to_string(),
+                signature,
+                _metadata: metadata,
+            },
+        );
 
         Ok(())
     }
@@ -92,11 +101,14 @@ impl RecommendationEngine {
         signature: FrequencySignature,
         metadata: Option<ContentMetadata>,
     ) {
-        self.content_index.insert(content_id.to_string(), ContentEntry {
-            content_id: content_id.to_string(),
-            signature,
-            _metadata: metadata,
-        });
+        self.content_index.insert(
+            content_id.to_string(),
+            ContentEntry {
+                content_id: content_id.to_string(),
+                signature,
+                _metadata: metadata,
+            },
+        );
     }
 
     /// Remove content from the index.
@@ -105,11 +117,7 @@ impl RecommendationEngine {
     }
 
     /// Get recommendations for a specific content item.
-    pub fn get_similar(
-        &self,
-        content_id: &str,
-        limit: usize,
-    ) -> Vec<Recommendation> {
+    pub fn get_similar(&self, content_id: &str, limit: usize) -> Vec<Recommendation> {
         let target = match self.content_index.get(content_id) {
             Some(entry) => &entry.signature,
             None => return Vec::new(),
@@ -124,7 +132,9 @@ impl RecommendationEngine {
         audio: &AudioData,
         limit: usize,
     ) -> Result<Vec<Recommendation>> {
-        let signature = self.analyzer.compute_signature(&audio.samples, audio.sample_rate)?;
+        let signature = self
+            .analyzer
+            .compute_signature(&audio.samples, audio.sample_rate)?;
         Ok(self.find_similar_to_signature(&signature, None, limit))
     }
 
@@ -139,7 +149,8 @@ impl RecommendationEngine {
         }
 
         // Compute average signature from watch history
-        let history_signatures: Vec<&FrequencySignature> = watch_history.iter()
+        let history_signatures: Vec<&FrequencySignature> = watch_history
+            .iter()
             .filter_map(|id| self.content_index.get(id))
             .map(|entry| &entry.signature)
             .collect();
@@ -208,8 +219,10 @@ impl RecommendationEngine {
         exclude_id: Option<&str>,
         limit: usize,
     ) -> Vec<Recommendation> {
-        let mut similarities: Vec<(String, f32, Vec<String>)> = self.content_index.iter()
-            .filter(|(id, _)| exclude_id.map_or(true, |ex| *id != ex))
+        let mut similarities: Vec<(String, f32, Vec<String>)> = self
+            .content_index
+            .iter()
+            .filter(|(id, _)| exclude_id.is_none_or(|ex| *id != ex))
             .map(|(id, entry)| {
                 let (similarity, features) = self.compute_similarity(target, &entry.signature);
                 (id.clone(), similarity, features)
@@ -219,13 +232,16 @@ impl RecommendationEngine {
 
         similarities.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
 
-        similarities.into_iter()
+        similarities
+            .into_iter()
             .take(limit)
-            .map(|(content_id, similarity, matching_features)| Recommendation {
-                content_id,
-                similarity,
-                matching_features,
-            })
+            .map(
+                |(content_id, similarity, matching_features)| Recommendation {
+                    content_id,
+                    similarity,
+                    matching_features,
+                },
+            )
             .collect()
     }
 
@@ -250,7 +266,8 @@ impl RecommendationEngine {
         }
 
         // Spectral feature similarity
-        let centroid_diff = (sig1.centroid - sig2.centroid).abs() / sig1.centroid.max(sig2.centroid).max(1.0);
+        let centroid_diff =
+            (sig1.centroid - sig2.centroid).abs() / sig1.centroid.max(sig2.centroid).max(1.0);
         let flatness_diff = (sig1.flatness - sig2.flatness).abs();
 
         let spectral_sim = 1.0 - (centroid_diff * 0.5 + flatness_diff * 0.5);
@@ -259,10 +276,9 @@ impl RecommendationEngine {
         }
 
         // Weighted combination
-        let total_similarity =
-            feature_sim * self.config.signature_weight +
-            band_sim * self.config.band_weight +
-            spectral_sim * self.config.spectral_weight;
+        let total_similarity = feature_sim * self.config.signature_weight
+            + band_sim * self.config.band_weight
+            + spectral_sim * self.config.spectral_weight;
 
         (total_similarity, matching_features)
     }
@@ -317,11 +333,23 @@ impl RecommendationEngine {
 
         // Average band energies
         let avg_band = BandEnergies {
-            sub_bass: signatures.iter().map(|s| s.band_energies.sub_bass).sum::<f32>() / n,
+            sub_bass: signatures
+                .iter()
+                .map(|s| s.band_energies.sub_bass)
+                .sum::<f32>()
+                / n,
             bass: signatures.iter().map(|s| s.band_energies.bass).sum::<f32>() / n,
-            low_mid: signatures.iter().map(|s| s.band_energies.low_mid).sum::<f32>() / n,
+            low_mid: signatures
+                .iter()
+                .map(|s| s.band_energies.low_mid)
+                .sum::<f32>()
+                / n,
             mid: signatures.iter().map(|s| s.band_energies.mid).sum::<f32>() / n,
-            high_mid: signatures.iter().map(|s| s.band_energies.high_mid).sum::<f32>() / n,
+            high_mid: signatures
+                .iter()
+                .map(|s| s.band_energies.high_mid)
+                .sum::<f32>()
+                / n,
             high: signatures.iter().map(|s| s.band_energies.high).sum::<f32>() / n,
         };
 
@@ -349,7 +377,8 @@ impl RecommendationEngine {
 
             // Classify by dominant band
             let bands = entry.signature.band_energies.to_vec();
-            let dominant_band = bands.iter()
+            let dominant_band = bands
+                .iter()
                 .enumerate()
                 .max_by(|a, b| a.1.partial_cmp(b.1).unwrap_or(std::cmp::Ordering::Equal))
                 .map(|(i, _)| i)
@@ -400,7 +429,8 @@ impl RecommendationEngine {
 
     /// Export the index for persistence.
     pub fn export_index(&self) -> Vec<(String, FrequencySignature)> {
-        self.content_index.iter()
+        self.content_index
+            .iter()
             .map(|(id, entry)| (id.clone(), entry.signature.clone()))
             .collect()
     }
@@ -408,11 +438,14 @@ impl RecommendationEngine {
     /// Import signatures from persistence.
     pub fn import_index(&mut self, data: Vec<(String, FrequencySignature)>) {
         for (id, signature) in data {
-            self.content_index.insert(id.clone(), ContentEntry {
-                content_id: id,
-                signature,
-                _metadata: None,
-            });
+            self.content_index.insert(
+                id.clone(),
+                ContentEntry {
+                    content_id: id,
+                    signature,
+                    _metadata: None,
+                },
+            );
         }
     }
 }
@@ -480,7 +513,7 @@ mod tests {
 
         // Similar frequencies
         let audio1 = generate_test_audio(440.0, 5.0);
-        let audio2 = generate_test_audio(445.0, 5.0);  // Very close to 440
+        let audio2 = generate_test_audio(445.0, 5.0); // Very close to 440
         let audio3 = generate_test_audio(1000.0, 5.0); // Different
 
         engine.add_content("similar_1", &audio1, None).unwrap();
@@ -492,10 +525,12 @@ mod tests {
         // similar_2 should be ranked higher than different
         assert!(!recommendations.is_empty());
         if recommendations.len() >= 2 {
-            let sim_to_close = recommendations.iter()
+            let sim_to_close = recommendations
+                .iter()
                 .find(|r| r.content_id == "similar_2")
                 .map(|r| r.similarity);
-            let sim_to_diff = recommendations.iter()
+            let sim_to_diff = recommendations
+                .iter()
                 .find(|r| r.content_id == "different")
                 .map(|r| r.similarity);
 
@@ -514,13 +549,17 @@ mod tests {
         let audio2 = generate_test_audio(250.0, 5.0);
 
         // Unwatched content
-        let audio3 = generate_test_audio(220.0, 5.0);  // Similar
+        let audio3 = generate_test_audio(220.0, 5.0); // Similar
         let audio4 = generate_test_audio(5000.0, 5.0); // Different
 
         engine.add_content("watched_1", &audio1, None).unwrap();
         engine.add_content("watched_2", &audio2, None).unwrap();
-        engine.add_content("unwatched_similar", &audio3, None).unwrap();
-        engine.add_content("unwatched_different", &audio4, None).unwrap();
+        engine
+            .add_content("unwatched_similar", &audio3, None)
+            .unwrap();
+        engine
+            .add_content("unwatched_different", &audio4, None)
+            .unwrap();
 
         let history = vec!["watched_1".to_string(), "watched_2".to_string()];
         let recommendations = engine.get_user_recommendations(&history, 2);

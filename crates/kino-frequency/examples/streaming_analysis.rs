@@ -83,7 +83,10 @@ fn main() -> Result<()> {
     println!("  Frame count:       {}", stats.frame_count);
     println!("  Avg RMS energy:    {:.4}", stats.avg_rms_energy);
     println!("  RMS variance:      {:.6}", stats.rms_variance);
-    println!("  Avg dominant freq: {:.1} Hz", stats.avg_dominant_frequency);
+    println!(
+        "  Avg dominant freq: {:.1} Hz",
+        stats.avg_dominant_frequency
+    );
     println!("  Freq variance:     {:.1}", stats.frequency_variance);
     println!("  Avg centroid:      {:.1} Hz", stats.avg_spectral_centroid);
 
@@ -103,7 +106,10 @@ fn main() -> Result<()> {
         println!("\nDetected Events:");
         for event in events.iter().take(20) {
             match event {
-                AnalysisEvent::BeatDetected { timestamp, strength } => {
+                AnalysisEvent::BeatDetected {
+                    timestamp,
+                    strength,
+                } => {
                     println!(
                         "  [{:>6.2}s] Beat detected - strength: {:.2}",
                         timestamp, strength
@@ -112,19 +118,29 @@ fn main() -> Result<()> {
                 AnalysisEvent::SilenceStart { timestamp } => {
                     println!("  [{:>6.2}s] Silence started", timestamp);
                 }
-                AnalysisEvent::SilenceEnd { timestamp, duration } => {
+                AnalysisEvent::SilenceEnd {
+                    timestamp,
+                    duration,
+                } => {
                     println!(
                         "  [{:>6.2}s] Silence ended (duration: {:.2}s)",
                         timestamp, duration
                     );
                 }
-                AnalysisEvent::DominantChange { old, new, timestamp } => {
+                AnalysisEvent::DominantChange {
+                    old,
+                    new,
+                    timestamp,
+                } => {
                     println!(
                         "  [{:>6.2}s] Frequency change: {:.1} Hz -> {:.1} Hz",
                         timestamp, old, new
                     );
                 }
-                AnalysisEvent::SpectralShift { timestamp, magnitude } => {
+                AnalysisEvent::SpectralShift {
+                    timestamp,
+                    magnitude,
+                } => {
                     println!(
                         "  [{:>6.2}s] Spectral shift - magnitude: {:.2}",
                         timestamp, magnitude

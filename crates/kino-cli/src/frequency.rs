@@ -6,23 +6,15 @@
 //! - Thumbnail selection
 //! - Recommendation similarity
 
-use std::path::PathBuf;
 use anyhow::Result;
 use kino_frequency::{
-    AudioAnalyzer,
-    fingerprint::Fingerprinter,
-    tagging::ContentTagger,
-    thumbnail::ThumbnailSelector,
-    recommend::RecommendationEngine,
-    types::*,
+    fingerprint::Fingerprinter, recommend::RecommendationEngine, tagging::ContentTagger,
+    thumbnail::ThumbnailSelector, types::*, AudioAnalyzer,
 };
+use std::path::PathBuf;
 
 /// Analyze audio frequencies in a video file.
-pub async fn analyze_frequency(
-    input: &PathBuf,
-    top_k: usize,
-    output_json: bool,
-) -> Result<()> {
+pub async fn analyze_frequency(input: &PathBuf, top_k: usize, output_json: bool) -> Result<()> {
     println!("Analyzing frequencies: {}", input.display());
 
     let analyzer = AudioAnalyzer::new(44100);
@@ -31,7 +23,10 @@ pub async fn analyze_frequency(
     println!("\nAudio Info:");
     println!("  Samples: {}", audio.samples.len());
     println!("  Sample Rate: {} Hz", audio.sample_rate);
-    println!("  Duration: {:.2}s", audio.samples.len() as f64 / audio.sample_rate as f64);
+    println!(
+        "  Duration: {:.2}s",
+        audio.samples.len() as f64 / audio.sample_rate as f64
+    );
 
     // Get dominant frequencies
     let dominant = analyzer.dominant_frequencies(&audio, top_k)?;
@@ -53,18 +48,48 @@ pub async fn analyze_frequency(
     let analysis = analyzer.analyze(&audio)?;
 
     println!("\nSpectral Features:");
-    println!("  Centroid: {:.1} Hz (brightness)", analysis.spectral_centroid);
-    println!("  Rolloff: {:.1} Hz (95% energy)", analysis.spectral_rolloff);
-    println!("  Flatness: {:.4} (0=tonal, 1=noise)", analysis.spectral_flatness);
-    println!("  ZCR: {:.4} (zero crossing rate)", analysis.zero_crossing_rate);
+    println!(
+        "  Centroid: {:.1} Hz (brightness)",
+        analysis.spectral_centroid
+    );
+    println!(
+        "  Rolloff: {:.1} Hz (95% energy)",
+        analysis.spectral_rolloff
+    );
+    println!(
+        "  Flatness: {:.4} (0=tonal, 1=noise)",
+        analysis.spectral_flatness
+    );
+    println!(
+        "  ZCR: {:.4} (zero crossing rate)",
+        analysis.zero_crossing_rate
+    );
 
     println!("\nBand Energies:");
-    println!("  Sub-bass (20-60 Hz):    {:>5.1}%", analysis.band_energies.sub_bass * 100.0);
-    println!("  Bass (60-250 Hz):       {:>5.1}%", analysis.band_energies.bass * 100.0);
-    println!("  Low-mid (250-500 Hz):   {:>5.1}%", analysis.band_energies.low_mid * 100.0);
-    println!("  Mid (500-2000 Hz):      {:>5.1}%", analysis.band_energies.mid * 100.0);
-    println!("  High-mid (2000-4000 Hz):{:>5.1}%", analysis.band_energies.high_mid * 100.0);
-    println!("  High (4000+ Hz):        {:>5.1}%", analysis.band_energies.high * 100.0);
+    println!(
+        "  Sub-bass (20-60 Hz):    {:>5.1}%",
+        analysis.band_energies.sub_bass * 100.0
+    );
+    println!(
+        "  Bass (60-250 Hz):       {:>5.1}%",
+        analysis.band_energies.bass * 100.0
+    );
+    println!(
+        "  Low-mid (250-500 Hz):   {:>5.1}%",
+        analysis.band_energies.low_mid * 100.0
+    );
+    println!(
+        "  Mid (500-2000 Hz):      {:>5.1}%",
+        analysis.band_energies.mid * 100.0
+    );
+    println!(
+        "  High-mid (2000-4000 Hz):{:>5.1}%",
+        analysis.band_energies.high_mid * 100.0
+    );
+    println!(
+        "  High (4000+ Hz):        {:>5.1}%",
+        analysis.band_energies.high * 100.0
+    );
 
     if output_json {
         let result = serde_json::json!({
@@ -128,18 +153,18 @@ pub async fn fingerprint(
         }
 
         println!("\nTo verify later, run:");
-        println!("  kino fingerprint {} --verify {}", input.display(), fp.hash);
+        println!(
+            "  kino fingerprint {} --verify {}",
+            input.display(),
+            fp.hash
+        );
     }
 
     Ok(())
 }
 
 /// Auto-tag content based on audio analysis.
-pub async fn autotag(
-    input: &PathBuf,
-    max_tags: usize,
-    min_confidence: f32,
-) -> Result<()> {
+pub async fn autotag(input: &PathBuf, max_tags: usize, min_confidence: f32) -> Result<()> {
     println!("Auto-tagging: {}", input.display());
 
     let analyzer = AudioAnalyzer::new(44100);
@@ -152,13 +177,17 @@ pub async fn autotag(
     println!("  {:>20}  {:>10}", "Tag", "Confidence");
     println!("  {:->20}  {:->10}", "", "");
 
-    let filtered: Vec<_> = tags.iter()
+    let filtered: Vec<_> = tags
+        .iter()
         .filter(|t| t.confidence >= min_confidence)
         .take(max_tags)
         .collect();
 
     if filtered.is_empty() {
-        println!("  No tags above confidence threshold ({:.0}%)", min_confidence * 100.0);
+        println!(
+            "  No tags above confidence threshold ({:.0}%)",
+            min_confidence * 100.0
+        );
     } else {
         for tag in filtered {
             println!("  {:>20}  {:>9.0}%", tag.label, tag.confidence * 100.0);
@@ -186,9 +215,14 @@ pub async fn thumbnail(
         let candidates = selector.find_candidates(input, &audio, num_candidates)?;
 
         println!("\nThumbnail Candidates:");
-        println!("  {:>4}  {:>10}  {:>10}  {:>10}  {:>10}",
-            "Rank", "Timestamp", "Sharpness", "Contrast", "Score");
-        println!("  {:->4}  {:->10}  {:->10}  {:->10}  {:->10}", "", "", "", "", "");
+        println!(
+            "  {:>4}  {:>10}  {:>10}  {:>10}  {:>10}",
+            "Rank", "Timestamp", "Sharpness", "Contrast", "Score"
+        );
+        println!(
+            "  {:->4}  {:->10}  {:->10}  {:->10}  {:->10}",
+            "", "", "", "", ""
+        );
 
         for (i, c) in candidates.iter().enumerate() {
             println!(
@@ -205,7 +239,11 @@ pub async fn thumbnail(
         if let Some(path) = output {
             if let Some(best) = candidates.first() {
                 selector.extract_thumbnail(input, best.timestamp, &path)?;
-                println!("\nExtracted thumbnail at {:.2}s to: {}", best.timestamp, path.display());
+                println!(
+                    "\nExtracted thumbnail at {:.2}s to: {}",
+                    best.timestamp,
+                    path.display()
+                );
             }
         }
     } else {
@@ -218,7 +256,10 @@ pub async fn thumbnail(
             println!("Extracted to: {}", path.display());
         } else {
             println!("\nTo extract thumbnail, run:");
-            println!("  kino thumbnail {} --output thumbnail.jpg", input.display());
+            println!(
+                "  kino thumbnail {} --output thumbnail.jpg",
+                input.display()
+            );
         }
     }
 
@@ -226,11 +267,7 @@ pub async fn thumbnail(
 }
 
 /// Find similar content using frequency signatures.
-pub async fn similar(
-    input: &PathBuf,
-    library_dir: &PathBuf,
-    limit: usize,
-) -> Result<()> {
+pub async fn similar(input: &PathBuf, library_dir: &PathBuf, limit: usize) -> Result<()> {
     println!("Finding similar content to: {}", input.display());
     println!("Scanning library: {}", library_dir.display());
 
@@ -248,7 +285,8 @@ pub async fn similar(
             if video_extensions.contains(&ext.to_str().unwrap_or("")) {
                 match analyzer.extract_audio(&path).await {
                     Ok(audio) => {
-                        let id = path.file_name()
+                        let id = path
+                            .file_name()
                             .and_then(|n| n.to_str())
                             .unwrap_or("unknown")
                             .to_string();
@@ -272,7 +310,10 @@ pub async fn similar(
         println!("\nNo similar content found.");
     } else {
         println!("\nSimilar Content:");
-        println!("  {:>4}  {:>30}  {:>10}  {}", "Rank", "File", "Similarity", "Features");
+        println!(
+            "  {:>4}  {:>30}  {:>10}  Features",
+            "Rank", "File", "Similarity"
+        );
         println!("  {:->4}  {:->30}  {:->10}  {:->20}", "", "", "", "");
 
         for (i, rec) in recommendations.iter().enumerate() {

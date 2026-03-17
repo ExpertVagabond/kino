@@ -52,8 +52,10 @@ fn main() -> Result<()> {
     println!("  Band similarity:      {:.2}%", band_similarity * 100.0);
 
     // Compare centroid and flatness
-    let centroid_diff = (sig1.centroid - sig2.centroid).abs() / sig1.centroid.max(sig2.centroid).max(1.0);
-    let flatness_diff = (sig1.flatness - sig2.flatness).abs() / sig1.flatness.max(sig2.flatness).max(0.001);
+    let centroid_diff =
+        (sig1.centroid - sig2.centroid).abs() / sig1.centroid.max(sig2.centroid).max(1.0);
+    let flatness_diff =
+        (sig1.flatness - sig2.flatness).abs() / sig1.flatness.max(sig2.flatness).max(0.001);
 
     println!("  Centroid difference:  {:.1}%", centroid_diff * 100.0);
     println!("  Flatness difference:  {:.1}%", flatness_diff * 100.0);
@@ -86,7 +88,10 @@ fn main() -> Result<()> {
         analysis1.spectral_centroid,
         analysis2.spectral_centroid,
         ((analysis1.spectral_centroid - analysis2.spectral_centroid).abs()
-            / analysis1.spectral_centroid.max(analysis2.spectral_centroid).max(1.0))
+            / analysis1
+                .spectral_centroid
+                .max(analysis2.spectral_centroid)
+                .max(1.0))
             * 100.0
     );
 
@@ -95,7 +100,10 @@ fn main() -> Result<()> {
         analysis1.spectral_flatness,
         analysis2.spectral_flatness,
         ((analysis1.spectral_flatness - analysis2.spectral_flatness).abs()
-            / analysis1.spectral_flatness.max(analysis2.spectral_flatness).max(0.001))
+            / analysis1
+                .spectral_flatness
+                .max(analysis2.spectral_flatness)
+                .max(0.001))
             * 100.0
     );
 

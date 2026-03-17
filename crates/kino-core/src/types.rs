@@ -120,11 +120,26 @@ impl Resolution {
     }
 
     /// Common resolutions
-    pub const SD_480P: Resolution = Resolution { width: 854, height: 480 };
-    pub const HD_720P: Resolution = Resolution { width: 1280, height: 720 };
-    pub const FHD_1080P: Resolution = Resolution { width: 1920, height: 1080 };
-    pub const QHD_1440P: Resolution = Resolution { width: 2560, height: 1440 };
-    pub const UHD_4K: Resolution = Resolution { width: 3840, height: 2160 };
+    pub const SD_480P: Resolution = Resolution {
+        width: 854,
+        height: 480,
+    };
+    pub const HD_720P: Resolution = Resolution {
+        width: 1280,
+        height: 720,
+    };
+    pub const FHD_1080P: Resolution = Resolution {
+        width: 1920,
+        height: 1080,
+    };
+    pub const QHD_1440P: Resolution = Resolution {
+        width: 2560,
+        height: 1440,
+    };
+    pub const UHD_4K: Resolution = Resolution {
+        width: 3840,
+        height: 2160,
+    };
 }
 
 impl std::fmt::Display for Resolution {
@@ -459,7 +474,12 @@ pub struct Chapter {
 
 impl Chapter {
     /// Create a new chapter
-    pub fn new(id: impl Into<String>, title: impl Into<String>, start_time: f64, end_time: f64) -> Self {
+    pub fn new(
+        id: impl Into<String>,
+        title: impl Into<String>,
+        start_time: f64,
+        end_time: f64,
+    ) -> Self {
         Self {
             id: id.into(),
             title: title.into(),
@@ -593,11 +613,7 @@ impl TextTrack {
     }
 
     /// Create a captions track
-    pub fn captions(
-        language: impl Into<String>,
-        label: impl Into<String>,
-        url: Url,
-    ) -> Self {
+    pub fn captions(language: impl Into<String>, label: impl Into<String>, url: Url) -> Self {
         let lang = language.into();
         Self {
             id: format!("cc-{}", lang),
@@ -613,11 +629,7 @@ impl TextTrack {
     }
 
     /// Create a subtitles track
-    pub fn subtitles(
-        language: impl Into<String>,
-        label: impl Into<String>,
-        url: Url,
-    ) -> Self {
+    pub fn subtitles(language: impl Into<String>, label: impl Into<String>, url: Url) -> Self {
         let lang = language.into();
         Self {
             id: format!("sub-{}", lang),
@@ -754,7 +766,10 @@ impl MediaTracks {
 
     /// Get text tracks by language
     pub fn text_tracks_by_language(&self, language: &str) -> Vec<&TextTrack> {
-        self.text.iter().filter(|t| t.language == language).collect()
+        self.text
+            .iter()
+            .filter(|t| t.language == language)
+            .collect()
     }
 
     /// Get default text track of a kind

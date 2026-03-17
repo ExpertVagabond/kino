@@ -2,7 +2,7 @@
 //!
 //! Run with: cargo bench -p kino-frequency
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId};
+use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 
 // Helper to generate test audio
 fn generate_sine_wave(freq: f32, sample_rate: u32, duration_secs: f32) -> Vec<f32> {
@@ -21,9 +21,9 @@ fn generate_complex_audio(sample_rate: u32, duration_secs: f32) -> Vec<f32> {
         .map(|i| {
             let t = i as f32 / sample_rate as f32;
             // Mix of frequencies simulating music
-            0.5 * (2.0 * std::f32::consts::PI * 440.0 * t).sin() +
-            0.3 * (2.0 * std::f32::consts::PI * 880.0 * t).sin() +
-            0.2 * (2.0 * std::f32::consts::PI * 220.0 * t).sin()
+            0.5 * (2.0 * std::f32::consts::PI * 440.0 * t).sin()
+                + 0.3 * (2.0 * std::f32::consts::PI * 880.0 * t).sin()
+                + 0.2 * (2.0 * std::f32::consts::PI * 220.0 * t).sin()
         })
         .collect()
 }
@@ -33,7 +33,7 @@ fn generate_complex_audio(sample_rate: u32, duration_secs: f32) -> Vec<f32> {
 // ============================================================================
 
 fn bench_fft_sizes(c: &mut Criterion) {
-    use rustfft::{FftPlanner, num_complex::Complex};
+    use rustfft::{num_complex::Complex, FftPlanner};
 
     let mut group = c.benchmark_group("FFT Size");
 
@@ -45,7 +45,8 @@ fn bench_fft_sizes(c: &mut Criterion) {
             let fft = planner.plan_fft_forward(size);
 
             b.iter(|| {
-                let mut buffer: Vec<Complex<f32>> = samples.iter()
+                let mut buffer: Vec<Complex<f32>> = samples
+                    .iter()
                     .take(size)
                     .map(|&s| Complex::new(s, 0.0))
                     .collect();
@@ -106,20 +107,21 @@ fn bench_spectral_features(c: &mut Criterion) {
     let samples = generate_complex_audio(44100, 5.0);
 
     c.bench_function("Spectral Centroid", |b| {
-        let spectrum: Vec<f32> = (0..2048)
-            .map(|i| (i as f32 / 2048.0).sin().abs())
-            .collect();
-        let frequencies: Vec<f32> = (0..2048)
-            .map(|i| i as f32 * 44100.0 / 4096.0)
-            .collect();
+        let spectrum: Vec<f32> = (0..2048).map(|i| (i as f32 / 2048.0).sin().abs()).collect();
+        let frequencies: Vec<f32> = (0..2048).map(|i| i as f32 * 44100.0 / 4096.0).collect();
 
         b.iter(|| {
-            let weighted_sum: f32 = spectrum.iter()
+            let weighted_sum: f32 = spectrum
+                .iter()
                 .zip(frequencies.iter())
                 .map(|(&m, &f)| m * f)
                 .sum();
             let total: f32 = spectrum.iter().sum();
-            let centroid = if total > 0.0 { weighted_sum / total } else { 0.0 };
+            let centroid = if total > 0.0 {
+                weighted_sum / total
+            } else {
+                0.0
+            };
             black_box(centroid)
         });
     });
@@ -131,9 +133,7 @@ fn bench_spectral_features(c: &mut Criterion) {
 
         b.iter(|| {
             let n = spectrum.len() as f32;
-            let log_sum: f32 = spectrum.iter()
-                .map(|&x| x.ln())
-                .sum();
+            let log_sum: f32 = spectrum.iter().map(|&x| x.ln()).sum();
             let geometric_mean = (log_sum / n).exp();
             let arithmetic_mean: f32 = spectrum.iter().sum::<f32>() / n;
             let flatness = geometric_mean / arithmetic_mean;
@@ -142,16 +142,16 @@ fn bench_spectral_features(c: &mut Criterion) {
     });
 
     c.bench_function("Band Energies", |b| {
-        let spectrum: Vec<f32> = (0..2048)
-            .map(|i| (i as f32 / 2048.0).sin().abs())
-            .collect();
-        let frequencies: Vec<f32> = (0..2048)
-            .map(|i| i as f32 * 44100.0 / 4096.0)
-            .collect();
+        let spectrum: Vec<f32> = (0..2048).map(|i| (i as f32 / 2048.0).sin().abs()).collect();
+        let frequencies: Vec<f32> = (0..2048).map(|i| i as f32 * 44100.0 / 4096.0).collect();
 
         let bands = [
-            (20.0, 60.0), (60.0, 250.0), (250.0, 500.0),
-            (500.0, 2000.0), (2000.0, 4000.0), (4000.0, 20000.0),
+            (20.0, 60.0),
+            (60.0, 250.0),
+            (250.0, 500.0),
+            (500.0, 2000.0),
+            (2000.0, 4000.0),
+            (4000.0, 20000.0),
         ];
 
         b.iter(|| {
@@ -235,10 +235,8 @@ fn bench_throughput(c: &mut Criterion) {
                 let frame = &samples[start..start + fft_size];
 
                 // Simple spectrum (placeholder for FFT)
-                let spectrum: Vec<f32> = frame.iter()
-                    .take(fft_size / 2)
-                    .map(|&s| s.abs())
-                    .collect();
+                let spectrum: Vec<f32> =
+                    frame.iter().take(fft_size / 2).map(|&s| s.abs()).collect();
 
                 all_spectra.push(spectrum);
             }

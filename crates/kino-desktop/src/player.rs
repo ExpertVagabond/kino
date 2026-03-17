@@ -9,7 +9,7 @@
 use anyhow::{Context, Result};
 use gstreamer as gst;
 use gstreamer_player as gst_player;
-use kino_core::{PlayerConfig, PlayerSession, PlayerState, QualityMetrics, Resolution, KinoColors};
+use kino_core::{KinoColors, PlayerConfig, PlayerSession, PlayerState, QualityMetrics, Resolution};
 use std::sync::{Arc, Mutex};
 use tracing::{debug, error, info, warn};
 
@@ -331,9 +331,7 @@ impl DesktopPlayer {
 
     /// Get current position in nanoseconds
     pub fn position(&self) -> u64 {
-        self.player.position()
-            .map(|p| p.nseconds())
-            .unwrap_or(0)
+        self.player.position().map(|p| p.nseconds()).unwrap_or(0)
     }
 
     /// Get current position in seconds
@@ -343,9 +341,7 @@ impl DesktopPlayer {
 
     /// Get total duration in nanoseconds
     pub fn duration(&self) -> u64 {
-        self.player.duration()
-            .map(|d| d.nseconds())
-            .unwrap_or(0)
+        self.player.duration().map(|d| d.nseconds()).unwrap_or(0)
     }
 
     /// Get total duration in seconds
@@ -355,14 +351,16 @@ impl DesktopPlayer {
 
     /// Get current player state
     pub fn player_state(&self) -> PlayerState {
-        self.state.lock()
+        self.state
+            .lock()
             .map(|s| s.state)
             .unwrap_or(PlayerState::Error)
     }
 
     /// Get video dimensions
     pub fn video_dimensions(&self) -> (u32, u32) {
-        self.state.lock()
+        self.state
+            .lock()
             .map(|s| (s.video_width, s.video_height))
             .unwrap_or((0, 0))
     }
@@ -379,14 +377,18 @@ impl DesktopPlayer {
 
     /// Check if hardware decoding is active
     pub fn is_hardware_accelerated(&self) -> bool {
-        self.config.hardware_decode &&
-            self.available_backends.iter().any(|b| *b != HardwareBackend::Software)
+        self.config.hardware_decode
+            && self
+                .available_backends
+                .iter()
+                .any(|b| *b != HardwareBackend::Software)
     }
 
     /// Get quality metrics
     pub fn quality_metrics(&self) -> QualityMetrics {
         let s = self.state.lock().ok();
-        let (width, height) = s.as_ref()
+        let (width, height) = s
+            .as_ref()
             .map(|s| (s.video_width, s.video_height))
             .unwrap_or((0, 0));
 
@@ -485,6 +487,8 @@ impl GStreamerInfo {
     }
 
     pub fn has_hardware_accel(&self) -> bool {
-        self.hardware_backends.iter().any(|b| *b != HardwareBackend::Software)
+        self.hardware_backends
+            .iter()
+            .any(|b| *b != HardwareBackend::Software)
     }
 }

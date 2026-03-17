@@ -29,9 +29,9 @@
 //! });
 //! ```
 
-use wasm_bindgen::prelude::*;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use std::collections::VecDeque;
+use wasm_bindgen::prelude::*;
 
 /// Level/Quality information from hls.js
 #[derive(Clone, Serialize, Deserialize)]

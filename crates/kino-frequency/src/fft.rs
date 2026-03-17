@@ -3,8 +3,8 @@
 //! This module provides the fundamental frequency analysis operations
 //! used throughout the Kino frequency analysis system.
 
-use anyhow::{Result, bail};
-use rustfft::{FftPlanner, num_complex::Complex};
+use anyhow::{bail, Result};
+use rustfft::{num_complex::Complex, FftPlanner};
 
 use crate::types::*;
 
@@ -35,7 +35,10 @@ impl FrequencyAnalyzer {
     /// Perform complete frequency analysis on audio samples.
     pub fn analyze(&self, samples: &[f32], sample_rate: u32) -> Result<FrequencyAnalysis> {
         if samples.len() < self.fft_size {
-            bail!("Not enough samples for FFT analysis. Need at least {} samples.", self.fft_size);
+            bail!(
+                "Not enough samples for FFT analysis. Need at least {} samples.",
+                self.fft_size
+            );
         }
 
         // Compute average spectrum across all frames
@@ -122,7 +125,8 @@ impl FrequencyAnalyzer {
         let analysis = self.analyze(samples, sample_rate)?;
 
         // Find peaks in spectrum
-        let mut indexed: Vec<(usize, f32)> = analysis.spectrum
+        let mut indexed: Vec<(usize, f32)> = analysis
+            .spectrum
             .iter()
             .enumerate()
             .map(|(i, &mag)| (i, mag))
@@ -148,7 +152,11 @@ impl FrequencyAnalyzer {
     }
 
     /// Compute a compact frequency signature for similarity matching.
-    pub fn compute_signature(&self, samples: &[f32], sample_rate: u32) -> Result<FrequencySignature> {
+    pub fn compute_signature(
+        &self,
+        samples: &[f32],
+        sample_rate: u32,
+    ) -> Result<FrequencySignature> {
         let analysis = self.analyze(samples, sample_rate)?;
 
         // Create mel-scale inspired binning (128 features)
@@ -203,7 +211,8 @@ impl FrequencyAnalyzer {
 
     /// Compute spectral centroid (center of mass of spectrum).
     fn compute_spectral_centroid(&self, spectrum: &[f32], frequencies: &[f32]) -> f32 {
-        let weighted_sum: f32 = spectrum.iter()
+        let weighted_sum: f32 = spectrum
+            .iter()
             .zip(frequencies.iter())
             .map(|(&mag, &freq)| mag * freq)
             .sum();
@@ -218,7 +227,12 @@ impl FrequencyAnalyzer {
     }
 
     /// Compute spectral rolloff (frequency below which N% of energy lies).
-    fn compute_spectral_rolloff(&self, spectrum: &[f32], frequencies: &[f32], percentage: f32) -> f32 {
+    fn compute_spectral_rolloff(
+        &self,
+        spectrum: &[f32],
+        frequencies: &[f32],
+        percentage: f32,
+    ) -> f32 {
         let total_energy: f32 = spectrum.iter().sum();
         let threshold = total_energy * percentage;
 
@@ -238,9 +252,7 @@ impl FrequencyAnalyzer {
         let n = spectrum.len() as f32;
 
         // Geometric mean
-        let log_sum: f32 = spectrum.iter()
-            .map(|&x| (x + 1e-10).ln())
-            .sum();
+        let log_sum: f32 = spectrum.iter().map(|&x| (x + 1e-10).ln()).sum();
         let geometric_mean = (log_sum / n).exp();
 
         // Arithmetic mean
@@ -255,7 +267,8 @@ impl FrequencyAnalyzer {
 
     /// Compute zero crossing rate.
     fn compute_zcr(&self, samples: &[f32]) -> f32 {
-        let crossings: usize = samples.windows(2)
+        let crossings: usize = samples
+            .windows(2)
             .filter(|w| (w[0] >= 0.0) != (w[1] >= 0.0))
             .count();
 
@@ -275,10 +288,7 @@ impl FrequencyAnalyzer {
         let fft_inverse = planner.plan_fft_inverse(samples.len());
 
         // Forward FFT
-        let mut buffer: Vec<Complex<f32>> = samples
-            .iter()
-            .map(|&s| Complex::new(s, 0.0))
-            .collect();
+        let mut buffer: Vec<Complex<f32>> = samples.iter().map(|&s| Complex::new(s, 0.0)).collect();
         fft_forward.process(&mut buffer);
 
         // Apply bandpass filter in frequency domain
@@ -317,10 +327,7 @@ impl FrequencyAnalyzer {
         let fft_inverse = planner.plan_fft_inverse(samples.len());
 
         // Forward FFT
-        let mut buffer: Vec<Complex<f32>> = samples
-            .iter()
-            .map(|&s| Complex::new(s, 0.0))
-            .collect();
+        let mut buffer: Vec<Complex<f32>> = samples.iter().map(|&s| Complex::new(s, 0.0)).collect();
         fft_forward.process(&mut buffer);
 
         // Keep only dominant frequency bins
@@ -419,7 +426,9 @@ mod tests {
         let samples = generate_sine_wave(440.0, sample_rate, 1.0);
 
         let analyzer = FrequencyAnalyzer::new(4096, 2048);
-        let dominant = analyzer.dominant_frequencies(&samples, sample_rate, 5).unwrap();
+        let dominant = analyzer
+            .dominant_frequencies(&samples, sample_rate, 5)
+            .unwrap();
 
         // First dominant frequency should be close to 440 Hz
         assert!((dominant[0].frequency_hz - 440.0).abs() < 20.0);
@@ -472,18 +481,22 @@ mod tests {
         let samples: Vec<f32> = (0..sample_rate as usize)
             .map(|i| {
                 let t = i as f32 / sample_rate as f32;
-                (2.0 * std::f32::consts::PI * 200.0 * t).sin() +
-                (2.0 * std::f32::consts::PI * 2000.0 * t).sin()
+                (2.0 * std::f32::consts::PI * 200.0 * t).sin()
+                    + (2.0 * std::f32::consts::PI * 2000.0 * t).sin()
             })
             .collect();
 
         let analyzer = FrequencyAnalyzer::new(4096, 2048);
 
         // Filter to keep only 150-250 Hz
-        let filtered = analyzer.bandpass_filter(&samples, sample_rate, 150.0, 250.0).unwrap();
+        let filtered = analyzer
+            .bandpass_filter(&samples, sample_rate, 150.0, 250.0)
+            .unwrap();
 
         // Analyze filtered signal
-        let dominant = analyzer.dominant_frequencies(&filtered, sample_rate, 1).unwrap();
+        let dominant = analyzer
+            .dominant_frequencies(&filtered, sample_rate, 1)
+            .unwrap();
 
         // Dominant should be close to 200 Hz
         assert!((dominant[0].frequency_hz - 200.0).abs() < 30.0);

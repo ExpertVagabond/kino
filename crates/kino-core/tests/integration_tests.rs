@@ -1,11 +1,8 @@
 //! Integration tests for Kino Core
 
 use kino_core::{
-    PlayerConfig, PlayerState, Resolution,
-    KinoColors, KinoTheme, CssVariables,
-    DrmConfig, DrmManager, DrmSystem,
-    WebVttParser, SrtParser,
-    AbrAlgorithmType,
+    AbrAlgorithmType, CssVariables, DrmConfig, DrmManager, DrmSystem, KinoColors, KinoTheme,
+    PlayerConfig, PlayerState, Resolution, SrtParser, WebVttParser,
 };
 
 // =============================================================================
@@ -304,7 +301,7 @@ fn test_chapter_duration() {
 
 #[test]
 fn test_media_tracks_chapter_at() {
-    use kino_core::{MediaTracks, Chapter};
+    use kino_core::{Chapter, MediaTracks};
 
     let mut tracks = MediaTracks::new();
     tracks.add_chapter(Chapter::new("ch1", "Intro", 0.0, 60.0));

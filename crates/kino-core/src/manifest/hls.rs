@@ -7,14 +7,10 @@
 //! - EXT-X-MAP initialization segments
 //! - Discontinuity handling
 
-use crate::{
-    error::Error,
-    types::*,
-    Result,
-};
 use super::{Manifest, ManifestParser, ManifestType};
+use crate::{error::Error, types::*, Result};
 use async_trait::async_trait;
-use m3u8_rs::{self, MediaPlaylist, MasterPlaylist};
+use m3u8_rs::{self, MasterPlaylist, MediaPlaylist};
 use reqwest::Client;
 use std::time::Duration;
 use tracing::{debug, instrument};
@@ -57,7 +53,11 @@ impl HlsParser {
     }
 
     /// Extract renditions from master playlist
-    fn extract_renditions(&self, master: &MasterPlaylist, base_url: &Url) -> Result<Vec<Rendition>> {
+    fn extract_renditions(
+        &self,
+        master: &MasterPlaylist,
+        base_url: &Url,
+    ) -> Result<Vec<Rendition>> {
         let mut renditions = Vec::new();
 
         for (idx, variant) in master.variants.iter().enumerate() {
@@ -92,7 +92,11 @@ impl HlsParser {
     }
 
     /// Parse media playlist
-    fn parse_media(&self, content: &str, base_url: &Url) -> Result<(Vec<Segment>, bool, Option<Duration>)> {
+    fn parse_media(
+        &self,
+        content: &str,
+        base_url: &Url,
+    ) -> Result<(Vec<Segment>, bool, Option<Duration>)> {
         let parsed = m3u8_rs::parse_media_playlist_res(content.as_bytes())
             .map_err(|e| Error::ManifestParse(format!("Failed to parse HLS media: {:?}", e)))?;
 

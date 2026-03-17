@@ -11,15 +11,14 @@ use crate::{
     abr::{AbrContext, AbrEngine},
     analytics::{AnalyticsEmitter, AnalyticsEvent},
     buffer::{BufferConfig, BufferManager},
-    Error,
     manifest::{create_parser, Manifest},
     types::*,
-    Result,
+    Error, Result,
 };
 use reqwest::Client;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
-use tokio::sync::{RwLock, watch};
+use tokio::sync::{watch, RwLock};
 use tracing::{debug, info, instrument, warn};
 use url::Url;
 
@@ -126,11 +125,13 @@ impl PlayerSession {
 
         // Emit analytics event
         if let Some(ref analytics) = self.analytics {
-            analytics.emit(AnalyticsEvent::StateChange {
-                from: current,
-                to: new_state,
-                position: *self.position.read().await,
-            }).await;
+            analytics
+                .emit(AnalyticsEvent::StateChange {
+                    from: current,
+                    to: new_state,
+                    position: *self.position.read().await,
+                })
+                .await;
         }
 
         info!(from = %current, to = %new_state, "State transition");
@@ -173,10 +174,12 @@ impl PlayerSession {
 
         // Emit load event
         if let Some(ref analytics) = self.analytics {
-            analytics.emit(AnalyticsEvent::Load {
-                url: url.to_string(),
-                is_live: manifest.is_live,
-            }).await;
+            analytics
+                .emit(AnalyticsEvent::Load {
+                    url: url.to_string(),
+                    is_live: manifest.is_live,
+                })
+                .await;
         }
 
         // Transition to buffering
@@ -212,9 +215,11 @@ impl PlayerSession {
 
         // Emit play event
         if let Some(ref analytics) = self.analytics {
-            analytics.emit(AnalyticsEvent::Play {
-                position: *self.position.read().await,
-            }).await;
+            analytics
+                .emit(AnalyticsEvent::Play {
+                    position: *self.position.read().await,
+                })
+                .await;
         }
 
         Ok(())
@@ -228,9 +233,11 @@ impl PlayerSession {
 
             // Emit pause event
             if let Some(ref analytics) = self.analytics {
-                analytics.emit(AnalyticsEvent::Pause {
-                    position: *self.position.read().await,
-                }).await;
+                analytics
+                    .emit(AnalyticsEvent::Pause {
+                        position: *self.position.read().await,
+                    })
+                    .await;
             }
         }
         Ok(())
@@ -262,10 +269,12 @@ impl PlayerSession {
 
         // Emit seek event
         if let Some(ref analytics) = self.analytics {
-            analytics.emit(AnalyticsEvent::Seek {
-                from: *self.position.read().await,
-                to: clamped,
-            }).await;
+            analytics
+                .emit(AnalyticsEvent::Seek {
+                    from: *self.position.read().await,
+                    to: clamped,
+                })
+                .await;
         }
 
         if is_buffered && was_playing {
@@ -293,10 +302,12 @@ impl PlayerSession {
 
         // Emit end event
         if let Some(ref analytics) = self.analytics {
-            analytics.emit(AnalyticsEvent::End {
-                position: *self.position.read().await,
-                watch_time: self.start_time.elapsed().as_secs_f64(),
-            }).await;
+            analytics
+                .emit(AnalyticsEvent::End {
+                    position: *self.position.read().await,
+                    watch_time: self.start_time.elapsed().as_secs_f64(),
+                })
+                .await;
         }
 
         Ok(())
@@ -366,13 +377,10 @@ impl PlayerSession {
                 source: e,
             })?;
 
-        let data = response
-            .bytes()
-            .await
-            .map_err(|e| Error::SegmentFetch {
-                url: segment.uri.to_string(),
-                source: e,
-            })?;
+        let data = response.bytes().await.map_err(|e| Error::SegmentFetch {
+            url: segment.uri.to_string(),
+            source: e,
+        })?;
 
         let duration = start.elapsed();
         let bytes = data.len();
@@ -410,10 +418,12 @@ impl PlayerSession {
 
             // Emit rebuffer event
             if let Some(ref analytics) = self.analytics {
-                analytics.emit(AnalyticsEvent::Rebuffer {
-                    position,
-                    buffer_level: self.buffer.buffer_level().await,
-                }).await;
+                analytics
+                    .emit(AnalyticsEvent::Rebuffer {
+                        position,
+                        buffer_level: self.buffer.buffer_level().await,
+                    })
+                    .await;
             }
         }
     }

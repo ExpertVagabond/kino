@@ -6,10 +6,7 @@ fn resolve_kino_cli() -> String {
     if let Ok(p) = std::env::var("KINO_CLI_PATH") {
         return p;
     }
-    for candidate in &[
-        "/usr/local/bin/kino-cli",
-        "/opt/homebrew/bin/kino-cli",
-    ] {
+    for candidate in &["/usr/local/bin/kino-cli", "/opt/homebrew/bin/kino-cli"] {
         if std::path::Path::new(candidate).exists() {
             return candidate.to_string();
         }
@@ -87,7 +84,14 @@ fn call_tool(name: &str, args: &Value) -> Value {
         "monitor_stream" => {
             let url = args["url"].as_str().unwrap_or_default();
             let interval = args["interval"].as_i64().unwrap_or(5);
-            run_kino(&["monitor", url, "--interval", &interval.to_string(), "--count", "1"])
+            run_kino(&[
+                "monitor",
+                url,
+                "--interval",
+                &interval.to_string(),
+                "--count",
+                "1",
+            ])
         }
         "fingerprint_audio" => {
             let path = args["file_path"].as_str().unwrap_or_default();
@@ -118,7 +122,9 @@ fn handle(req: &Value) -> Value {
             "result": {"protocolVersion": "2024-11-05", "capabilities": {"tools": {}},
                 "serverInfo": {"name": "kino-mcp", "version": "0.1.0"}}}),
         "notifications/initialized" | "initialized" => return Value::Null,
-        "tools/list" => json!({"jsonrpc": "2.0", "id": id, "result": {"tools": tool_definitions()}}),
+        "tools/list" => {
+            json!({"jsonrpc": "2.0", "id": id, "result": {"tools": tool_definitions()}})
+        }
         "tools/call" => {
             let name = req["params"]["name"].as_str().unwrap_or_default();
             let args = req["params"].get("arguments").cloned().unwrap_or(json!({}));

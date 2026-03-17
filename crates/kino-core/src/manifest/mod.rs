@@ -1,12 +1,12 @@
 //! Manifest parsing for HLS and DASH
 
-mod hls;
 mod dash;
+mod hls;
 
-pub use hls::HlsParser;
 pub use dash::DashParser;
+pub use hls::HlsParser;
 
-use crate::{Result, Rendition, Segment};
+use crate::{Rendition, Result, Segment};
 use async_trait::async_trait;
 use url::Url;
 

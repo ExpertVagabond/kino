@@ -26,28 +26,44 @@ pub struct KinoBranding;
 #[wasm_bindgen]
 impl KinoBranding {
     #[wasm_bindgen(getter)]
-    pub fn primary() -> String { Colors::PRIMARY.to_string() }
+    pub fn primary() -> String {
+        Colors::PRIMARY.to_string()
+    }
 
     #[wasm_bindgen(getter)]
-    pub fn primary_dark() -> String { Colors::PRIMARY_DARK.to_string() }
+    pub fn primary_dark() -> String {
+        Colors::PRIMARY_DARK.to_string()
+    }
 
     #[wasm_bindgen(getter)]
-    pub fn primary_deep() -> String { Colors::PRIMARY_DEEP.to_string() }
+    pub fn primary_deep() -> String {
+        Colors::PRIMARY_DEEP.to_string()
+    }
 
     #[wasm_bindgen(getter)]
-    pub fn background() -> String { Colors::BACKGROUND.to_string() }
+    pub fn background() -> String {
+        Colors::BACKGROUND.to_string()
+    }
 
     #[wasm_bindgen(getter)]
-    pub fn background_light() -> String { Colors::BACKGROUND_LIGHT.to_string() }
+    pub fn background_light() -> String {
+        Colors::BACKGROUND_LIGHT.to_string()
+    }
 
     #[wasm_bindgen(getter)]
-    pub fn surface() -> String { Colors::SURFACE.to_string() }
+    pub fn surface() -> String {
+        Colors::SURFACE.to_string()
+    }
 
     #[wasm_bindgen(getter)]
-    pub fn text() -> String { Colors::TEXT.to_string() }
+    pub fn text() -> String {
+        Colors::TEXT.to_string()
+    }
 
     #[wasm_bindgen(getter)]
-    pub fn text_soft() -> String { Colors::TEXT_SOFT.to_string() }
+    pub fn text_soft() -> String {
+        Colors::TEXT_SOFT.to_string()
+    }
 
     /// Get primary color as RGBA with custom alpha
     #[wasm_bindgen]
@@ -158,7 +174,8 @@ impl KinoBranding {
   color: var(--kino-text);
   border: 1px solid rgba(155, 48, 255, 0.3);
 }
-"#.to_string()
+"#
+        .to_string()
     }
 
     /// Get theme as JSON object
@@ -181,6 +198,7 @@ impl KinoBranding {
             "border_radius": 8,
             "show_watermark": true,
             "watermark_text": "Kino"
-        }).to_string()
+        })
+        .to_string()
     }
 }

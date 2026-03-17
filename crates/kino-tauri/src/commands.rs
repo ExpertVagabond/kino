@@ -3,11 +3,11 @@
 //! Lightweight commands that work with the web frontend.
 //! The actual video playback is handled by hls.js in the frontend.
 
-use kino_core::{KinoColors, Chapter, TextTrack};
+use kino_core::{Chapter, KinoColors, TextTrack};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use tokio::sync::RwLock;
 use tauri::State;
+use tokio::sync::RwLock;
 
 /// Shared application state
 pub struct AppState {
@@ -153,31 +153,40 @@ pub async fn set_quality(_state: State<'_, AppState>, _quality_id: String) -> Re
 #[tauri::command]
 pub async fn get_chapters(state: State<'_, AppState>) -> Result<Vec<ChapterInfo>, String> {
     let chapters = state.chapters.read().await;
-    Ok(chapters.iter().map(|c| ChapterInfo {
-        id: c.id.clone(),
-        title: c.title.clone(),
-        start_time: c.start_time,
-        end_time: c.end_time,
-        thumbnail: c.thumbnail.as_ref().map(|u| u.to_string()),
-    }).collect())
+    Ok(chapters
+        .iter()
+        .map(|c| ChapterInfo {
+            id: c.id.clone(),
+            title: c.title.clone(),
+            start_time: c.start_time,
+            end_time: c.end_time,
+            thumbnail: c.thumbnail.as_ref().map(|u| u.to_string()),
+        })
+        .collect())
 }
 
 /// Get text tracks
 #[tauri::command]
 pub async fn get_text_tracks(state: State<'_, AppState>) -> Result<Vec<TextTrackInfo>, String> {
     let tracks = state.text_tracks.read().await;
-    Ok(tracks.iter().map(|t| TextTrackInfo {
-        id: t.id.clone(),
-        kind: format!("{:?}", t.kind),
-        language: t.language.clone(),
-        label: t.label.clone(),
-        active: t.is_default,
-    }).collect())
+    Ok(tracks
+        .iter()
+        .map(|t| TextTrackInfo {
+            id: t.id.clone(),
+            kind: format!("{:?}", t.kind),
+            language: t.language.clone(),
+            label: t.label.clone(),
+            active: t.is_default,
+        })
+        .collect())
 }
 
 /// Set text track
 #[tauri::command]
-pub async fn set_text_track(_state: State<'_, AppState>, _track_id: Option<String>) -> Result<(), String> {
+pub async fn set_text_track(
+    _state: State<'_, AppState>,
+    _track_id: Option<String>,
+) -> Result<(), String> {
     Ok(())
 }
 

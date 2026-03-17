@@ -5,10 +5,10 @@
 //! - Generating HLS/DASH manifests
 //! - Applying Kino encoding presets
 
+use anyhow::{bail, Context, Result};
+use serde::{Deserialize, Serialize};
 use std::path::Path;
 use std::process::Command;
-use anyhow::{Context, Result, bail};
-use serde::{Deserialize, Serialize};
 
 /// Kino encoding presets
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -65,9 +65,7 @@ impl EncodingPreset {
                 RenditionSpec::new(720, 2_500_000, 30),
                 RenditionSpec::new(1080, 4_500_000, 30),
             ],
-            Self::Archive => vec![
-                RenditionSpec::new(1080, 8_000_000, 30),
-            ],
+            Self::Archive => vec![RenditionSpec::new(1080, 8_000_000, 30)],
         }
     }
 
@@ -99,7 +97,11 @@ pub struct RenditionSpec {
 
 impl RenditionSpec {
     pub fn new(height: u32, bitrate: u32, framerate: u32) -> Self {
-        Self { height, bitrate, framerate }
+        Self {
+            height,
+            bitrate,
+            framerate,
+        }
     }
 
     pub fn width(&self) -> u32 {
@@ -155,8 +157,10 @@ pub fn check_ffmpeg() -> Result<String> {
 pub fn probe_input(input: &Path) -> Result<InputInfo> {
     let output = Command::new("ffprobe")
         .args([
-            "-v", "quiet",
-            "-print_format", "json",
+            "-v",
+            "quiet",
+            "-print_format",
+            "json",
             "-show_format",
             "-show_streams",
         ])
@@ -164,15 +168,13 @@ pub fn probe_input(input: &Path) -> Result<InputInfo> {
         .output()
         .context("FFprobe failed")?;
 
-    let json: serde_json::Value = serde_json::from_slice(&output.stdout)
-        .context("Failed to parse ffprobe output")?;
+    let json: serde_json::Value =
+        serde_json::from_slice(&output.stdout).context("Failed to parse ffprobe output")?;
 
     // Extract video stream info
     let video_stream = json["streams"]
         .as_array()
-        .and_then(|streams| {
-            streams.iter().find(|s| s["codec_type"] == "video")
-        });
+        .and_then(|streams| streams.iter().find(|s| s["codec_type"] == "video"));
 
     let (width, height, framerate, duration) = if let Some(vs) = video_stream {
         let w = vs["width"].as_u64().unwrap_or(0) as u32;
@@ -202,9 +204,7 @@ pub fn probe_input(input: &Path) -> Result<InputInfo> {
     // Audio info
     let audio_stream = json["streams"]
         .as_array()
-        .and_then(|streams| {
-            streams.iter().find(|s| s["codec_type"] == "audio")
-        });
+        .and_then(|streams| streams.iter().find(|s| s["codec_type"] == "audio"));
 
     let has_audio = audio_stream.is_some();
 
@@ -240,14 +240,16 @@ pub fn encode_hls(
     std::fs::create_dir_all(output_dir)?;
 
     println!("Encoding to HLS with {} preset", preset.description());
-    println!("Input: {}x{} @ {}fps, {:.1}s",
-        input_info.width, input_info.height, input_info.framerate, input_info.duration);
+    println!(
+        "Input: {}x{} @ {}fps, {:.1}s",
+        input_info.width, input_info.height, input_info.framerate, input_info.duration
+    );
 
     // Build FFmpeg command for multi-rendition HLS
     let mut args: Vec<String> = vec![
         "-i".to_string(),
         input.to_string_lossy().to_string(),
-        "-y".to_string(),  // Overwrite
+        "-y".to_string(), // Overwrite
     ];
 
     // Filter complex for scaling
@@ -264,27 +266,40 @@ pub fn encode_hls(
         // Scale filter
         filter_complex.push_str(&format!(
             "[0:v]scale={}:{}:force_original_aspect_ratio=decrease[v{}];",
-            r.width(), r.height, i
+            r.width(),
+            r.height,
+            i
         ));
 
         // Video output
         map_args.extend([
-            "-map".to_string(), format!("[v{}]", i),
-            format!("-c:v:{}", i), "libx264".to_string(),
-            format!("-b:v:{}", i), format!("{}", r.bitrate),
-            format!("-maxrate:v:{}", i), format!("{}", (r.bitrate as f64 * 1.1) as u32),
-            format!("-bufsize:v:{}", i), format!("{}", r.bitrate * 2),
-            format!("-preset:v:{}", i), "medium".to_string(),
-            format!("-g:v:{}", i), format!("{}", r.framerate * 2),  // GOP size
-            format!("-keyint_min:v:{}", i), format!("{}", r.framerate),
+            "-map".to_string(),
+            format!("[v{}]", i),
+            format!("-c:v:{}", i),
+            "libx264".to_string(),
+            format!("-b:v:{}", i),
+            format!("{}", r.bitrate),
+            format!("-maxrate:v:{}", i),
+            format!("{}", (r.bitrate as f64 * 1.1) as u32),
+            format!("-bufsize:v:{}", i),
+            format!("{}", r.bitrate * 2),
+            format!("-preset:v:{}", i),
+            "medium".to_string(),
+            format!("-g:v:{}", i),
+            format!("{}", r.framerate * 2), // GOP size
+            format!("-keyint_min:v:{}", i),
+            format!("{}", r.framerate),
         ]);
 
         // Audio (copy to all variants)
         if input_info.has_audio {
             map_args.extend([
-                "-map".to_string(), "0:a".to_string(),
-                format!("-c:a:{}", i), "aac".to_string(),
-                format!("-b:a:{}", i), "128k".to_string(),
+                "-map".to_string(),
+                "0:a".to_string(),
+                format!("-c:a:{}", i),
+                "aac".to_string(),
+                format!("-b:a:{}", i),
+                "128k".to_string(),
             ]);
         }
 
@@ -301,22 +316,30 @@ pub fn encode_hls(
     // Remove trailing semicolon
     filter_complex.pop();
 
-    args.extend([
-        "-filter_complex".to_string(),
-        filter_complex,
-    ]);
+    args.extend(["-filter_complex".to_string(), filter_complex]);
     args.extend(map_args);
 
     // HLS options
     args.extend([
-        "-f".to_string(), "hls".to_string(),
-        "-hls_time".to_string(), format!("{}", segment_duration as u32),
-        "-hls_playlist_type".to_string(), "vod".to_string(),
+        "-f".to_string(),
+        "hls".to_string(),
+        "-hls_time".to_string(),
+        format!("{}", segment_duration as u32),
+        "-hls_playlist_type".to_string(),
+        "vod".to_string(),
         "-hls_segment_filename".to_string(),
-        output_dir.join("stream_%v_%03d.ts").to_string_lossy().to_string(),
-        "-master_pl_name".to_string(), "master.m3u8".to_string(),
-        "-var_stream_map".to_string(), stream_map,
-        output_dir.join("stream_%v.m3u8").to_string_lossy().to_string(),
+        output_dir
+            .join("stream_%v_%03d.ts")
+            .to_string_lossy()
+            .to_string(),
+        "-master_pl_name".to_string(),
+        "master.m3u8".to_string(),
+        "-var_stream_map".to_string(),
+        stream_map,
+        output_dir
+            .join("stream_%v.m3u8")
+            .to_string_lossy()
+            .to_string(),
     ]);
 
     println!("Running FFmpeg...");
@@ -332,7 +355,10 @@ pub fn encode_hls(
 
     println!("HLS encoding complete!");
     println!("Output: {}", output_dir.display());
-    println!("Master playlist: {}", output_dir.join("master.m3u8").display());
+    println!(
+        "Master playlist: {}",
+        output_dir.join("master.m3u8").display()
+    );
 
     Ok(())
 }
@@ -369,42 +395,57 @@ pub fn encode_dash(
 
         filter_complex.push_str(&format!(
             "[0:v]scale={}:{}:force_original_aspect_ratio=decrease[v{}];",
-            r.width(), r.height, i
+            r.width(),
+            r.height,
+            i
         ));
 
         map_args.extend([
-            "-map".to_string(), format!("[v{}]", i),
-            format!("-c:v:{}", i), "libx264".to_string(),
-            format!("-b:v:{}", i), format!("{}", r.bitrate),
-            format!("-preset:v:{}", i), "medium".to_string(),
+            "-map".to_string(),
+            format!("[v{}]", i),
+            format!("-c:v:{}", i),
+            "libx264".to_string(),
+            format!("-b:v:{}", i),
+            format!("{}", r.bitrate),
+            format!("-preset:v:{}", i),
+            "medium".to_string(),
         ]);
 
         if input_info.has_audio {
             map_args.extend([
-                "-map".to_string(), "0:a".to_string(),
-                format!("-c:a:{}", i), "aac".to_string(),
-                format!("-b:a:{}", i), "128k".to_string(),
+                "-map".to_string(),
+                "0:a".to_string(),
+                format!("-c:a:{}", i),
+                "aac".to_string(),
+                format!("-b:a:{}", i),
+                "128k".to_string(),
             ]);
         }
     }
 
     filter_complex.pop();
 
-    args.extend([
-        "-filter_complex".to_string(),
-        filter_complex,
-    ]);
+    args.extend(["-filter_complex".to_string(), filter_complex]);
     args.extend(map_args);
 
     // DASH options
     args.extend([
-        "-f".to_string(), "dash".to_string(),
-        "-seg_duration".to_string(), format!("{}", segment_duration as u32),
-        "-use_template".to_string(), "1".to_string(),
-        "-use_timeline".to_string(), "1".to_string(),
-        "-init_seg_name".to_string(), "init_$RepresentationID$.mp4".to_string(),
-        "-media_seg_name".to_string(), "segment_$RepresentationID$_$Number$.m4s".to_string(),
-        output_dir.join("manifest.mpd").to_string_lossy().to_string(),
+        "-f".to_string(),
+        "dash".to_string(),
+        "-seg_duration".to_string(),
+        format!("{}", segment_duration as u32),
+        "-use_template".to_string(),
+        "1".to_string(),
+        "-use_timeline".to_string(),
+        "1".to_string(),
+        "-init_seg_name".to_string(),
+        "init_$RepresentationID$.mp4".to_string(),
+        "-media_seg_name".to_string(),
+        "segment_$RepresentationID$_$Number$.m4s".to_string(),
+        output_dir
+            .join("manifest.mpd")
+            .to_string_lossy()
+            .to_string(),
     ]);
 
     println!("Running FFmpeg for DASH...");
@@ -420,7 +461,10 @@ pub fn encode_dash(
 
     println!("DASH encoding complete!");
     println!("Output: {}", output_dir.display());
-    println!("MPD manifest: {}", output_dir.join("manifest.mpd").display());
+    println!(
+        "MPD manifest: {}",
+        output_dir.join("manifest.mpd").display()
+    );
 
     Ok(())
 }
@@ -436,11 +480,20 @@ pub fn list_presets() {
         EncodingPreset::Live,
         EncodingPreset::Archive,
     ] {
-        println!("  {} - {}", format!("{:?}", preset).to_lowercase(), preset.description());
+        println!(
+            "  {} - {}",
+            format!("{:?}", preset).to_lowercase(),
+            preset.description()
+        );
         println!("    Renditions:");
         for r in preset.renditions() {
-            println!("      {} - {}x{} @ {}kbps",
-                r.quality_name(), r.width(), r.height, r.bitrate / 1000);
+            println!(
+                "      {} - {}x{} @ {}kbps",
+                r.quality_name(),
+                r.width(),
+                r.height,
+                r.bitrate / 1000
+            );
         }
         println!("    Segment duration: {}s\n", preset.segment_duration());
     }
@@ -453,10 +506,14 @@ pub fn show_preset(name: &str) {
         println!("Description: {}", preset.description());
         println!("Segment duration: {}s", preset.segment_duration());
         println!("\nRenditions:");
-        println!("  {:>6}  {:>10}  {:>8}  {:>4}", "Quality", "Resolution", "Bitrate", "FPS");
+        println!(
+            "  {:>6}  {:>10}  {:>8}  {:>4}",
+            "Quality", "Resolution", "Bitrate", "FPS"
+        );
         println!("  {:->6}  {:->10}  {:->8}  {:->4}", "", "", "", "");
         for r in preset.renditions() {
-            println!("  {:>6}  {:>10}  {:>7}k  {:>4}",
+            println!(
+                "  {:>6}  {:>10}  {:>7}k  {:>4}",
                 r.quality_name(),
                 format!("{}x{}", r.width(), r.height),
                 r.bitrate / 1000,
@@ -469,10 +526,17 @@ pub fn show_preset(name: &str) {
         let renditions = preset.renditions();
         println!("  ffmpeg -i input.mp4 \\");
         for r in &renditions {
-            println!("    -vf scale={}:{} -b:v {}k \\",
-                r.width(), r.height, r.bitrate / 1000);
+            println!(
+                "    -vf scale={}:{} -b:v {}k \\",
+                r.width(),
+                r.height,
+                r.bitrate / 1000
+            );
         }
-        println!("    -f hls -hls_time {} output/master.m3u8", preset.segment_duration() as u32);
+        println!(
+            "    -f hls -hls_time {} output/master.m3u8",
+            preset.segment_duration() as u32
+        );
     } else {
         println!("Unknown preset: {}", name);
         println!("Available presets: web, mobile, premium, live, archive");

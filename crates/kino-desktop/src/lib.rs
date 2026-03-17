@@ -17,14 +17,11 @@
 //! player.play();
 //! ```
 
+pub mod controls;
 pub mod player;
 pub mod window;
-pub mod controls;
 
 pub use player::{
-    DesktopPlayer,
-    DesktopPlayerConfig,
+    check_gstreamer_installation, DesktopPlayer, DesktopPlayerConfig, GStreamerInfo,
     HardwareBackend,
-    GStreamerInfo,
-    check_gstreamer_installation,
 };

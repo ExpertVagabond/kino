@@ -6,12 +6,8 @@
 //! - AdaptationSets and Representations
 //! - Period handling
 
-use crate::{
-    error::Error,
-    types::*,
-    Result,
-};
 use super::{Manifest, ManifestParser, ManifestType};
+use crate::{error::Error, types::*, Result};
 use async_trait::async_trait;
 use reqwest::Client;
 use std::time::Duration;
@@ -71,13 +67,16 @@ impl DashParser {
             if let Some(end) = rep_match.find('>') {
                 let attrs = &rep_match[..end];
 
-                let bandwidth = self.extract_attr(attrs, "bandwidth")
+                let bandwidth = self
+                    .extract_attr(attrs, "bandwidth")
                     .and_then(|s| s.parse::<u64>().ok())
                     .unwrap_or(0);
 
-                let width = self.extract_attr(attrs, "width")
+                let width = self
+                    .extract_attr(attrs, "width")
                     .and_then(|s| s.parse::<u32>().ok());
-                let height = self.extract_attr(attrs, "height")
+                let height = self
+                    .extract_attr(attrs, "height")
                     .and_then(|s| s.parse::<u32>().ok());
 
                 let resolution = match (width, height) {
@@ -89,27 +88,28 @@ impl DashParser {
                 let video_codec = codecs.as_ref().and_then(|c| parse_dash_video_codec(c));
                 let audio_codec = codecs.as_ref().and_then(|c| parse_dash_audio_codec(c));
 
-                let frame_rate = self.extract_attr(attrs, "frameRate")
-                    .and_then(|s| {
-                        if s.contains('/') {
-                            let parts: Vec<_> = s.split('/').collect();
-                            if parts.len() == 2 {
-                                let num: f32 = parts[0].parse().ok()?;
-                                let den: f32 = parts[1].parse().ok()?;
-                                Some(num / den)
-                            } else {
-                                None
-                            }
+                let frame_rate = self.extract_attr(attrs, "frameRate").and_then(|s| {
+                    if s.contains('/') {
+                        let parts: Vec<_> = s.split('/').collect();
+                        if parts.len() == 2 {
+                            let num: f32 = parts[0].parse().ok()?;
+                            let den: f32 = parts[1].parse().ok()?;
+                            Some(num / den)
                         } else {
-                            s.parse().ok()
+                            None
                         }
-                    });
+                    } else {
+                        s.parse().ok()
+                    }
+                });
 
                 // Get BaseURL or construct from template
                 let uri = self.extract_base_url(rep_match, base_url)?;
 
                 renditions.push(Rendition {
-                    id: self.extract_attr(attrs, "id").unwrap_or_else(|| format!("rep_{}", idx)),
+                    id: self
+                        .extract_attr(attrs, "id")
+                        .unwrap_or_else(|| format!("rep_{}", idx)),
                     bandwidth,
                     resolution,
                     frame_rate,
@@ -129,7 +129,9 @@ impl DashParser {
         renditions.sort_by_key(|r| r.bandwidth);
 
         if renditions.is_empty() {
-            return Err(Error::InvalidManifest("No representations found in MPD".to_string()));
+            return Err(Error::InvalidManifest(
+                "No representations found in MPD".to_string(),
+            ));
         }
 
         Ok(renditions)
@@ -166,7 +168,8 @@ impl DashParser {
         if let Some(start) = rep_content.find("<BaseURL>") {
             if let Some(end) = rep_content[start..].find("</BaseURL>") {
                 let url_str = &rep_content[start + 9..start + end];
-                return base_url.join(url_str)
+                return base_url
+                    .join(url_str)
                     .map_err(|e| Error::InvalidManifest(format!("Invalid BaseURL: {}", e)));
             }
         }
@@ -192,7 +195,8 @@ impl DashParser {
                 .replace("$Number$", &i.to_string())
                 .replace("$Time$", &(i * 4000).to_string()); // Assume 4s segments
 
-            let url = base_url.join(&url_str)
+            let url = base_url
+                .join(&url_str)
                 .map_err(|e| Error::InvalidManifest(format!("Invalid segment URL: {}", e)))?;
             urls.push(url);
         }
@@ -272,10 +276,12 @@ impl DashParser {
                 let template_attrs = &content[template_start..template_start + template_end];
 
                 let media_template = self.extract_attr(template_attrs, "media");
-                let timescale: u64 = self.extract_attr(template_attrs, "timescale")
+                let timescale: u64 = self
+                    .extract_attr(template_attrs, "timescale")
                     .and_then(|s| s.parse().ok())
                     .unwrap_or(1);
-                let duration: u64 = self.extract_attr(template_attrs, "duration")
+                let duration: u64 = self
+                    .extract_attr(template_attrs, "duration")
                     .and_then(|s| s.parse().ok())
                     .unwrap_or(timescale * 4);
 
@@ -290,11 +296,12 @@ impl DashParser {
                             .replace("$Number$", &i.to_string())
                             .replace("$Time$", &((i - 1) * duration).to_string());
 
-                        let url = base_url.join(&url_str)
-                            .map_err(|e| Error::InvalidManifest(format!("Invalid segment URL: {}", e)))?;
+                        let url = base_url.join(&url_str).map_err(|e| {
+                            Error::InvalidManifest(format!("Invalid segment URL: {}", e))
+                        })?;
 
                         segments.push(Segment {
-                            number: i as u64,
+                            number: i,
                             uri: url,
                             duration: segment_duration,
                             byte_range: None,
@@ -315,8 +322,9 @@ impl DashParser {
                     let attrs = &segment_match[..end];
 
                     if let Some(media) = self.extract_attr(attrs, "media") {
-                        let url = base_url.join(&media)
-                            .map_err(|e| Error::InvalidManifest(format!("Invalid segment URL: {}", e)))?;
+                        let url = base_url.join(&media).map_err(|e| {
+                            Error::InvalidManifest(format!("Invalid segment URL: {}", e))
+                        })?;
 
                         segments.push(Segment {
                             number: segments.len() as u64 + 1,
@@ -333,7 +341,9 @@ impl DashParser {
         }
 
         if segments.is_empty() {
-            return Err(Error::InvalidManifest("No segments found in MPD".to_string()));
+            return Err(Error::InvalidManifest(
+                "No segments found in MPD".to_string(),
+            ));
         }
 
         Ok(segments)

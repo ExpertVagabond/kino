@@ -18,38 +18,22 @@ use uuid::Uuid;
 #[serde(tag = "event", rename_all = "snake_case")]
 pub enum AnalyticsEvent {
     /// Content loaded
-    Load {
-        url: String,
-        is_live: bool,
-    },
+    Load { url: String, is_live: bool },
 
     /// Playback started
-    Play {
-        position: f64,
-    },
+    Play { position: f64 },
 
     /// Playback paused
-    Pause {
-        position: f64,
-    },
+    Pause { position: f64 },
 
     /// Seek performed
-    Seek {
-        from: f64,
-        to: f64,
-    },
+    Seek { from: f64, to: f64 },
 
     /// Rebuffering started
-    Rebuffer {
-        position: f64,
-        buffer_level: f64,
-    },
+    Rebuffer { position: f64, buffer_level: f64 },
 
     /// Rebuffering ended
-    RebufferEnd {
-        position: f64,
-        duration: f64,
-    },
+    RebufferEnd { position: f64, duration: f64 },
 
     /// Quality change
     QualityChange {
@@ -68,10 +52,7 @@ pub enum AnalyticsEvent {
     },
 
     /// Playback ended
-    End {
-        position: f64,
-        watch_time: f64,
-    },
+    End { position: f64, watch_time: f64 },
 
     /// Error occurred
     Error {
@@ -219,10 +200,7 @@ impl AnalyticsEmitter {
             // Use reqwest to send events
             // This is fire-and-forget for beacons
             let client = reqwest::Client::new();
-            let _ = client.post(url)
-                .json(&events)
-                .send()
-                .await;
+            let _ = client.post(url).json(&events).send().await;
         }
     }
 
@@ -347,7 +325,8 @@ impl QoeCalculator {
             return 0;
         }
 
-        let weighted_sum: f64 = self.bitrate_samples
+        let weighted_sum: f64 = self
+            .bitrate_samples
             .iter()
             .map(|(d, b)| d * *b as f64)
             .sum();

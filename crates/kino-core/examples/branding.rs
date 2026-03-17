@@ -4,7 +4,7 @@
 //!
 //! Run with: cargo run -p kino-core --example branding
 
-use kino_core::{KinoColors, KinoTheme, CssVariables};
+use kino_core::{CssVariables, KinoColors, KinoTheme};
 
 fn main() {
     println!("Kino Core - Branding Example");
@@ -15,7 +15,10 @@ fn main() {
 
     println!("Kino Brand Colors:");
     println!("-----------------");
-    println!("  Primary:          {} (Purple Squirrel signature)", colors.primary);
+    println!(
+        "  Primary:          {} (Purple Squirrel signature)",
+        colors.primary
+    );
     println!("  Primary Dark:     {} (hover states)", colors.primary_dark);
     println!("  Primary Deep:     {} (accents)", colors.primary_deep);
     println!("  Background:       {} (main bg)", colors.background);
@@ -54,7 +57,14 @@ fn main() {
     println!("Theme Configuration:");
     println!("--------------------");
     println!("  Border Radius: {}px", theme.border_radius);
-    println!("  Watermark: {}", if theme.show_watermark { "enabled" } else { "disabled" });
+    println!(
+        "  Watermark: {}",
+        if theme.show_watermark {
+            "enabled"
+        } else {
+            "disabled"
+        }
+    );
     println!("  Watermark Text: {}", theme.watermark_text);
     println!();
 

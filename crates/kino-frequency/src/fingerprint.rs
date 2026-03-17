@@ -17,9 +17,9 @@
 //! The fingerprint hash can be stored on Solana for decentralized content
 //! verification, ensuring creator ownership without centralized control.
 
-use std::collections::HashMap;
 use anyhow::Result;
 use ring::digest::{Context, SHA256};
+use std::collections::HashMap;
 use tracing::{debug, info};
 
 use crate::fft::FrequencyAnalyzer;
@@ -108,7 +108,8 @@ impl Fingerprinter {
 
     /// Find spectral peaks in each frame using band-wise maximum detection.
     fn find_peaks(&self, spectrogram: &[Vec<f32>]) -> Result<Vec<SpectralPeak>> {
-        let spectrum_size = spectrogram.first()
+        let spectrum_size = spectrogram
+            .first()
             .map(|f| f.len())
             .ok_or_else(|| anyhow::anyhow!("Empty spectrogram"))?;
 
@@ -155,7 +156,8 @@ impl Fingerprinter {
 
     /// Create constellation points from spectral peaks.
     fn create_constellation(&self, peaks: &[SpectralPeak]) -> Vec<FingerprintPoint> {
-        peaks.iter()
+        peaks
+            .iter()
             .map(|peak| FingerprintPoint {
                 time_offset: peak.time_frame,
                 freq_bin: peak.freq_bin,
@@ -214,7 +216,11 @@ impl Fingerprinter {
     }
 
     /// Match two fingerprints and return similarity score.
-    pub fn match_fingerprints(&self, fp1: &AudioFingerprint, fp2: &AudioFingerprint) -> MatchResult {
+    pub fn match_fingerprints(
+        &self,
+        fp1: &AudioFingerprint,
+        fp2: &AudioFingerprint,
+    ) -> MatchResult {
         // Build hash map from first fingerprint
         let pairs1 = self.generate_hash_pairs(&fp1.points);
         let pairs2 = self.generate_hash_pairs(&fp2.points);
@@ -242,7 +248,8 @@ impl Fingerprinter {
         }
 
         // Find best time offset alignment
-        let best_offset = time_offsets.iter()
+        let best_offset = time_offsets
+            .iter()
             .max_by_key(|(_, &count)| count)
             .map(|(&offset, _)| offset)
             .unwrap_or(0);
@@ -350,7 +357,8 @@ impl FingerprintDatabase {
 
         for pair in pairs {
             let key = (pair.anchor_freq, pair.target_freq, pair.time_delta);
-            self.index.entry(key)
+            self.index
+                .entry(key)
                 .or_default()
                 .push((content_id.to_string(), pair.anchor_time));
         }
@@ -379,7 +387,8 @@ impl FingerprintDatabase {
         }
 
         // Find best matches
-        let mut results: Vec<DatabaseMatch> = content_matches.iter()
+        let mut results: Vec<DatabaseMatch> = content_matches
+            .iter()
             .filter_map(|(content_id, offsets)| {
                 let best_count = offsets.values().max().copied().unwrap_or(0);
                 let similarity = best_count as f32 / pairs.len() as f32;
@@ -396,7 +405,11 @@ impl FingerprintDatabase {
             })
             .collect();
 
-        results.sort_by(|a, b| b.similarity.partial_cmp(&a.similarity).unwrap_or(std::cmp::Ordering::Equal));
+        results.sort_by(|a, b| {
+            b.similarity
+                .partial_cmp(&a.similarity)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
         results
     }
 }

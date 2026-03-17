@@ -84,13 +84,13 @@ pub mod solana;
 
 pub mod streaming;
 
+use anyhow::{bail, Context, Result};
 use std::path::Path;
 use std::process::Command;
-use anyhow::{Context, Result, bail};
-use tracing::{info, debug, warn};
+use tracing::{debug, info, warn};
 
-pub use types::*;
 pub use fft::FrequencyAnalyzer;
+pub use types::*;
 
 #[cfg(feature = "fingerprint")]
 pub use fingerprint::Fingerprinter;
@@ -143,12 +143,16 @@ impl AudioAnalyzer {
         // Run FFmpeg to extract audio
         let output = Command::new("ffmpeg")
             .args([
-                "-i", &video_path.to_string_lossy(),
-                "-vn",                          // No video
-                "-acodec", "pcm_s16le",         // 16-bit PCM
-                "-ar", &self.sample_rate.to_string(),  // Sample rate
-                "-ac", "1",                     // Mono
-                "-y",                           // Overwrite
+                "-i",
+                &video_path.to_string_lossy(),
+                "-vn", // No video
+                "-acodec",
+                "pcm_s16le", // 16-bit PCM
+                "-ar",
+                &self.sample_rate.to_string(), // Sample rate
+                "-ac",
+                "1",  // Mono
+                "-y", // Overwrite
                 &temp_wav.to_string_lossy(),
             ])
             .output()
@@ -160,8 +164,7 @@ impl AudioAnalyzer {
         }
 
         // Read the WAV file
-        let reader = hound::WavReader::open(&temp_wav)
-            .context("Failed to open extracted audio")?;
+        let reader = hound::WavReader::open(&temp_wav).context("Failed to open extracted audio")?;
 
         let spec = reader.spec();
         debug!("Audio spec: {:?}", spec);
@@ -175,7 +178,11 @@ impl AudioAnalyzer {
         // Clean up temp file
         let _ = std::fs::remove_file(&temp_wav);
 
-        info!("Extracted {} samples at {}Hz", samples.len(), spec.sample_rate);
+        info!(
+            "Extracted {} samples at {}Hz",
+            samples.len(),
+            spec.sample_rate
+        );
 
         Ok(AudioData {
             samples,
@@ -192,7 +199,11 @@ impl AudioAnalyzer {
     }
 
     /// Get the dominant frequencies from audio.
-    pub fn dominant_frequencies(&self, audio: &AudioData, top_k: usize) -> Result<Vec<DominantFrequency>> {
+    pub fn dominant_frequencies(
+        &self,
+        audio: &AudioData,
+        top_k: usize,
+    ) -> Result<Vec<DominantFrequency>> {
         let analyzer = FrequencyAnalyzer::new(self.fft_size, self.hop_size);
         analyzer.dominant_frequencies(&audio.samples, audio.sample_rate, top_k)
     }

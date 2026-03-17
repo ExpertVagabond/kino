@@ -29,7 +29,11 @@ fn main() -> Result<()> {
 
     // Load audio file
     let audio = load_wav(file_path)?;
-    println!("Loaded {} samples at {}Hz", audio.samples.len(), audio.sample_rate);
+    println!(
+        "Loaded {} samples at {}Hz",
+        audio.samples.len(),
+        audio.sample_rate
+    );
 
     // Create analyzer
     let analyzer = FrequencyAnalyzer::new(4096, 2048);
@@ -64,12 +68,30 @@ fn main() -> Result<()> {
     println!("  Zero crossing rate: {:.4}", analysis.zero_crossing_rate);
 
     println!("\nBand Energies:");
-    println!("  Sub-bass (20-60 Hz):    {:.4}", analysis.band_energies.sub_bass);
-    println!("  Bass (60-250 Hz):       {:.4}", analysis.band_energies.bass);
-    println!("  Low-mid (250-500 Hz):   {:.4}", analysis.band_energies.low_mid);
-    println!("  Mid (500-2000 Hz):      {:.4}", analysis.band_energies.mid);
-    println!("  High-mid (2-4 kHz):     {:.4}", analysis.band_energies.high_mid);
-    println!("  High (4-20 kHz):        {:.4}", analysis.band_energies.high);
+    println!(
+        "  Sub-bass (20-60 Hz):    {:.4}",
+        analysis.band_energies.sub_bass
+    );
+    println!(
+        "  Bass (60-250 Hz):       {:.4}",
+        analysis.band_energies.bass
+    );
+    println!(
+        "  Low-mid (250-500 Hz):   {:.4}",
+        analysis.band_energies.low_mid
+    );
+    println!(
+        "  Mid (500-2000 Hz):      {:.4}",
+        analysis.band_energies.mid
+    );
+    println!(
+        "  High-mid (2-4 kHz):     {:.4}",
+        analysis.band_energies.high_mid
+    );
+    println!(
+        "  High (4-20 kHz):        {:.4}",
+        analysis.band_energies.high
+    );
 
     Ok(())
 }

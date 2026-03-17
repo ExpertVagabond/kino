@@ -96,11 +96,11 @@ impl BandEnergies {
     /// Create band energies from a spectrum and frequency bins.
     pub fn from_spectrum(spectrum: &[f32], frequencies: &[f32]) -> Self {
         let bands = [
-            (20.0, 60.0),     // sub_bass
-            (60.0, 250.0),    // bass
-            (250.0, 500.0),   // low_mid
-            (500.0, 2000.0),  // mid
-            (2000.0, 4000.0), // high_mid
+            (20.0, 60.0),      // sub_bass
+            (60.0, 250.0),     // bass
+            (250.0, 500.0),    // low_mid
+            (500.0, 2000.0),   // mid
+            (2000.0, 4000.0),  // high_mid
             (4000.0, 20000.0), // high
         ];
 
@@ -165,7 +165,9 @@ impl FrequencySignature {
             return 0.0;
         }
 
-        let dot: f32 = self.features.iter()
+        let dot: f32 = self
+            .features
+            .iter()
             .zip(other.features.iter())
             .map(|(a, b)| a * b)
             .sum();

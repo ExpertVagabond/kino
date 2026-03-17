@@ -34,27 +34,27 @@
 //! └─────────────────────────────────────────────────────────────────┘
 //! ```
 
-pub mod error;
-pub mod types;
-pub mod manifest;
-pub mod buffer;
 pub mod abr;
-pub mod session;
 pub mod analytics;
 pub mod branding;
-pub mod drm;
+pub mod buffer;
 pub mod captions;
+pub mod drm;
+pub mod error;
+pub mod manifest;
+pub mod session;
+pub mod types;
 
-pub use error::{Error, Result};
-pub use types::*;
-pub use manifest::{ManifestParser, HlsParser, DashParser};
+pub use abr::{AbrAlgorithm, AbrEngine};
+pub use analytics::{AnalyticsEmitter, AnalyticsEvent};
+pub use branding::{CssVariables, JsTheme, KinoColors, KinoTheme};
 pub use buffer::BufferManager;
-pub use abr::{AbrEngine, AbrAlgorithm};
-pub use session::PlayerSession;
-pub use analytics::{AnalyticsEvent, AnalyticsEmitter};
-pub use branding::{KinoColors, KinoTheme, JsTheme, CssVariables};
+pub use captions::{SrtParser, WebVttParser};
 pub use drm::{DrmConfig, DrmManager, DrmSession, PsshBox};
-pub use captions::{WebVttParser, SrtParser};
+pub use error::{Error, Result};
+pub use manifest::{DashParser, HlsParser, ManifestParser};
+pub use session::PlayerSession;
+pub use types::*;
 
 /// Library version
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

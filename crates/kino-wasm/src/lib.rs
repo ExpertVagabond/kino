@@ -15,24 +15,21 @@
 //! const abr = new KinoAbrController();
 //! ```
 
+use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
-use serde::{Serialize, Deserialize};
 
 mod abr_controller;
-mod buffer_controller;
 mod analytics;
 mod branding;
+mod buffer_controller;
 mod frequency;
 
 pub use abr_controller::KinoAbrController;
-pub use buffer_controller::KinoBufferController;
 pub use analytics::KinoAnalytics;
 pub use branding::KinoBranding;
+pub use buffer_controller::KinoBufferController;
 pub use frequency::{
-    KinoFrequencyAnalyzer,
-    KinoFingerprinter,
-    KinoStreamingAnalyzer,
-    FrequencyResult,
+    FrequencyResult, KinoFingerprinter, KinoFrequencyAnalyzer, KinoStreamingAnalyzer,
     RealtimeFrequencyData,
 };
 

@@ -13,15 +13,11 @@ fn main() {
     // Initialize tracing
     tracing_subscriber::fmt()
         .with_env_filter(
-            std::env::var("RUST_LOG")
-                .unwrap_or_else(|_| "info,kino=debug".to_string())
+            std::env::var("RUST_LOG").unwrap_or_else(|_| "info,kino=debug".to_string()),
         )
         .init();
 
-    tracing::info!(
-        version = kino_core::VERSION,
-        "Starting Kino"
-    );
+    tracing::info!(version = kino_core::VERSION, "Starting Kino");
 
     tauri::Builder::default()
         .manage(AppState::new())
@@ -53,7 +49,7 @@ fn main() {
             // Open devtools in debug mode
             #[cfg(debug_assertions)]
             if let Some(window) = app.get_webview_window("main") {
-                let _ = window.open_devtools();
+                window.open_devtools();
             }
 
             Ok(())

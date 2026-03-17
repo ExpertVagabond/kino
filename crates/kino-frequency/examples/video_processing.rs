@@ -15,9 +15,7 @@ use std::env;
 #[tokio::main]
 async fn main() -> Result<()> {
     // Initialize logging
-    tracing_subscriber::fmt()
-        .with_env_filter("info")
-        .init();
+    tracing_subscriber::fmt().with_env_filter("info").init();
 
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
@@ -123,9 +121,16 @@ fn print_results(result: &ProcessingResult) {
         println!("\n   Band Energy Distribution:");
         let bands = &sig.band_energies;
         let max_energy = [
-            bands.sub_bass, bands.bass, bands.low_mid,
-            bands.mid, bands.high_mid, bands.high
-        ].iter().cloned().fold(0.0f32, f32::max);
+            bands.sub_bass,
+            bands.bass,
+            bands.low_mid,
+            bands.mid,
+            bands.high_mid,
+            bands.high,
+        ]
+        .iter()
+        .cloned()
+        .fold(0.0f32, f32::max);
 
         if max_energy > 0.0 {
             let bar = |energy: f32| "#".repeat(((energy / max_energy) * 30.0) as usize);
@@ -145,7 +150,9 @@ fn frequency_to_note(freq: f32) -> String {
         return "-".to_string();
     }
 
-    let notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    let notes = [
+        "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
+    ];
     let a4 = 440.0;
 
     // Calculate semitones from A4

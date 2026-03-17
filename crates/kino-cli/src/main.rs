@@ -136,7 +136,6 @@ enum Commands {
     // =========================================================================
     // Frequency Analysis Commands
     // =========================================================================
-
     /// Analyze audio frequencies in a video
     Frequency {
         /// Input video file
@@ -236,30 +235,49 @@ async fn main() -> anyhow::Result<()> {
 
     // Initialize tracing
     let level = if cli.verbose { "debug" } else { "info" };
-    tracing_subscriber::fmt()
-        .with_env_filter(level)
-        .init();
+    tracing_subscriber::fmt().with_env_filter(level).init();
 
     match cli.command {
         Commands::Analyze { manifest } => {
             commands::analyze(&manifest, &cli.format).await?;
         }
-        Commands::Validate { manifest, segments, all_renditions } => {
+        Commands::Validate {
+            manifest,
+            segments,
+            all_renditions,
+        } => {
             commands::validate(&manifest, segments, all_renditions, &cli.format).await?;
         }
-        Commands::Qc { manifest, output, strict } => {
+        Commands::Qc {
+            manifest,
+            output,
+            strict,
+        } => {
             commands::qc(&manifest, output, strict, &cli.format).await?;
         }
         Commands::Extract { manifest, what } => {
             commands::extract(&manifest, &what, &cli.format).await?;
         }
-        Commands::Compare { manifest1, manifest2 } => {
+        Commands::Compare {
+            manifest1,
+            manifest2,
+        } => {
             commands::compare(&manifest1, &manifest2, &cli.format).await?;
         }
-        Commands::Monitor { manifest, interval, duration } => {
+        Commands::Monitor {
+            manifest,
+            interval,
+            duration,
+        } => {
             commands::monitor(&manifest, interval, duration, &cli.format).await?;
         }
-        Commands::Encode { input, output, format, preset, segment_duration } => {
+        Commands::Encode {
+            input,
+            output,
+            format,
+            preset,
+            segment_duration,
+        } => {
             // Check FFmpeg
             match encoding::check_ffmpeg() {
                 Ok(version) => println!("Using: {}", version),
@@ -269,16 +287,15 @@ async fn main() -> anyhow::Result<()> {
                 }
             }
 
-            let enc_preset = encoding::EncodingPreset::from_str(&preset)
-                .unwrap_or_else(|| {
-                    eprintln!("Unknown preset '{}', using 'web'", preset);
-                    encoding::EncodingPreset::Web
-                });
+            let enc_preset = encoding::EncodingPreset::from_str(&preset).unwrap_or_else(|| {
+                eprintln!("Unknown preset '{}', using 'web'", preset);
+                encoding::EncodingPreset::Web
+            });
 
             let seg_dur = segment_duration.unwrap_or(enc_preset.segment_duration());
 
-            let output_format = encoding::OutputFormat::from_str(&format)
-                .unwrap_or(encoding::OutputFormat::Hls);
+            let output_format =
+                encoding::OutputFormat::from_str(&format).unwrap_or(encoding::OutputFormat::Hls);
 
             match output_format {
                 encoding::OutputFormat::Hls => {
@@ -307,20 +324,43 @@ async fn main() -> anyhow::Result<()> {
         Commands::Frequency { input, top_k, json } => {
             frequency::analyze_frequency(&input, top_k, json).await?;
         }
-        Commands::Fingerprint { input, output, verify } => {
+        Commands::Fingerprint {
+            input,
+            output,
+            verify,
+        } => {
             frequency::fingerprint(&input, output, verify).await?;
         }
-        Commands::Autotag { input, max_tags, min_confidence } => {
+        Commands::Autotag {
+            input,
+            max_tags,
+            min_confidence,
+        } => {
             frequency::autotag(&input, max_tags, min_confidence).await?;
         }
-        Commands::Thumbnail { input, output, candidates } => {
+        Commands::Thumbnail {
+            input,
+            output,
+            candidates,
+        } => {
             frequency::thumbnail(&input, output, candidates).await?;
         }
-        Commands::Similar { input, library, limit } => {
+        Commands::Similar {
+            input,
+            library,
+            limit,
+        } => {
             frequency::similar(&input, &library, limit).await?;
         }
-        Commands::Process { input, output, skip_fingerprint, skip_tags, skip_thumbnail } => {
-            frequency::process(&input, &output, skip_fingerprint, skip_tags, skip_thumbnail).await?;
+        Commands::Process {
+            input,
+            output,
+            skip_fingerprint,
+            skip_tags,
+            skip_thumbnail,
+        } => {
+            frequency::process(&input, &output, skip_fingerprint, skip_tags, skip_thumbnail)
+                .await?;
         }
     }
 

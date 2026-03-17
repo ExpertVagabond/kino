@@ -23,7 +23,7 @@
 //! ```
 
 use crate::error::{Error, Result};
-use crate::types::{TextCue, CueSettings, CueAlignment};
+use crate::types::{CueAlignment, CueSettings, TextCue};
 
 /// WebVTT parser
 pub struct WebVttParser;
@@ -37,7 +37,9 @@ impl WebVttParser {
         // Check for WEBVTT header
         let first_line = lines.next().unwrap_or("");
         if !first_line.starts_with("WEBVTT") {
-            return Err(Error::ManifestParse("Invalid WebVTT: missing WEBVTT header".to_string()));
+            return Err(Error::ManifestParse(
+                "Invalid WebVTT: missing WEBVTT header".to_string(),
+            ));
         }
 
         // Skip header metadata until first blank line
@@ -63,7 +65,7 @@ impl WebVttParser {
             // Check for NOTE (comment)
             if lines.peek().map(|l| l.starts_with("NOTE")).unwrap_or(false) {
                 // Skip comment block
-                while let Some(line) = lines.next() {
+                for line in lines.by_ref() {
                     if line.is_empty() {
                         break;
                     }
@@ -72,9 +74,13 @@ impl WebVttParser {
             }
 
             // Check for STYLE block
-            if lines.peek().map(|l| l.starts_with("STYLE")).unwrap_or(false) {
+            if lines
+                .peek()
+                .map(|l| l.starts_with("STYLE"))
+                .unwrap_or(false)
+            {
                 // Skip style block
-                while let Some(line) = lines.next() {
+                for line in lines.by_ref() {
                     if line.is_empty() {
                         break;
                     }
@@ -83,9 +89,13 @@ impl WebVttParser {
             }
 
             // Check for REGION block
-            if lines.peek().map(|l| l.starts_with("REGION")).unwrap_or(false) {
+            if lines
+                .peek()
+                .map(|l| l.starts_with("REGION"))
+                .unwrap_or(false)
+            {
                 // Skip region block
-                while let Some(line) = lines.next() {
+                for line in lines.by_ref() {
                     if line.is_empty() {
                         break;
                     }
@@ -147,7 +157,7 @@ impl WebVttParser {
         let start = Self::parse_timestamp(parts[0].trim())?;
 
         // End time might have settings after it
-        let end_parts: Vec<&str> = parts[1].trim().split_whitespace().collect();
+        let end_parts: Vec<&str> = parts[1].split_whitespace().collect();
         let end = Self::parse_timestamp(end_parts[0])?;
 
         // Parse settings
@@ -167,16 +177,19 @@ impl WebVttParser {
         match parts.len() {
             // mm:ss.mmm
             2 => {
-                let minutes: f64 = parts[0].parse()
+                let minutes: f64 = parts[0]
+                    .parse()
                     .map_err(|_| Error::ManifestParse(format!("Invalid minutes: {}", parts[0])))?;
                 let seconds = Self::parse_seconds(parts[1])?;
                 Ok(minutes * 60.0 + seconds)
             }
             // hh:mm:ss.mmm
             3 => {
-                let hours: f64 = parts[0].parse()
+                let hours: f64 = parts[0]
+                    .parse()
                     .map_err(|_| Error::ManifestParse(format!("Invalid hours: {}", parts[0])))?;
-                let minutes: f64 = parts[1].parse()
+                let minutes: f64 = parts[1]
+                    .parse()
                     .map_err(|_| Error::ManifestParse(format!("Invalid minutes: {}", parts[1])))?;
                 let seconds = Self::parse_seconds(parts[2])?;
                 Ok(hours * 3600.0 + minutes * 60.0 + seconds)
@@ -328,16 +341,23 @@ impl SrtParser {
     fn parse_timestamp(ts: &str) -> Result<f64> {
         let parts: Vec<&str> = ts.split(':').collect();
         if parts.len() != 3 {
-            return Err(Error::ManifestParse(format!("Invalid SRT timestamp: {}", ts)));
+            return Err(Error::ManifestParse(format!(
+                "Invalid SRT timestamp: {}",
+                ts
+            )));
         }
 
-        let hours: f64 = parts[0].parse()
+        let hours: f64 = parts[0]
+            .parse()
             .map_err(|_| Error::ManifestParse(format!("Invalid hours: {}", parts[0])))?;
-        let minutes: f64 = parts[1].parse()
+        let minutes: f64 = parts[1]
+            .parse()
             .map_err(|_| Error::ManifestParse(format!("Invalid minutes: {}", parts[1])))?;
 
         // SRT uses comma as decimal separator
-        let seconds: f64 = parts[2].replace(',', ".").parse()
+        let seconds: f64 = parts[2]
+            .replace(',', ".")
+            .parse()
             .map_err(|_| Error::ManifestParse(format!("Invalid seconds: {}", parts[2])))?;
 
         Ok(hours * 3600.0 + minutes * 60.0 + seconds)
@@ -427,7 +447,10 @@ This is a subtitle.
     #[test]
     fn test_timestamp_parsing() {
         assert_eq!(WebVttParser::parse_timestamp("00:00:05.500").unwrap(), 5.5);
-        assert_eq!(WebVttParser::parse_timestamp("01:30:00.000").unwrap(), 5400.0);
+        assert_eq!(
+            WebVttParser::parse_timestamp("01:30:00.000").unwrap(),
+            5400.0
+        );
         assert_eq!(WebVttParser::parse_timestamp("05:30.000").unwrap(), 330.0);
     }
 

@@ -4,7 +4,7 @@
 //!
 //! Run with: cargo run -p kino-core --example captions
 
-use kino_core::captions::{WebVttParser, SrtParser, cues_at_time, srt_to_vtt};
+use kino_core::captions::{cues_at_time, srt_to_vtt, SrtParser, WebVttParser};
 
 fn main() {
     println!("Kino Core - Caption Parsing Example");
@@ -56,8 +56,10 @@ This caption appears at 1 hour 30 minutes.
 
                 if let Some(ref settings) = cue.settings {
                     if settings.align.is_some() || settings.position.is_some() {
-                        println!("  Settings: align={:?}, position={:?}",
-                            settings.align, settings.position);
+                        println!(
+                            "  Settings: align={:?}, position={:?}",
+                            settings.align, settings.position
+                        );
                     }
                 }
                 println!();
@@ -110,7 +112,8 @@ amazing player capabilities.
 
             for cue in &cues {
                 let clean_text = SrtParser::strip_tags(&cue.text);
-                println!("  [{}] {:.3}s -> {:.3}s: {}",
+                println!(
+                    "  [{}] {:.3}s -> {:.3}s: {}",
                     cue.id,
                     cue.start_time,
                     cue.end_time,

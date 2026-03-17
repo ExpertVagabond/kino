@@ -21,9 +21,9 @@
 //! console.log('Centroid:', result.spectral_centroid);
 //! ```
 
+use js_sys::{Array, Float32Array};
+use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
-use serde::{Serialize, Deserialize};
-use js_sys::{Float32Array, Array};
 
 // ============================================================================
 // Core FFT Implementation (no Tokio - WASM compatible)
@@ -53,7 +53,8 @@ impl FftAnalyzer {
         }
 
         // Apply window
-        let windowed: Vec<f32> = samples.iter()
+        let windowed: Vec<f32> = samples
+            .iter()
             .take(self.fft_size)
             .zip(self.window.iter())
             .map(|(&s, &w)| s * w)
@@ -188,14 +189,13 @@ impl KinoFrequencyAnalyzer {
         let freq_resolution = sample_rate as f32 / self.fft_size as f32;
 
         // Find dominant frequencies
-        let mut indexed: Vec<(usize, f32)> = spectrum.iter()
-            .enumerate()
-            .map(|(i, &m)| (i, m))
-            .collect();
+        let mut indexed: Vec<(usize, f32)> =
+            spectrum.iter().enumerate().map(|(i, &m)| (i, m)).collect();
         indexed.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
 
         let max_mag = indexed.first().map(|(_, m)| *m).unwrap_or(1.0);
-        let dominant_frequencies: Vec<DominantFreq> = indexed.iter()
+        let dominant_frequencies: Vec<DominantFreq> = indexed
+            .iter()
             .take(10)
             .enumerate()
             .map(|(rank, (idx, mag))| DominantFreq {
@@ -250,12 +250,17 @@ impl KinoFrequencyAnalyzer {
     }
 
     fn compute_centroid(&self, spectrum: &[f32], frequencies: &[f32]) -> f32 {
-        let weighted_sum: f32 = spectrum.iter()
+        let weighted_sum: f32 = spectrum
+            .iter()
             .zip(frequencies.iter())
             .map(|(&m, &f)| m * f)
             .sum();
         let total: f32 = spectrum.iter().sum();
-        if total > 0.0 { weighted_sum / total } else { 0.0 }
+        if total > 0.0 {
+            weighted_sum / total
+        } else {
+            0.0
+        }
     }
 
     fn compute_rolloff(&self, spectrum: &[f32], frequencies: &[f32], threshold: f32) -> f32 {
@@ -275,9 +280,7 @@ impl KinoFrequencyAnalyzer {
 
     fn compute_flatness(&self, spectrum: &[f32]) -> f32 {
         let n = spectrum.len() as f32;
-        let log_sum: f32 = spectrum.iter()
-            .map(|&x| (x + 1e-10).ln())
-            .sum();
+        let log_sum: f32 = spectrum.iter().map(|&x| (x + 1e-10).ln()).sum();
         let geometric_mean = (log_sum / n).exp();
         let arithmetic_mean: f32 = spectrum.iter().sum::<f32>() / n;
 
@@ -382,11 +385,9 @@ impl KinoFingerprinter {
         }
 
         // Simple hash (in production, use proper SHA-256)
-        let hash: u64 = hash_data.iter()
-            .enumerate()
-            .fold(0u64, |acc, (i, &b)| {
-                acc.wrapping_add((b as u64).wrapping_mul(31u64.pow(i as u32)))
-            });
+        let hash: u64 = hash_data.iter().enumerate().fold(0u64, |acc, (i, &b)| {
+            acc.wrapping_add((b as u64).wrapping_mul(31u64.pow(i as u32)))
+        });
 
         format!("{:016x}", hash)
     }
@@ -398,7 +399,8 @@ impl KinoFingerprinter {
             return 0.0;
         }
 
-        let matching: usize = hash1.chars()
+        let matching: usize = hash1
+            .chars()
             .zip(hash2.chars())
             .filter(|(a, b)| a == b)
             .count();
@@ -473,7 +475,9 @@ impl KinoStreamingAnalyzer {
         self.buffer.extend(samples.to_vec());
 
         if self.buffer.len() >= self.fft_size {
-            let spectrum = self.analyzer.compute_spectrum(&self.buffer[..self.fft_size]);
+            let spectrum = self
+                .analyzer
+                .compute_spectrum(&self.buffer[..self.fft_size]);
 
             // Compute features
             let freq_resolution = self.sample_rate as f32 / self.fft_size as f32;
@@ -482,7 +486,8 @@ impl KinoStreamingAnalyzer {
                 .collect();
 
             // Dominant frequency
-            let dominant_idx = spectrum.iter()
+            let dominant_idx = spectrum
+                .iter()
                 .enumerate()
                 .max_by(|a, b| a.1.partial_cmp(b.1).unwrap())
                 .map(|(i, _)| i)
@@ -490,15 +495,22 @@ impl KinoStreamingAnalyzer {
             let dominant_freq = dominant_idx as f32 * freq_resolution;
 
             // Centroid
-            let weighted: f32 = spectrum.iter().zip(frequencies.iter())
-                .map(|(&m, &f)| m * f).sum();
+            let weighted: f32 = spectrum
+                .iter()
+                .zip(frequencies.iter())
+                .map(|(&m, &f)| m * f)
+                .sum();
             let total: f32 = spectrum.iter().sum();
             let centroid = if total > 0.0 { weighted / total } else { 0.0 };
 
             // Band energies
             let bands = [
-                (20.0, 60.0), (60.0, 250.0), (250.0, 500.0),
-                (500.0, 2000.0), (2000.0, 4000.0), (4000.0, 20000.0),
+                (20.0, 60.0),
+                (60.0, 250.0),
+                (250.0, 500.0),
+                (500.0, 2000.0),
+                (2000.0, 4000.0),
+                (4000.0, 20000.0),
             ];
             let mut band_energies = [0.0f32; 6];
             for (i, (low, high)) in bands.iter().enumerate() {

@@ -155,7 +155,10 @@ pub struct ContentTag {
 #[pymethods]
 impl ContentTag {
     fn __repr__(&self) -> String {
-        format!("ContentTag('{}', confidence={:.2})", self.label, self.confidence)
+        format!(
+            "ContentTag('{}', confidence={:.2})",
+            self.label, self.confidence
+        )
     }
 }
 
@@ -183,7 +186,9 @@ impl FrequencySignature {
             return 0.0;
         }
 
-        let dot: f32 = self.features.iter()
+        let dot: f32 = self
+            .features
+            .iter()
             .zip(other.features.iter())
             .map(|(a, b)| a * b)
             .sum();
@@ -229,9 +234,11 @@ impl FrequencyAnalyzer {
         let samples_slice = samples.as_slice()?;
 
         if samples_slice.len() < self.fft_size {
-            return Err(pyo3::exceptions::PyValueError::new_err(
-                format!("Need at least {} samples, got {}", self.fft_size, samples_slice.len())
-            ));
+            return Err(pyo3::exceptions::PyValueError::new_err(format!(
+                "Need at least {} samples, got {}",
+                self.fft_size,
+                samples_slice.len()
+            )));
         }
 
         // Compute spectrum using simple DFT (in production, use proper FFT)
@@ -239,14 +246,13 @@ impl FrequencyAnalyzer {
         let freq_resolution = self.sample_rate as f32 / self.fft_size as f32;
 
         // Find dominant frequencies
-        let mut indexed: Vec<(usize, f32)> = spectrum.iter()
-            .enumerate()
-            .map(|(i, &m)| (i, m))
-            .collect();
+        let mut indexed: Vec<(usize, f32)> =
+            spectrum.iter().enumerate().map(|(i, &m)| (i, m)).collect();
         indexed.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
 
         let max_mag = indexed.first().map(|(_, m)| *m).unwrap_or(1.0);
-        let dominant_frequencies: Vec<DominantFrequency> = indexed.iter()
+        let dominant_frequencies: Vec<DominantFrequency> = indexed
+            .iter()
             .take(10)
             .enumerate()
             .map(|(rank, (idx, mag))| DominantFrequency {
@@ -285,11 +291,18 @@ impl FrequencyAnalyzer {
         top_k: usize,
     ) -> PyResult<Vec<DominantFrequency>> {
         let result = self.analyze(samples)?;
-        Ok(result.dominant_frequencies.into_iter().take(top_k).collect())
+        Ok(result
+            .dominant_frequencies
+            .into_iter()
+            .take(top_k)
+            .collect())
     }
 
     /// Compute frequency signature
-    pub fn compute_signature(&self, samples: PyReadonlyArray1<f32>) -> PyResult<FrequencySignature> {
+    pub fn compute_signature(
+        &self,
+        samples: PyReadonlyArray1<f32>,
+    ) -> PyResult<FrequencySignature> {
         let samples_slice = samples.as_slice()?;
         let spectrum = self.compute_spectrum(samples_slice);
         let freq_resolution = self.sample_rate as f32 / self.fft_size as f32;
@@ -363,7 +376,8 @@ impl FrequencyAnalyzer {
             for (i, &sample) in samples.iter().take(n).enumerate() {
                 let angle = 2.0 * std::f32::consts::PI * k as f32 * i as f32 / n as f32;
                 // Apply Hann window
-                let window = 0.5 * (1.0 - (2.0 * std::f32::consts::PI * i as f32 / (n - 1) as f32).cos());
+                let window =
+                    0.5 * (1.0 - (2.0 * std::f32::consts::PI * i as f32 / (n - 1) as f32).cos());
                 let windowed = sample * window;
                 real += windowed * angle.cos();
                 imag -= windowed * angle.sin();
@@ -376,10 +390,17 @@ impl FrequencyAnalyzer {
     }
 
     fn compute_centroid(&self, spectrum: &[f32], frequencies: &[f32]) -> f32 {
-        let weighted: f32 = spectrum.iter().zip(frequencies.iter())
-            .map(|(&m, &f)| m * f).sum();
+        let weighted: f32 = spectrum
+            .iter()
+            .zip(frequencies.iter())
+            .map(|(&m, &f)| m * f)
+            .sum();
         let total: f32 = spectrum.iter().sum();
-        if total > 0.0 { weighted / total } else { 0.0 }
+        if total > 0.0 {
+            weighted / total
+        } else {
+            0.0
+        }
     }
 
     fn compute_rolloff(&self, spectrum: &[f32], frequencies: &[f32], threshold: f32) -> f32 {
@@ -399,17 +420,20 @@ impl FrequencyAnalyzer {
 
     fn compute_flatness(&self, spectrum: &[f32]) -> f32 {
         let n = spectrum.len() as f32;
-        let log_sum: f32 = spectrum.iter()
-            .map(|&x| (x + 1e-10).ln())
-            .sum();
+        let log_sum: f32 = spectrum.iter().map(|&x| (x + 1e-10).ln()).sum();
         let geometric_mean = (log_sum / n).exp();
         let arithmetic_mean: f32 = spectrum.iter().sum::<f32>() / n;
 
-        if arithmetic_mean > 0.0 { geometric_mean / arithmetic_mean } else { 0.0 }
+        if arithmetic_mean > 0.0 {
+            geometric_mean / arithmetic_mean
+        } else {
+            0.0
+        }
     }
 
     fn compute_zcr(&self, samples: &[f32]) -> f32 {
-        let crossings: usize = samples.windows(2)
+        let crossings: usize = samples
+            .windows(2)
             .filter(|w| (w[0] >= 0.0) != (w[1] >= 0.0))
             .count();
         crossings as f32 / samples.len() as f32
@@ -417,8 +441,12 @@ impl FrequencyAnalyzer {
 
     fn compute_band_energies(&self, spectrum: &[f32], frequencies: &[f32]) -> BandEnergies {
         let bands = [
-            (20.0, 60.0), (60.0, 250.0), (250.0, 500.0),
-            (500.0, 2000.0), (2000.0, 4000.0), (4000.0, 20000.0),
+            (20.0, 60.0),
+            (60.0, 250.0),
+            (250.0, 500.0),
+            (500.0, 2000.0),
+            (2000.0, 4000.0),
+            (4000.0, 20000.0),
         ];
 
         let mut energies = [0.0f32; 6];
@@ -473,7 +501,9 @@ impl Fingerprinter {
         let samples_slice = samples.as_slice()?;
 
         if samples_slice.len() < self.fft_size {
-            return Err(pyo3::exceptions::PyValueError::new_err("Not enough samples"));
+            return Err(pyo3::exceptions::PyValueError::new_err(
+                "Not enough samples",
+            ));
         }
 
         // Generate hash based on spectral peaks (simplified)
@@ -490,11 +520,9 @@ impl Fingerprinter {
         }
 
         // Generate hash
-        let hash: u64 = hash_data.iter()
-            .enumerate()
-            .fold(0u64, |acc, (i, &b)| {
-                acc.wrapping_add((b as u64).wrapping_mul(31u64.pow((i % 16) as u32)))
-            });
+        let hash: u64 = hash_data.iter().enumerate().fold(0u64, |acc, (i, &b)| {
+            acc.wrapping_add((b as u64).wrapping_mul(31u64.pow((i % 16) as u32)))
+        });
 
         let duration_secs = samples_slice.len() as f64 / sample_rate as f64;
 
@@ -548,22 +576,35 @@ impl ContentTagger {
         let energy: f32 = samples_slice.iter().take(n).map(|&s| s * s).sum::<f32>() / n as f32;
 
         // ZCR for speech/music detection
-        let zcr: usize = samples_slice.windows(2)
+        let zcr: usize = samples_slice
+            .windows(2)
             .take(n - 1)
             .filter(|w| (w[0] >= 0.0) != (w[1] >= 0.0))
             .count();
         let zcr_rate = zcr as f32 / n as f32;
 
         if zcr_rate < 0.05 {
-            tags.push(ContentTag { label: "music".to_string(), confidence: 0.7 });
+            tags.push(ContentTag {
+                label: "music".to_string(),
+                confidence: 0.7,
+            });
         } else if zcr_rate < 0.1 {
-            tags.push(ContentTag { label: "speech".to_string(), confidence: 0.65 });
+            tags.push(ContentTag {
+                label: "speech".to_string(),
+                confidence: 0.65,
+            });
         }
 
         if energy > 0.1 {
-            tags.push(ContentTag { label: "energetic".to_string(), confidence: 0.6 });
+            tags.push(ContentTag {
+                label: "energetic".to_string(),
+                confidence: 0.6,
+            });
         } else if energy < 0.01 {
-            tags.push(ContentTag { label: "ambient".to_string(), confidence: 0.5 });
+            tags.push(ContentTag {
+                label: "ambient".to_string(),
+                confidence: 0.5,
+            });
         }
 
         // Filter by confidence

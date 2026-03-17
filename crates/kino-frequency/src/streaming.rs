@@ -211,7 +211,8 @@ impl StreamAnalyzer {
         // Process complete frames
         while self.buffer.len() >= self.config.fft_size {
             // Extract frame
-            let frame_samples: Vec<f32> = self.buffer
+            let frame_samples: Vec<f32> = self
+                .buffer
                 .iter()
                 .take(self.config.fft_size)
                 .copied()
@@ -238,10 +239,14 @@ impl StreamAnalyzer {
 
     /// Analyze a single frame of audio.
     fn analyze_frame(&self, samples: &[f32]) -> Option<AnalysisFrame> {
-        let analysis = self.analyzer.analyze(samples, self.config.sample_rate).ok()?;
+        let analysis = self
+            .analyzer
+            .analyze(samples, self.config.sample_rate)
+            .ok()?;
 
         // Find dominant frequency
-        let (dominant_idx, dominant_mag) = analysis.spectrum
+        let (dominant_idx, dominant_mag) = analysis
+            .spectrum
             .iter()
             .enumerate()
             .max_by(|a, b| a.1.partial_cmp(b.1).unwrap_or(std::cmp::Ordering::Equal))?;
@@ -250,7 +255,8 @@ impl StreamAnalyzer {
         let dominant_frequency = dominant_idx as f32 * freq_resolution;
 
         // Compute RMS energy
-        let rms_energy = (samples.iter().map(|&s| s * s).sum::<f32>() / samples.len() as f32).sqrt();
+        let rms_energy =
+            (samples.iter().map(|&s| s * s).sum::<f32>() / samples.len() as f32).sqrt();
 
         Some(AnalysisFrame {
             timestamp: self.current_time,
@@ -283,7 +289,8 @@ impl StreamAnalyzer {
         }
 
         if self.energy_history.len() >= 10 {
-            let avg_energy: f32 = self.energy_history.iter().sum::<f32>() / self.energy_history.len() as f32;
+            let avg_energy: f32 =
+                self.energy_history.iter().sum::<f32>() / self.energy_history.len() as f32;
             if frame.rms_energy > avg_energy * self.config.beat_threshold {
                 self.emit_event(AnalysisEvent::BeatDetected {
                     timestamp: frame.timestamp,
@@ -342,34 +349,48 @@ impl StreamAnalyzer {
         let n = self.history.len() as f32;
 
         // Average dominant frequency
-        let avg_dominant: f32 = self.history.iter()
+        let avg_dominant: f32 = self
+            .history
+            .iter()
             .map(|f| f.dominant_frequency)
-            .sum::<f32>() / n;
+            .sum::<f32>()
+            / n;
 
         // Average centroid
-        let avg_centroid: f32 = self.history.iter()
+        let avg_centroid: f32 = self
+            .history
+            .iter()
             .map(|f| f.spectral_centroid)
-            .sum::<f32>() / n;
+            .sum::<f32>()
+            / n;
 
         // Average RMS
-        let avg_rms: f32 = self.history.iter()
-            .map(|f| f.rms_energy)
-            .sum::<f32>() / n;
+        let avg_rms: f32 = self.history.iter().map(|f| f.rms_energy).sum::<f32>() / n;
 
         // RMS variance
-        let rms_variance: f32 = self.history.iter()
+        let rms_variance: f32 = self
+            .history
+            .iter()
             .map(|f| (f.rms_energy - avg_rms).powi(2))
-            .sum::<f32>() / n;
+            .sum::<f32>()
+            / n;
 
         // Dominant frequency variance
-        let freq_variance: f32 = self.history.iter()
+        let freq_variance: f32 = self
+            .history
+            .iter()
             .map(|f| (f.dominant_frequency - avg_dominant).powi(2))
-            .sum::<f32>() / n;
+            .sum::<f32>()
+            / n;
 
         // Average band energies
         let mut avg_bands = BandEnergies {
-            sub_bass: 0.0, bass: 0.0, low_mid: 0.0,
-            mid: 0.0, high_mid: 0.0, high: 0.0,
+            sub_bass: 0.0,
+            bass: 0.0,
+            low_mid: 0.0,
+            mid: 0.0,
+            high_mid: 0.0,
+            high: 0.0,
         };
         for frame in &self.history {
             avg_bands.sub_bass += frame.band_energies.sub_bass;
@@ -387,8 +408,7 @@ impl StreamAnalyzer {
         avg_bands.high /= n;
 
         StreamStatistics {
-            window_duration: self.config.history_length as f64
-                * self.config.hop_size as f64
+            window_duration: self.config.history_length as f64 * self.config.hop_size as f64
                 / self.config.sample_rate as f64,
             avg_dominant_frequency: avg_dominant,
             avg_spectral_centroid: avg_centroid,

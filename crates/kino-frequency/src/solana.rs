@@ -42,10 +42,10 @@
 //! }
 //! ```
 
-use std::str::FromStr;
-use anyhow::{Result, Context, bail};
+use anyhow::{bail, Context, Result};
 use serde::{Deserialize, Serialize};
-use tracing::{info, debug, warn};
+use std::str::FromStr;
+use tracing::{debug, info, warn};
 
 // Note: These imports require the "solana" feature
 #[cfg(feature = "solana")]
@@ -141,15 +141,13 @@ impl SolanaFingerprintClient {
             ..Default::default()
         };
 
-        let keypair_data = std::fs::read_to_string(keypair_path)
-            .context("Failed to read keypair file")?;
-        let keypair_bytes: Vec<u8> = serde_json::from_str(&keypair_data)
-            .context("Failed to parse keypair JSON")?;
-        let payer = Keypair::from_bytes(&keypair_bytes)
-            .context("Failed to create keypair")?;
+        let keypair_data =
+            std::fs::read_to_string(keypair_path).context("Failed to read keypair file")?;
+        let keypair_bytes: Vec<u8> =
+            serde_json::from_str(&keypair_data).context("Failed to parse keypair JSON")?;
+        let payer = Keypair::from_bytes(&keypair_bytes).context("Failed to create keypair")?;
 
-        let program_id = Pubkey::from_str(&config.program_id)
-            .context("Invalid program ID")?;
+        let program_id = Pubkey::from_str(&config.program_id).context("Invalid program ID")?;
 
         Ok(Self {
             config,
@@ -160,15 +158,13 @@ impl SolanaFingerprintClient {
 
     /// Create client with custom configuration.
     pub fn with_config(config: SolanaConfig, keypair_path: &str) -> Result<Self> {
-        let keypair_data = std::fs::read_to_string(keypair_path)
-            .context("Failed to read keypair file")?;
-        let keypair_bytes: Vec<u8> = serde_json::from_str(&keypair_data)
-            .context("Failed to parse keypair JSON")?;
-        let payer = Keypair::from_bytes(&keypair_bytes)
-            .context("Failed to create keypair")?;
+        let keypair_data =
+            std::fs::read_to_string(keypair_path).context("Failed to read keypair file")?;
+        let keypair_bytes: Vec<u8> =
+            serde_json::from_str(&keypair_data).context("Failed to parse keypair JSON")?;
+        let payer = Keypair::from_bytes(&keypair_bytes).context("Failed to create keypair")?;
 
-        let program_id = Pubkey::from_str(&config.program_id)
-            .context("Invalid program ID")?;
+        let program_id = Pubkey::from_str(&config.program_id).context("Invalid program ID")?;
 
         Ok(Self {
             config,
@@ -179,10 +175,7 @@ impl SolanaFingerprintClient {
 
     /// Derive the PDA address for a fingerprint.
     pub fn derive_fingerprint_address(&self, content_hash: &[u8; 32]) -> (Pubkey, u8) {
-        Pubkey::find_program_address(
-            &[b"fingerprint", content_hash.as_ref()],
-            &self.program_id,
-        )
+        Pubkey::find_program_address(&[b"fingerprint", content_hash.as_ref()], &self.program_id)
     }
 
     /// Store a fingerprint on-chain.
@@ -191,7 +184,10 @@ impl SolanaFingerprintClient {
         content_hash: &[u8; 32],
         metadata_uri: Option<&str>,
     ) -> Result<String> {
-        info!("Storing fingerprint on Solana: {:?}", hex::encode(content_hash));
+        info!(
+            "Storing fingerprint on Solana: {:?}",
+            hex::encode(content_hash)
+        );
 
         let (fingerprint_pda, bump) = self.derive_fingerprint_address(content_hash);
 
@@ -202,7 +198,10 @@ impl SolanaFingerprintClient {
 
         if let Some(uri) = metadata_uri {
             if uri.len() > MAX_METADATA_URI_LEN {
-                bail!("Metadata URI too long (max {} characters)", MAX_METADATA_URI_LEN);
+                bail!(
+                    "Metadata URI too long (max {} characters)",
+                    MAX_METADATA_URI_LEN
+                );
             }
             instruction_data.extend_from_slice(&(uri.len() as u32).to_le_bytes());
             instruction_data.extend_from_slice(uri.as_bytes());
@@ -226,7 +225,10 @@ impl SolanaFingerprintClient {
         debug!("Creator: {}", self.payer.pubkey());
 
         // Return placeholder signature (actual implementation would send tx)
-        Ok(format!("simulated_signature_{}", hex::encode(&content_hash[..8])))
+        Ok(format!(
+            "simulated_signature_{}",
+            hex::encode(&content_hash[..8])
+        ))
     }
 
     /// Verify content against on-chain fingerprint.
@@ -250,7 +252,10 @@ impl SolanaFingerprintClient {
     }
 
     /// Get fingerprint details from on-chain.
-    pub async fn get_fingerprint(&self, content_hash: &[u8; 32]) -> Result<Option<OnChainFingerprint>> {
+    pub async fn get_fingerprint(
+        &self,
+        content_hash: &[u8; 32],
+    ) -> Result<Option<OnChainFingerprint>> {
         let (fingerprint_pda, _) = self.derive_fingerprint_address(content_hash);
 
         // In production, fetch and deserialize account data
@@ -261,8 +266,7 @@ impl SolanaFingerprintClient {
 
     /// Get all fingerprints registered by a creator.
     pub async fn get_creator_fingerprints(&self, creator: &str) -> Result<Vec<OnChainFingerprint>> {
-        let creator_pubkey = Pubkey::from_str(creator)
-            .context("Invalid creator address")?;
+        let creator_pubkey = Pubkey::from_str(creator).context("Invalid creator address")?;
 
         // In production, use getProgramAccounts with filters
         debug!("Fetching fingerprints for creator: {}", creator_pubkey);
@@ -276,8 +280,7 @@ impl SolanaFingerprintClient {
         content_hash: &[u8; 32],
         new_owner: &str,
     ) -> Result<String> {
-        let new_owner_pubkey = Pubkey::from_str(new_owner)
-            .context("Invalid new owner address")?;
+        let new_owner_pubkey = Pubkey::from_str(new_owner).context("Invalid new owner address")?;
 
         let (fingerprint_pda, _) = self.derive_fingerprint_address(content_hash);
 
@@ -297,7 +300,10 @@ impl SolanaFingerprintClient {
 
         debug!("Transfer instruction created");
 
-        Ok(format!("simulated_transfer_{}", hex::encode(&content_hash[..8])))
+        Ok(format!(
+            "simulated_transfer_{}",
+            hex::encode(&content_hash[..8])
+        ))
     }
 }
 
@@ -309,10 +315,8 @@ pub async fn verify_fingerprint_hash(
 ) -> Result<VerificationResult> {
     let program_id = Pubkey::from_str(FINGERPRINT_PROGRAM_ID)?;
 
-    let (fingerprint_pda, _) = Pubkey::find_program_address(
-        &[b"fingerprint", content_hash.as_ref()],
-        &program_id,
-    );
+    let (fingerprint_pda, _) =
+        Pubkey::find_program_address(&[b"fingerprint", content_hash.as_ref()], &program_id);
 
     // In production, make RPC call to check if account exists
     Ok(VerificationResult {
@@ -350,10 +354,7 @@ fn hex_decode(s: &str) -> Result<Vec<u8>> {
 
     (0..s.len())
         .step_by(2)
-        .map(|i| {
-            u8::from_str_radix(&s[i..i + 2], 16)
-                .context("Invalid hex character")
-        })
+        .map(|i| u8::from_str_radix(&s[i..i + 2], 16).context("Invalid hex character"))
         .collect()
 }
 
@@ -395,15 +396,10 @@ pub mod instructions {
     }
 
     /// Build instruction to verify a fingerprint.
-    pub fn verify_fingerprint(
-        program_id: &Pubkey,
-        fingerprint_pda: &Pubkey,
-    ) -> Instruction {
+    pub fn verify_fingerprint(program_id: &Pubkey, fingerprint_pda: &Pubkey) -> Instruction {
         Instruction {
             program_id: *program_id,
-            accounts: vec![
-                AccountMeta::new_readonly(*fingerprint_pda, false),
-            ],
+            accounts: vec![AccountMeta::new_readonly(*fingerprint_pda, false)],
             data: vec![2u8], // Verify discriminator
         }
     }

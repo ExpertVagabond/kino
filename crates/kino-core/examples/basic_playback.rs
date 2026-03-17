@@ -4,10 +4,7 @@
 //!
 //! Run with: cargo run -p kino-core --example basic_playback
 
-use kino_core::{
-    PlayerConfig, PlayerState, Resolution,
-    AbrAlgorithmType,
-};
+use kino_core::{AbrAlgorithmType, PlayerConfig, PlayerState, Resolution};
 
 fn main() {
     println!("Kino Core - Basic Playback Example");
@@ -24,7 +21,10 @@ fn main() {
 
     println!("Configuration:");
     println!("  - ABR Algorithm: {:?}", config.abr_algorithm);
-    println!("  - Buffer: {:.1}s - {:.1}s", config.min_buffer_time, config.max_buffer_time);
+    println!(
+        "  - Buffer: {:.1}s - {:.1}s",
+        config.min_buffer_time, config.max_buffer_time
+    );
     println!("  - Prefetch: {}", config.prefetch_enabled);
     println!("  - Analytics: {}\n", config.analytics_enabled);
 
@@ -38,7 +38,12 @@ fn main() {
 
     println!("Available quality levels:");
     for level in &levels {
-        println!("  - {} ({}x{})", level.quality_name(), level.width, level.height);
+        println!(
+            "  - {} ({}x{})",
+            level.quality_name(),
+            level.width,
+            level.height
+        );
     }
     println!();
 
