@@ -16,7 +16,15 @@ const execFileAsync = promisify(execFile);
 function resolveKinoCli() {
   // 1. Explicit env override
   if (process.env.KINO_CLI_PATH) {
-    return process.env.KINO_CLI_PATH;
+    const cliPath = process.env.KINO_CLI_PATH;
+    // Validate: must be an absolute path, no shell metacharacters
+    if (!cliPath.startsWith('/') || /[;|`$\n\r]/.test(cliPath)) {
+      throw new Error('KINO_CLI_PATH must be an absolute path without shell metacharacters');
+    }
+    if (!existsSync(cliPath)) {
+      throw new Error(`KINO_CLI_PATH not found: ${cliPath}`);
+    }
+    return cliPath;
   }
 
   // 2. Common install locations
@@ -168,9 +176,12 @@ server.tool(
   "fingerprint_audio",
   "Generate an audio fingerprint for content identification and duplicate detection",
   {
-    file_path: z.string().describe("Path to audio or video file"),
+    file_path: z.string().min(1).max(1024).describe("Path to audio or video file"),
   },
   async ({ file_path }) => {
+    if (/[;|`$\n\r]/.test(file_path) || file_path.includes('\0')) {
+      return { content: [{ type: "text", text: "Error: Invalid characters in file path" }], isError: true };
+    }
     const result = await runKinoCli(["fingerprint", file_path]);
     return formatResult(result);
   }
@@ -182,9 +193,12 @@ server.tool(
   "autotag_content",
   "Auto-detect genre, mood, and BPM from audio content",
   {
-    file_path: z.string().describe("Path to audio or video file"),
+    file_path: z.string().min(1).max(1024).describe("Path to audio or video file"),
   },
   async ({ file_path }) => {
+    if (/[;|`$\n\r]/.test(file_path) || file_path.includes('\0')) {
+      return { content: [{ type: "text", text: "Error: Invalid characters in file path" }], isError: true };
+    }
     const result = await runKinoCli(["autotag", file_path]);
     return formatResult(result);
   }
