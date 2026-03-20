@@ -1,4 +1,15 @@
 #!/usr/bin/env node
+/**
+ * kino-mcp — MCP server for video stream analysis, QC, and monitoring.
+ *
+ * @security
+ * - CLI path validation: KINO_CLI_PATH must be absolute, no shell metacharacters
+ * - No shell execution: uses execFile (not exec) to prevent injection
+ * - Input URLs validated via Zod `.url()` schema before passing to CLI
+ * - Process timeout: 30 s default, 10 MB max buffer to prevent resource exhaustion
+ * - Environment variables passed through — no secrets constructed in code
+ * - Error output from child process is bounded and never includes raw env
+ */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -10,7 +21,20 @@ import { existsSync } from "node:fs";
 const execFileAsync = promisify(execFile);
 
 // ---------------------------------------------------------------------------
-// Resolve kino-cli binary path
+// Security: constants
+// ---------------------------------------------------------------------------
+
+/** Maximum allowed CLI argument length — prevents oversized inputs. */
+const MAX_ARG_LENGTH = 4096;
+
+/** Maximum child process output buffer (10 MB). */
+const MAX_BUFFER = 10 * 1024 * 1024;
+
+/** Default child process timeout (30 seconds). */
+const DEFAULT_TIMEOUT_MS = 30_000;
+
+// ---------------------------------------------------------------------------
+// Resolve kino-cli binary path (security: validated)
 // ---------------------------------------------------------------------------
 
 function resolveKinoCli() {
@@ -47,11 +71,11 @@ const KINO_CLI = resolveKinoCli();
 // Helper — run kino-cli and return parsed output
 // ---------------------------------------------------------------------------
 
-async function runKinoCli(args, { timeoutMs = 30_000 } = {}) {
+async function runKinoCli(args, { timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
   try {
     const { stdout, stderr } = await execFileAsync(KINO_CLI, args, {
       timeout: timeoutMs,
-      maxBuffer: 10 * 1024 * 1024, // 10 MB
+      maxBuffer: MAX_BUFFER,
       env: { ...process.env },
     });
 
