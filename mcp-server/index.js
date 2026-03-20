@@ -72,6 +72,12 @@ const KINO_CLI = resolveKinoCli();
 // ---------------------------------------------------------------------------
 
 async function runKinoCli(args, { timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
+  // Validate all CLI arguments against size limit to prevent oversized inputs
+  for (const arg of args) {
+    if (typeof arg !== "string" || arg.length > MAX_ARG_LENGTH) {
+      return { ok: false, data: null, raw: `Argument exceeds max length (${MAX_ARG_LENGTH})` };
+    }
+  }
   try {
     const { stdout, stderr } = await execFileAsync(KINO_CLI, args, {
       timeout: timeoutMs,
