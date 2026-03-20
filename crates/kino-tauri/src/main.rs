@@ -1,8 +1,17 @@
 //! Kino Tauri - Cross-platform Desktop Application
 //!
 //! Combines Rust backend with web frontend for a native experience.
+//!
+//! # Security
+//!
+//! - Tauri's IPC layer validates all command arguments via serde deserialization
+//! - File access restricted to user-selected paths via Tauri's allowlist
+//! - No direct filesystem access from the webview — all IO proxied through commands
+//! - Debug devtools only enabled in debug builds
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+#![deny(clippy::arithmetic_side_effects)]
+#![forbid(unsafe_code)]
 
 use commands::AppState;
 use tauri::Manager;
