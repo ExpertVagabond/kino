@@ -2234,6 +2234,17 @@
             return `${m}:${sec.toString().padStart(2, '0')}`;
         }
 
+        /** Escape HTML entities to prevent XSS in innerHTML contexts */
+        function escapeHtml(str) {
+            if (typeof str !== 'string') return '';
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         // ========== Captions Functions ==========
 
         function updateCaptionsMenu() {
@@ -2409,12 +2420,12 @@
                 <div class="chapter-item ${index === currentChapter ? 'active' : ''}" data-index="${index}">
                     <div class="chapter-thumb">
                         ${chapter.thumbnail
-                            ? `<img src="${chapter.thumbnail}" alt="${chapter.title}">`
+                            ? `<img src="${escapeHtml(chapter.thumbnail)}" alt="${escapeHtml(chapter.title)}">`
                             : `<span class="chapter-thumb-placeholder">${formatTime(chapter.startTime)}</span>`
                         }
                     </div>
                     <div class="chapter-info">
-                        <div class="chapter-title">${chapter.title}</div>
+                        <div class="chapter-title">${escapeHtml(chapter.title)}</div>
                         <div class="chapter-time">${formatTime(chapter.startTime)} - ${formatTime(chapter.endTime)}</div>
                     </div>
                 </div>
@@ -2799,7 +2810,7 @@
                     <div class="playlist-item ${isPlaying ? 'playing' : ''}" data-index="${index}">
                         <div class="playlist-item-thumb">
                             ${item.thumbnail
-                                ? `<img src="${item.thumbnail}" alt="${item.title}">`
+                                ? `<img src="${escapeHtml(item.thumbnail)}" alt="${escapeHtml(item.title)}">`
                                 : `<svg viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px;opacity:0.3"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg>`
                             }
                             <div class="playlist-item-playing-indicator">
@@ -2808,7 +2819,7 @@
                         </div>
                         <div class="playlist-item-info">
                             <div class="playlist-item-index">${displayIndex + 1}</div>
-                            <div class="playlist-item-title">${item.title}</div>
+                            <div class="playlist-item-title">${escapeHtml(item.title)}</div>
                             ${item.duration ? `<div class="playlist-item-duration">${formatTime(item.duration)}</div>` : ''}
                         </div>
                     </div>
