@@ -1,19 +1,14 @@
 # kino-mcp
 
-MCP server that gives AI agents full access to video stream analysis, audio fingerprinting, quality monitoring, and encoding presets — powered by the `kino-cli` Rust binary.
+**Video stream analysis and quality checking MCP -- monitor, validate, and encode with AI agents.**
 
-## Tools (8)
+[![npm version](https://img.shields.io/npm/v/kino-mcp)](https://npmjs.com/package/kino-mcp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../LICENSE-MIT)
+[![Tools: 8](https://img.shields.io/badge/tools-8-green)]()
 
-| Tool | Description |
-|------|-------------|
-| `analyze_stream` | Parse HLS/DASH manifest — renditions, codecs, duration, live status |
-| `validate_stream` | Check segment accessibility and bitrate conformance |
-| `quality_check` | Full QC report — DRM, captions, bitrate ladder |
-| `monitor_stream` | Live stream health check — latency, segment freshness |
-| `fingerprint_audio` | Generate audio fingerprint for content identification |
-| `autotag_content` | Auto-detect genre, mood, BPM from audio |
-| `compare_streams` | Diff two streams for quality mismatches |
-| `encode_video` | Generate encoding presets (mobile, desktop, 4k, low-bandwidth) |
+---
+
+8 tools for HLS/DASH stream analysis, real-time monitoring, audio fingerprinting, content auto-tagging, and encoding preset generation. Powered by the `kino-cli` Rust binary with formally verified state machines (8 TLA+ specs). Give any MCP-compatible AI agent full video infrastructure awareness.
 
 ## Install
 
@@ -21,25 +16,19 @@ MCP server that gives AI agents full access to video stream analysis, audio fing
 npm install -g kino-mcp
 ```
 
-### Requires `kino-cli`
+Requires the `kino-cli` binary:
 
 ```bash
-# From source
-cargo install --path crates/kino-cli
+# From the parent workspace
+cargo install --path ../crates/kino-cli
 
-# Or from crates.io (when published)
-cargo install kino-cli
-```
-
-If `kino-cli` is not in your PATH, set the `KINO_CLI_PATH` environment variable:
-
-```bash
+# Or set the path manually
 export KINO_CLI_PATH=/path/to/kino-cli
 ```
 
-## Configure in Claude Desktop
+## Configure
 
-Add to your MCP settings (`~/.claude/settings.json` or Claude Desktop config):
+Add to `claude_desktop_config.json` or `~/.mcp.json`:
 
 ```json
 {
@@ -54,32 +43,57 @@ Add to your MCP settings (`~/.claude/settings.json` or Claude Desktop config):
 }
 ```
 
-Or if installed locally:
+## Tool Reference
 
-```json
-{
-  "mcpServers": {
-    "kino": {
-      "command": "node",
-      "args": ["/path/to/kino/mcp-server/index.js"]
-    }
-  }
-}
+| Tool | Description |
+|---|---|
+| `analyze_stream` | Parse HLS/DASH manifest -- renditions, codecs, duration, live status |
+| `validate_stream` | Check segment accessibility and bitrate conformance |
+| `quality_check` | Full QC report -- DRM status, captions, bitrate ladder validation |
+| `monitor_stream` | Live stream health -- latency, segment freshness, error rates |
+| `fingerprint_audio` | Generate SHA-256 audio fingerprint for content identification |
+| `autotag_content` | Auto-detect genre, mood, BPM from audio via FFT spectral analysis |
+| `compare_streams` | Diff two streams for quality mismatches and regression detection |
+| `encode_video` | Generate encoding presets for target platforms (mobile, desktop, 4K, low-bandwidth) |
+
+## Usage Examples
+
+```
+> Analyze this HLS stream and tell me about the available renditions
+  -> analyze_stream { url: "https://cdn.example.com/master.m3u8" }
+
+> Run a full quality check before we go live
+  -> quality_check { url: "https://cdn.example.com/master.m3u8", strict: true }
+
+> Monitor the live stream health every 5 seconds
+  -> monitor_stream { url: "https://cdn.example.com/live.m3u8", interval: 5 }
+
+> Fingerprint this video for content identification
+  -> fingerprint_audio { file: "video.mp4" }
+
+> Compare our staging and production streams
+  -> compare_streams { url_a: "https://staging.example.com/master.m3u8", url_b: "https://cdn.example.com/master.m3u8" }
 ```
 
-## Usage
+## Why This One?
 
-Once configured, any MCP-compatible AI agent can:
+| | kino-mcp | Bitmovin QA | Mux Data |
+|---|---|---|---|
+| **MCP integration** | Native 8-tool MCP server | No MCP | No MCP |
+| **Stream analysis** | HLS + DASH, all codecs | Enterprise QA only | Analytics only |
+| **Audio fingerprinting** | Built-in (FFT + SHA-256) | No | No |
+| **Auto-tagging** | Genre, mood, BPM from audio | No | No |
+| **Quality monitoring** | Real-time segment-level checks | Batch reports | Viewer metrics |
+| **Encoding presets** | Generate per platform | Separate product | No |
+| **Formally verified** | 8 TLA+ specs in CI | No | No |
+| **Cost** | Free / MIT | Enterprise pricing | Usage-based |
 
-- Analyze HLS/DASH streams to understand available renditions and codecs
-- Validate segment accessibility before going live
-- Run automated QC checks on video assets
-- Monitor live stream health in real time
-- Fingerprint audio for content identification and deduplication
-- Auto-tag media files with genre, mood, and tempo
-- Compare streams to detect quality regressions
-- Generate encoding presets for target platforms
+The only MCP server for video stream infrastructure. Enterprise tools exist for QA and analytics, but none expose stream analysis, fingerprinting, and monitoring through the Model Context Protocol.
+
+## Architecture
+
+kino-mcp is a thin Node.js MCP wrapper around the `kino-cli` Rust binary, which is part of the [Kino](https://github.com/ExpertVagabond/kino) 7-crate workspace. The CLI handles all heavy lifting -- manifest parsing (kino-core), FFT analysis (kino-frequency), and encoding -- while the MCP layer provides schema validation and tool dispatch.
 
 ## License
 
-MIT
+[MIT](../LICENSE-MIT) -- [Purple Squirrel Media](https://purplesquirrelmedia.io)
