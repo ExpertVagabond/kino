@@ -9,7 +9,7 @@
     "dev": "node --watch src/index.js",
     "test": "node --test src/**/*.test.js"
   },
-  "author": "Purple Squirrel Media",
+  "author": "Matthew Karsten <matthewkarstenconnects@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "better-sqlite3": "^9.4.0",

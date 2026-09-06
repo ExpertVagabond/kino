@@ -1,5 +1,6 @@
 {
   "name": "kino-mcp",
+  "author": "Matthew Karsten <matthewkarstenconnects@gmail.com>",
   "version": "0.1.0",
   "description": "MCP server for AI-agent video analysis — HLS/DASH streaming, audio fingerprinting, quality monitoring",
   "main": "index.js",
