@@ -32,6 +32,24 @@ jobs:
           toolchain: ${{ matrix.rust }}
           components: clippy, rustfmt
 
+      # default-members includes kino-desktop (gstreamer-sys) and kino-tauri
+      # (glib-sys / webkit), so this job cannot build without the native
+      # libraries they bind to. Without these the run dies in the build script
+      # before compiling any of our code:
+      #   The system library `glib-2.0` required by crate `glib-sys` was not found.
+      #   The system library `gstreamer-1.0` required by crate `gstreamer-sys` was not found.
+      - name: Install system libraries (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev \
+            libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+
+      - name: Install system libraries (macOS)
+        if: runner.os == 'macOS'
+        run: brew install gstreamer gst-plugins-base
+
       - name: Cache cargo registry
         uses: actions/cache@v4
         with:
