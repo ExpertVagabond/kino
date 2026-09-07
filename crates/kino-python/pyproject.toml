@@ -39,10 +39,9 @@ visualization = [
 
 [project.urls]
 Homepage = "https://purplesquirrel.media"
-Repository = "https://github.com/purplesquirrel-media/kino"
+Repository = "https://github.com/ExpertVagabond/kino"
 Documentation = "https://docs.purplesquirrel.media/frequency"
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
-python-source = "python"
 module-name = "kino_frequency"

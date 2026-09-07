@@ -3,13 +3,19 @@
 # Builds the web player and serves it via nginx
 #
 # Usage:
-#   docker build -t psm-player .
-#   docker run -p 8080:80 psm-player
+#   docker build -t kino .
+#   docker run -p 8080:80 kino
 
 # ============================================================================
 # Stage 1: Build WASM module
 # ============================================================================
-FROM rust:1.75-slim AS wasm-builder
+# rust:1.75 predates Cargo.lock format v4 (Rust 1.78), which this workspace
+# now uses, so the pinned image failed before compiling anything:
+#   error: failed to parse lock file at: /app/Cargo.lock
+# Tracking the 1.x line keeps this stage from bit-rotting again as the
+# lockfile format moves. There is no -D warnings gate here, so a moving
+# toolchain costs nothing.
+FROM rust:1-slim AS wasm-builder
 
 # Install wasm-pack and build dependencies
 RUN apt-get update && apt-get install -y \
@@ -25,11 +31,16 @@ WORKDIR /app
 
 # Copy workspace files
 COPY Cargo.toml Cargo.lock ./
-COPY crates/psm-player-core ./crates/psm-player-core
-COPY crates/psm-player-wasm ./crates/psm-player-wasm
+# The root Cargo.toml declares eight workspace members, and `cargo metadata`
+# loads every one of them even though wasm-pack only builds kino-wasm. Copying
+# just the two used crates leaves the rest unresolvable:
+#   error: failed to load manifest for workspace member `/app/crates/kino-desktop`
+# Only kino-wasm is compiled, so the heavier crates' native dependencies
+# (gstreamer, gtk) are never needed here.
+COPY crates ./crates
 
 # Build WASM package
-WORKDIR /app/crates/psm-player-wasm
+WORKDIR /app/crates/kino-wasm
 RUN wasm-pack build --target web --release
 
 # ============================================================================
@@ -47,7 +58,7 @@ COPY docker/nginx.conf /etc/nginx/nginx.conf
 COPY web /usr/share/nginx/html/
 
 # Copy built WASM files
-COPY --from=wasm-builder /app/crates/psm-player-wasm/pkg /usr/share/nginx/html/wasm/
+COPY --from=wasm-builder /app/crates/kino-wasm/pkg /usr/share/nginx/html/wasm/
 
 # Create custom entrypoint for environment variable injection
 COPY docker/entrypoint.sh /entrypoint.sh
