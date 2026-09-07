@@ -455,7 +455,7 @@ mod tests {
         let fp = fingerprinter.fingerprint(&audio).unwrap();
 
         assert!(!fp.hash.is_empty());
-        assert!(fp.points.len() > 0);
+        assert!(!fp.points.is_empty());
         assert_eq!(fp.version, 1);
     }
 

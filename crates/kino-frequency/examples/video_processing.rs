@@ -159,7 +159,7 @@ fn frequency_to_note(freq: f32) -> String {
     let semitones = 12.0 * (freq / a4).log2();
     let midi = (semitones + 69.0).round() as i32;
 
-    if midi < 0 || midi > 127 {
+    if !(0..=127).contains(&midi) {
         return format!("{:.0}Hz", freq);
     }
 

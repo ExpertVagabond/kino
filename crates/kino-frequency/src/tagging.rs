@@ -624,7 +624,7 @@ mod tests {
         let tags = tagger.predict(&audio).unwrap();
 
         // Noise should have high flatness - might be tagged as nature or ambient
-        let has_ambient_like = tags
+        let _has_ambient_like = tags
             .iter()
             .any(|t| t.label == "nature" || t.label == "ambient");
 

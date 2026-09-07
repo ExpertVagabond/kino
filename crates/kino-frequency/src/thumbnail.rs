@@ -380,6 +380,10 @@ impl ThumbnailSelector {
 
         // FFT along columns
         let col_fft = planner.plan_fft_forward(fft_height);
+        // Transposed read: each iteration gathers column x down every row, so
+        // there is no iterator over `row_data` that yields it. Indexing is the
+        // access pattern, not a substitute for one.
+        #[allow(clippy::needless_range_loop)]
         for x in 0..fft_width {
             let mut col: Vec<Complex<f32>> = (0..fft_height)
                 .map(|y| {
@@ -404,9 +408,9 @@ impl ThumbnailSelector {
         let mut high_freq_energy = 0.0f32;
         let mut total_energy = 0.0f32;
 
-        for y in 0..height {
-            for x in 0..fft_width {
-                let magnitude = (row_data[y][x].re.powi(2) + row_data[y][x].im.powi(2)).sqrt();
+        for (y, row) in row_data.iter().enumerate().take(height) {
+            for (x, cell) in row.iter().enumerate().take(fft_width) {
+                let magnitude = (cell.re.powi(2) + cell.im.powi(2)).sqrt();
                 total_energy += magnitude;
 
                 // Distance from center (DC component)
@@ -562,6 +566,6 @@ mod tests {
             .map(|(i, _)| i)
             .unwrap();
 
-        assert!(max_idx >= 3 && max_idx <= 6);
+        assert!((3..=6).contains(&max_idx));
     }
 }

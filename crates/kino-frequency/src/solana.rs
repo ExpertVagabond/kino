@@ -20,7 +20,7 @@
 //! # Usage
 //!
 //! ```rust,no_run
-//! use kino_frequency::solana::{SolanaFingerprintClient, FingerprintConfig};
+//! use kino_frequency::solana::SolanaFingerprintClient;
 //!
 //! #[tokio::main]
 //! async fn main() -> anyhow::Result<()> {
@@ -28,6 +28,9 @@
 //!         "https://api.devnet.solana.com",
 //!         "path/to/keypair.json",
 //!     )?;
+//!
+//!     // SHA-256 of the fingerprint — 32 bytes.
+//!     let fingerprint_hash: [u8; 32] = [0u8; 32];
 //!
 //!     // Store fingerprint on-chain
 //!     let signature = client.store_fingerprint(
@@ -45,17 +48,15 @@
 use anyhow::{bail, Context, Result};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
-use tracing::{debug, info, warn};
+use tracing::{debug, info};
 
 // Note: These imports require the "solana" feature
 #[cfg(feature = "solana")]
 use solana_sdk::{
-    commitment_config::CommitmentConfig,
     instruction::{AccountMeta, Instruction},
     pubkey::Pubkey,
-    signature::{Keypair, Signature, Signer},
+    signature::{Keypair, Signer},
     system_program,
-    transaction::Transaction,
 };
 
 /// Program ID for the Kino Fingerprint program (placeholder - replace with deployed address)
@@ -156,6 +157,15 @@ impl SolanaFingerprintClient {
         })
     }
 
+    /// The configuration this client was built with.
+    ///
+    /// `new` derives most of it from defaults, so callers that need the
+    /// resolved RPC endpoint, commitment level or program ID read them here
+    /// rather than reconstructing them.
+    pub fn config(&self) -> &SolanaConfig {
+        &self.config
+    }
+
     /// Create client with custom configuration.
     pub fn with_config(config: SolanaConfig, keypair_path: &str) -> Result<Self> {
         let keypair_data =
@@ -209,7 +219,7 @@ impl SolanaFingerprintClient {
             instruction_data.extend_from_slice(&0u32.to_le_bytes());
         }
 
-        let instruction = Instruction {
+        let _instruction = Instruction {
             program_id: self.program_id,
             accounts: vec![
                 AccountMeta::new(fingerprint_pda, false),
@@ -288,7 +298,7 @@ impl SolanaFingerprintClient {
         let mut instruction_data = vec![1u8]; // Instruction discriminator: 1 = Transfer
         instruction_data.extend_from_slice(&new_owner_pubkey.to_bytes());
 
-        let instruction = Instruction {
+        let _instruction = Instruction {
             program_id: self.program_id,
             accounts: vec![
                 AccountMeta::new(fingerprint_pda, false),
@@ -310,7 +320,7 @@ impl SolanaFingerprintClient {
 /// Standalone verification without client initialization.
 /// Useful for quick lookups from any context.
 pub async fn verify_fingerprint_hash(
-    rpc_url: &str,
+    _rpc_url: &str,
     content_hash: &[u8; 32],
 ) -> Result<VerificationResult> {
     let program_id = Pubkey::from_str(FINGERPRINT_PROGRAM_ID)?;
@@ -348,7 +358,7 @@ mod hex {
 }
 
 fn hex_decode(s: &str) -> Result<Vec<u8>> {
-    if s.len() % 2 != 0 {
+    if !s.len().is_multiple_of(2) {
         bail!("Hex string must have even length");
     }
 

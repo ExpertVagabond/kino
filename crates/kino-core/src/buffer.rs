@@ -138,7 +138,7 @@ impl BufferManager {
         let playback_pos = *self.playback_position.read().await;
 
         let segments = self.segments.read().await;
-        for (_, segment) in segments.iter() {
+        for segment in segments.values() {
             if !segment.consumed && segment.end_time > playback_pos {
                 return Some(segment.clone());
             }
@@ -149,7 +149,7 @@ impl BufferManager {
     /// Get segment at specific time
     pub async fn get_segment_at(&self, time: f64) -> Option<BufferedSegment> {
         let segments = self.segments.read().await;
-        for (_, segment) in segments.iter() {
+        for segment in segments.values() {
             if time >= segment.start_time && time < segment.end_time {
                 return Some(segment.clone());
             }
@@ -179,7 +179,7 @@ impl BufferManager {
         let segments = self.segments.read().await;
 
         let mut buffered = 0.0;
-        for (_, segment) in segments.iter() {
+        for segment in segments.values() {
             if segment.end_time > playback_pos && !segment.consumed {
                 let start = segment.start_time.max(playback_pos);
                 buffered += segment.end_time - start;
@@ -211,7 +211,7 @@ impl BufferManager {
         let mut current_start: Option<f64> = None;
         let mut current_end: f64 = 0.0;
 
-        for (_, segment) in segments.iter() {
+        for segment in segments.values() {
             if !segment.consumed {
                 match current_start {
                     None => {

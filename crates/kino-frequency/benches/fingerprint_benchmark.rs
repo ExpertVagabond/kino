@@ -104,7 +104,7 @@ fn bench_fingerprint_duration(c: &mut Criterion) {
 // ============================================================================
 
 fn bench_spectral_features(c: &mut Criterion) {
-    let samples = generate_complex_audio(44100, 5.0);
+    let _samples = generate_complex_audio(44100, 5.0);
 
     c.bench_function("Spectral Centroid", |b| {
         let spectrum: Vec<f32> = (0..2048).map(|i| (i as f32 / 2048.0).sin().abs()).collect();
