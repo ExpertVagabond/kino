@@ -67,17 +67,44 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
 
+      # kino-desktop binds GStreamer (gstreamer-sys -> glib -> glib-sys) and
+      # kino-tauri binds WebKitGTK. The steps above install those for Linux and
+      # macOS, but there is no equivalent for Windows: the MSVC GStreamer
+      # distribution ships no pkg-config metadata, which is exactly what
+      # gstreamer-sys probes for. So on Windows the run died in the glib-sys
+      # build script — "failed to run custom build command for glib-sys" —
+      # before compiling a single line of this repo's code.
+      #
+      # Rather than drop Windows coverage, scope it to the default-members that
+      # bind nothing native: kino-core, kino-cli and kino-frequency are pure
+      # Rust, so Windows still catches real portability breaks in them.
+      # kino-tauri is still built for Windows by the separate tauri job.
+      #
+      # kino-mcp is deliberately not added here. It is outside default-members,
+      # so no CI job has ever linted it, and it currently fails clippy on stable
+      # (needless_return and if_same_then_else in src/main.rs). Pulling it in
+      # would import an unrelated failure into this fix.
+      - name: Select packages for this platform
+        id: scope
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            echo 'pkgs=-p kino-core -p kino-cli -p kino-frequency' >> "$GITHUB_OUTPUT"
+          else
+            echo 'pkgs=' >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Check formatting
         run: cargo fmt --all -- --check
 
       - name: Run clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
+        run: cargo clippy ${{ steps.scope.outputs.pkgs }} --all-targets --all-features -- -D warnings
 
       - name: Build
-        run: cargo build --all-features --verbose
+        run: cargo build ${{ steps.scope.outputs.pkgs }} --all-features --verbose
 
       - name: Run tests
-        run: cargo test --all-features --verbose
+        run: cargo test ${{ steps.scope.outputs.pkgs }} --all-features --verbose
 
   # ============================================================================
   # WASM Build
